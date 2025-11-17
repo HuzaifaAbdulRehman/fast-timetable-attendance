@@ -346,15 +346,17 @@ export default function TimetableSelector({ onCoursesSelected, onClose }) {
       return
     }
 
-    // Validate absences fields
-    if (allowedAbsences !== null && (isNaN(allowedAbsences) || allowedAbsences < 0)) {
-      setError('Maximum allowed absences must be a positive number')
-      return
-    }
+    // Validate absences fields only for single course selection
+    if (selectedCourses.length === 1) {
+      if (allowedAbsences !== null && (isNaN(allowedAbsences) || allowedAbsences < 0)) {
+        setError('Maximum allowed absences must be a positive number')
+        return
+      }
 
-    if (initialAbsences < 0 || isNaN(initialAbsences)) {
-      setError('Absences so far must be a positive number')
-      return
+      if (initialAbsences < 0 || isNaN(initialAbsences)) {
+        setError('Absences so far must be a positive number')
+        return
+      }
     }
 
     setError(null)
@@ -375,8 +377,11 @@ export default function TimetableSelector({ onCoursesSelected, onClose }) {
           ...converted,
           startDate: startDateISO,
           endDate: endDateISO,
-          initialAbsences: initialAbsences || 0,
-          allowedAbsences: allowedAbsences || (converted.creditHours || 3) * 3
+          // For single course, use configured values; for multiple, use defaults per course
+          initialAbsences: selectedCourses.length === 1 ? (initialAbsences || 0) : 0,
+          allowedAbsences: selectedCourses.length === 1 
+            ? (allowedAbsences || (converted.creditHours || 3) * 3)
+            : (converted.creditHours || 3) * 3
         }
       })
       .filter(course => course !== null)
@@ -389,19 +394,31 @@ export default function TimetableSelector({ onCoursesSelected, onClose }) {
 
     // Add courses using context
     console.log('🚀 Adding courses to context:', appCourses)
+    console.log(`📊 Total courses to add: ${appCourses.length}`)
+    
+    // Add all courses sequentially
     appCourses.forEach((course, index) => {
-      console.log(`  📝 Course ${index + 1}:`, {
+      console.log(`  📝 Course ${index + 1}/${appCourses.length}:`, {
         name: course.name,
+        courseCode: course.courseCode,
         hasSchedule: !!course.schedule,
         scheduleLength: Array.isArray(course.schedule) ? course.schedule.length : 'N/A',
         schedule: course.schedule
       })
-      const added = addCourse(course)
-      console.log(`  ✅ Added course:`, added)
+      try {
+        const added = addCourse(course)
+        console.log(`  ✅ Successfully added course ${index + 1}:`, added?.name || added?.id || 'Unknown')
+      } catch (error) {
+        console.error(`  ❌ Error adding course ${index + 1} (${course.name}):`, error)
+      }
     })
 
-    onCoursesSelected(appCourses)
-    vibrate([10, 50, 10])
+    // Wait a bit to ensure all courses are added before closing
+    setTimeout(() => {
+      console.log('✅ All courses added, closing modal')
+      onCoursesSelected(appCourses)
+      vibrate([10, 50, 10])
+    }, 100)
   }
 
   const convertToAppFormat = (course) => {
@@ -766,41 +783,52 @@ export default function TimetableSelector({ onCoursesSelected, onClose }) {
                 )}
               </div>
 
-              {/* Absences Configuration */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex flex-col">
-                  <label className="text-sm font-medium text-content-primary mb-2 block">
-                    Maximum Allowed Absences
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={allowedAbsences ?? ''}
-                    onChange={(e) => setAllowedAbsences(e.target.value === '' ? null : Number(e.target.value))}
-                    className="w-full px-4 py-2.5 bg-dark-bg/50 border border-dark-border/30 rounded-xl text-content-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
-                    placeholder="Auto-calculated"
-                  />
-                  <p className="text-xs text-content-tertiary mt-1.5">
-                    Total for all {selectedCourses.length} courses
+              {/* Absences Configuration - Only show for single course selection */}
+              {selectedCourses.length === 1 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col">
+                    <label className="text-sm font-medium text-content-primary mb-2 block">
+                      Maximum Allowed Absences
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={allowedAbsences ?? ''}
+                      onChange={(e) => setAllowedAbsences(e.target.value === '' ? null : Number(e.target.value))}
+                      className="w-full px-4 py-2.5 bg-dark-bg/50 border border-dark-border/30 rounded-xl text-content-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
+                      placeholder="Auto-calculated"
+                    />
+                    <p className="text-xs text-content-tertiary mt-1.5">
+                      Based on credit hours (auto-calculated if empty)
+                    </p>
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-sm font-medium text-content-primary mb-2 block">
+                      Absences So Far
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={initialAbsences || ''}
+                      onChange={(e) => setInitialAbsences(e.target.value === '' ? 0 : Number(e.target.value))}
+                      className="w-full px-4 py-2.5 bg-dark-bg/50 border border-dark-border/30 rounded-xl text-content-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
+                      placeholder="0"
+                    />
+                    <p className="text-xs text-content-tertiary mt-1.5">
+                      Already taken absences
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {/* Info message for multiple courses */}
+              {selectedCourses.length > 1 && (
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                  <p className="text-sm text-content-secondary">
+                    <strong className="text-content-primary">Note:</strong> Each course will have its allowed absences auto-calculated based on credit hours. You can edit individual courses later to adjust absences.
                   </p>
                 </div>
-                <div className="flex flex-col">
-                  <label className="text-sm font-medium text-content-primary mb-2 block">
-                    Absences So Far
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={initialAbsences || ''}
-                    onChange={(e) => setInitialAbsences(e.target.value === '' ? 0 : Number(e.target.value))}
-                    className="w-full px-4 py-2.5 bg-dark-bg/50 border border-dark-border/30 rounded-xl text-content-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
-                    placeholder="0"
-                  />
-                  <p className="text-xs text-content-tertiary mt-1.5">
-                    Already taken
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
           ) : (
             // Step 1: Course Selection
