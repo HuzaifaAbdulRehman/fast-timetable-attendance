@@ -292,7 +292,7 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
 
       {/* Scrollable Table Container */}
       <div
-        className={`overflow-auto ${showActions ? 'max-h-[calc(100vh-14rem)]' : 'max-h-[calc(100vh-11rem)]'} sm:${showActions ? 'max-h-[calc(100vh-15rem)]' : 'max-h-[calc(100vh-12rem)]'} md:${showActions ? 'max-h-[calc(100vh-17rem)]' : 'max-h-[calc(100vh-14rem)]'} scroll-smooth pb-12 sm:pb-14`}
+        className={`overflow-auto ${showActions ? 'max-h-[calc(100dvh-10.5rem)]' : 'max-h-[calc(100dvh-7.5rem)]'} sm:${showActions ? 'max-h-[calc(100vh-15rem)]' : 'max-h-[calc(100vh-12rem)]'} md:${showActions ? 'max-h-[calc(100vh-17rem)]' : 'max-h-[calc(100vh-14rem)]'} scroll-smooth pb-12 sm:pb-14`}
         role="table"
         aria-label="Course attendance grid"
       >
