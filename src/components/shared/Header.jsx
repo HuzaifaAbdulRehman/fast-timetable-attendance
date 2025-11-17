@@ -16,14 +16,14 @@ export default function Header() {
 
   return (
     <>
-      <header className="bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 sticky top-0 z-30 shadow-lg w-screen left-0">
-        <div className="w-full max-w-full px-4 md:px-8 py-4 md:py-5">
-          <div className="flex items-center justify-between gap-4 md:gap-6 w-full max-w-full">
+      <header className="bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 sticky top-0 z-30 shadow-lg w-full">
+        <div className="w-full px-4 md:px-8 py-4 md:py-5">
+          <div className="flex items-center w-full">
             <div className="flex items-center gap-3 md:gap-4 flex-1">
               <div className="p-2.5 md:p-3 bg-gradient-to-br from-accent/20 to-accent/10 rounded-lg border border-accent/20 flex-shrink-0">
                 <Calendar className="w-6 h-6 md:w-7 md:h-7 text-accent" />
               </div>
-              <div className="flex-1">
+              <div>
                 <div className="text-base sm:text-lg md:text-xl font-semibold text-content-primary whitespace-nowrap">
                   FAST Absence & Timetable Tracker
                 </div>
@@ -33,7 +33,7 @@ export default function Header() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 ml-auto">
+            <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
               {/* Settings Button */}
               <button
                 onClick={() => {
