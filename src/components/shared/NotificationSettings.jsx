@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Bell, BellOff, Send, Download } from 'lucide-react'
+import { X, Bell, BellOff, Send, Download, Trash2, AlertTriangle } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import {
   requestNotificationPermission,
@@ -141,6 +141,30 @@ export default function NotificationSettings({ onClose }) {
     }
   }
 
+  // Handle data reset
+  const handleResetData = () => {
+    const confirmation = prompt(
+      '⚠️ WARNING: This will PERMANENTLY delete all your data!\n\n' +
+      'This includes:\n' +
+      '• All courses\n' +
+      '• All attendance records\n' +
+      '• All semesters\n' +
+      '• All settings\n\n' +
+      'Type "DELETE" (all caps) to confirm:'
+    )
+
+    if (confirmation === 'DELETE') {
+      // Clear all localStorage
+      localStorage.clear()
+
+      // Reload the page to start fresh
+      alert('✅ All data has been erased. The app will reload with a fresh start.')
+      window.location.reload()
+    } else if (confirmation !== null) {
+      alert('Reset cancelled. Your data is safe.')
+    }
+  }
+
   return (
     <div
       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
@@ -274,6 +298,29 @@ export default function NotificationSettings({ onClose }) {
               </div>
             </div>
           )}
+
+          {/* Reset All Data - Danger Zone */}
+          <div className="pt-2 border-t border-attendance-danger/30">
+            <div className="space-y-2 pt-4">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-attendance-danger" />
+                <p className="text-sm font-medium text-attendance-danger">Danger Zone</p>
+              </div>
+              <p className="text-xs text-content-tertiary">
+                Permanently erase all data and start fresh. This cannot be undone!
+              </p>
+              <button
+                onClick={() => {
+                  vibrate([10, 50, 10])
+                  handleResetData()
+                }}
+                className="w-full bg-attendance-danger/10 border border-attendance-danger/30 text-attendance-danger font-semibold rounded-lg px-4 py-2.5 transition-all hover:bg-attendance-danger/20 hover:border-attendance-danger/50 active:scale-95 flex items-center justify-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Erase All Data
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Footer */}
