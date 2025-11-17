@@ -5,6 +5,7 @@ import { getDayStatus, getSessionStatus, calculateAttendanceStats } from '../../
 import { SESSION_STATUS, COURSE_COLORS } from '../../utils/constants'
 import { Check, X, Minus, Circle, Edit2, Trash2, CheckSquare, Square } from 'lucide-react'
 import { useSwipeable } from 'react-swipeable'
+import QuickMarkToday from './QuickMarkToday'
 
 // Haptic feedback utility
 const vibrate = (pattern = [10]) => {
@@ -192,33 +193,38 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
     <div className="card p-0">
       {/* Bulk Select Mode Toggle */}
       <div className="px-3 md:px-4 py-2 border-b border-dark-border bg-dark-surface-raised/50">
-        <div className="flex items-center justify-between gap-2">
-          <button
-            onClick={toggleBulkSelectMode}
-            className={`
-              flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
-              ${bulkSelectMode
-                ? 'text-white'
-                : 'bg-dark-bg border border-dark-border text-content-secondary hover:bg-dark-surface-raised hover:text-content-primary'
-              }
-            `}
-            style={bulkSelectMode ? {
-              backgroundColor: 'var(--color-secondary)',
-              boxShadow: 'var(--shadow-secondary)'
-            } : {}}
-          >
-            {bulkSelectMode ? (
-              <>
-                <CheckSquare className="w-3.5 h-3.5" />
-                <span>Bulk Select Active</span>
-              </>
-            ) : (
-              <>
-                <Square className="w-3.5 h-3.5" />
-                <span>Select Multiple Dates</span>
-              </>
-            )}
-          </button>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleBulkSelectMode}
+              className={`
+                flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                ${bulkSelectMode
+                  ? 'text-white'
+                  : 'bg-dark-bg border border-dark-border text-content-secondary hover:bg-dark-surface-raised hover:text-content-primary'
+                }
+              `}
+              style={bulkSelectMode ? {
+                backgroundColor: 'var(--color-secondary)',
+                boxShadow: 'var(--shadow-secondary)'
+              } : {}}
+            >
+              {bulkSelectMode ? (
+                <>
+                  <CheckSquare className="w-3.5 h-3.5" />
+                  <span>Bulk Select Active</span>
+                </>
+              ) : (
+                <>
+                  <Square className="w-3.5 h-3.5" />
+                  <span>Select Multiple Dates</span>
+                </>
+              )}
+            </button>
+
+            {/* Quick Mark Today Button */}
+            {!bulkSelectMode && <QuickMarkToday inline />}
+          </div>
           {bulkSelectMode && selectedDates.length > 0 && (
             <span className="text-xs text-content-tertiary">
               {selectedDates.length} date{selectedDates.length > 1 ? 's' : ''} selected

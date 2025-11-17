@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../../context/AppContext'
 import AttendanceTable from './AttendanceTable'
-import QuickMarkToday from './QuickMarkToday'
 import CourseForm from '../courses/CourseForm'
 import Toast from '../shared/Toast'
 import SemesterSelector from '../shared/SemesterSelector'
@@ -234,19 +233,14 @@ export default function AttendanceView() {
   )
 
   return (
-    <>
-      <PullToRefresh
-        onRefresh={handleRefresh}
-        pullingContent=""
-        refreshingContent={<div className="text-center py-4 text-accent text-sm">Refreshing...</div>}
-        isPullable={true}
-        resistance={2}
-      >
-        {renderContent()}
-      </PullToRefresh>
-
-      {/* Quick Mark Today FAB */}
-      <QuickMarkToday />
-    </>
+    <PullToRefresh
+      onRefresh={handleRefresh}
+      pullingContent=""
+      refreshingContent={<div className="text-center py-4 text-accent text-sm">Refreshing...</div>}
+      isPullable={true}
+      resistance={2}
+    >
+      {renderContent()}
+    </PullToRefresh>
   )
 }

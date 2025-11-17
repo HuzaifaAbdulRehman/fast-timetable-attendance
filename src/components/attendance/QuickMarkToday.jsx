@@ -5,7 +5,7 @@ import { getTodayISO, courseHasClassOnDate, formatDateLong } from '../../utils/d
 import { getDayStatus } from '../../utils/attendanceCalculator'
 import { SESSION_STATUS } from '../../utils/constants'
 
-export default function QuickMarkToday() {
+export default function QuickMarkToday({ inline = false }) {
   const { courses, attendance, toggleSession } = useApp()
   const [isOpen, setIsOpen] = useState(false)
   const today = getTodayISO()
@@ -36,30 +36,35 @@ export default function QuickMarkToday() {
     toggleSession(courseId, today, status === 'present' ? null : status)
   }
 
+  // Count unmarked classes
+  const unmarkedCount = todaysCourses.filter(course => {
+    const status = getCourseStatus(course.id)
+    return !status || status === 'present'
+  }).length
+
   if (todaysCourses.length === 0) {
-    return null // Don't show FAB if no classes today
+    return null // Don't show if no classes today
   }
 
   return (
     <>
-      {/* Floating Action Button */}
-      {!isOpen && (
+      {/* Inline Button (for AttendanceTable) */}
+      {inline && !isOpen && (
         <button
           onClick={() => {
             vibrate(15)
             setIsOpen(true)
           }}
-          className="fixed bottom-6 right-6 z-40 bg-gradient-to-br from-accent to-accent-hover text-dark-bg p-4 rounded-full shadow-2xl hover:shadow-accent-lg hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center group"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 bg-dark-bg border border-dark-border text-content-secondary hover:bg-dark-surface-raised hover:text-content-primary"
           aria-label="Quick mark today"
           title="Quick mark today's attendance"
         >
-          <Calendar className="w-6 h-6" />
-
-          {/* Badge showing number of courses */}
-          {todaysCourses.length > 0 && (
-            <div className="absolute -top-1 -right-1 bg-attendance-danger text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center border-2 border-dark-bg">
-              {todaysCourses.length}
-            </div>
+          <Calendar className="w-3.5 h-3.5" />
+          <span>Mark Today</span>
+          {unmarkedCount > 0 && (
+            <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-accent/20 text-accent text-[10px] font-semibold">
+              {unmarkedCount}
+            </span>
           )}
         </button>
       )}
