@@ -1,11 +1,27 @@
 import { useState } from 'react'
 import { useApp } from '../../context/AppContext'
-import { BookOpen, Calendar, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { BookOpen, Calendar, AlertCircle, CheckCircle2, Plus, Trash2, Edit } from 'lucide-react'
 import TimetableSelector from './TimetableSelector'
+import CourseForm from './CourseForm'
 
 export default function CoursesView() {
-  const { courses } = useApp()
+  const { courses, deleteCourse, deleteAllCourses } = useApp()
   const [showTimetableSelector, setShowTimetableSelector] = useState(false)
+  const [showCourseForm, setShowCourseForm] = useState(false)
+  const [editingCourse, setEditingCourse] = useState(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  const handleEditCourse = (course) => {
+    setEditingCourse(course)
+    setShowCourseForm(true)
+  }
+
+  const handleDeleteAll = () => {
+    if (window.confirm('Are you sure you want to delete all courses? This action cannot be undone.')) {
+      deleteAllCourses()
+      setShowDeleteConfirm(false)
+    }
+  }
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -62,14 +78,24 @@ export default function CoursesView() {
               </div>
             </div>
 
-            {/* CTA Button */}
-            <button
-              onClick={() => setShowTimetableSelector(true)}
-              className="px-8 py-4 bg-gradient-to-r from-accent to-accent/90 hover:from-accent/90 hover:to-accent text-white rounded-xl font-semibold shadow-lg shadow-accent/25 hover:shadow-accent/40 transition-all duration-200 flex items-center gap-3 text-base"
-            >
-              <BookOpen className="w-5 h-5" />
-              Select Courses from Timetable
-            </button>
+            {/* CTA Buttons */}
+            <div className="flex flex-col gap-3 w-full max-w-md">
+              <button
+                onClick={() => setShowTimetableSelector(true)}
+                className="px-8 py-4 bg-gradient-to-r from-accent to-accent/90 hover:from-accent/90 hover:to-accent text-white rounded-xl font-semibold shadow-lg shadow-accent/25 hover:shadow-accent/40 transition-all duration-200 flex items-center justify-center gap-3 text-base"
+              >
+                <BookOpen className="w-5 h-5" />
+                Select from Timetable
+              </button>
+
+              <button
+                onClick={() => setShowCourseForm(true)}
+                className="px-8 py-4 bg-dark-card border-2 border-dark-border hover:border-accent/50 text-content-primary rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-3 text-base hover:scale-[1.02] active:scale-95"
+              >
+                <Plus className="w-5 h-5" />
+                Add Course Manually
+              </button>
+            </div>
 
             <p className="text-xs text-content-tertiary mt-6">
               Plan Smart. Take Leaves. Chill at Home. Still Hit 80%. 🏠
@@ -78,14 +104,32 @@ export default function CoursesView() {
         ) : (
           // Course List - Courses Already Added
           <div>
-            {/* Header */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-content-primary mb-2">
-                Your Courses
-              </h2>
-              <p className="text-content-secondary text-sm">
-                {courses.length} {courses.length === 1 ? 'course' : 'courses'} selected for this semester
-              </p>
+            {/* Header with Actions */}
+            <div className="mb-6 flex items-start justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-content-primary mb-2">
+                  Your Courses
+                </h2>
+                <p className="text-content-secondary text-sm">
+                  {courses.length} {courses.length === 1 ? 'course' : 'courses'} selected for this semester
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowTimetableSelector(true)}
+                  className="px-3 py-2 bg-accent/10 text-accent border border-accent/30 rounded-lg text-sm font-medium hover:bg-accent/20 transition-all flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden sm:inline">Add More</span>
+                </button>
+                <button
+                  onClick={handleDeleteAll}
+                  className="px-3 py-2 bg-red-500/10 text-red-400 border border-red-500/30 rounded-lg text-sm font-medium hover:bg-red-500/20 transition-all flex items-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Clear All</span>
+                </button>
+              </div>
             </div>
 
             {/* Success Message */}
@@ -108,7 +152,7 @@ export default function CoursesView() {
               {courses.map((course) => (
                 <div
                   key={course.id}
-                  className="bg-dark-card rounded-xl p-4 border border-dark-border hover:border-accent/30 transition-all"
+                  className="bg-dark-card rounded-xl p-4 border border-dark-border hover:border-accent/30 transition-all group"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -121,10 +165,26 @@ export default function CoursesView() {
                         </p>
                       )}
                     </div>
-                    <div
-                      className="w-3 h-3 rounded-full flex-shrink-0 mt-1"
-                      style={{ backgroundColor: course.color?.hex || '#3B82F6' }}
-                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleEditCourse(course)}
+                        className="p-1.5 bg-dark-bg hover:bg-accent/10 text-content-secondary hover:text-accent rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                        title="Edit course"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteCourse(course.id)}
+                        className="p-1.5 bg-dark-bg hover:bg-red-500/10 text-content-secondary hover:text-red-400 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                        title="Delete course"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                      <div
+                        className="w-3 h-3 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: course.color?.hex || '#3B82F6' }}
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 text-xs">
@@ -183,6 +243,21 @@ export default function CoursesView() {
             setShowTimetableSelector(false)
           }}
           onClose={() => setShowTimetableSelector(false)}
+        />
+      )}
+
+      {/* Course Form Modal */}
+      {showCourseForm && (
+        <CourseForm
+          existingCourse={editingCourse}
+          onClose={() => {
+            setShowCourseForm(false)
+            setEditingCourse(null)
+          }}
+          onSave={() => {
+            setShowCourseForm(false)
+            setEditingCourse(null)
+          }}
         />
       )}
     </div>

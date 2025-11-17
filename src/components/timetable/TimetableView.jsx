@@ -82,11 +82,12 @@ export default function TimetableView() {
             No Timetable Yet
           </h3>
           <p className="text-content-secondary mb-6">
-            Select courses from your timetable to see your complete weekly schedule here.
+            Select courses first to see your complete weekly schedule here.
+            Go to the <span className="font-medium text-accent">Courses</span> tab to get started.
           </p>
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-lg text-sm">
             <BookOpen className="w-4 h-4" />
-            <span>Go to Attendance tab to add courses</span>
+            <span>Go to Courses tab to add courses</span>
           </div>
         </div>
       </div>
