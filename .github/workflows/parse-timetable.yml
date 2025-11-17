@@ -1,0 +1,40 @@
+name: Parse Timetable CSVs
+
+on:
+  push:
+    paths:
+      - 'public/timetable/*.csv'
+      - '.github/workflows/parse-timetable.yml'
+  workflow_dispatch:
+
+jobs:
+  parse-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Parse CSVs to JSON
+        run: node scripts/parse-timetable.js
+
+      - name: Commit parsed data
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add public/timetable/timetable.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-parse timetable CSVs to JSON"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}

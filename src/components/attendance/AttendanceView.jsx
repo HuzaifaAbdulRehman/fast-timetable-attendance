@@ -2,18 +2,20 @@ import { useState, useEffect } from 'react'
 import { useApp } from '../../context/AppContext'
 import AttendanceTable from './AttendanceTable'
 import CourseForm from '../courses/CourseForm'
+import TimetableSelector from '../courses/TimetableSelector'
 import Toast from '../shared/Toast'
 import SemesterSelector from '../shared/SemesterSelector'
-import { Plus, AlertCircle, CheckCircle2, Calendar, AlertTriangle, ChevronUp, ChevronDown } from 'lucide-react'
+import { Plus, AlertCircle, CheckCircle2, Calendar, AlertTriangle, ChevronUp, ChevronDown, BookOpen } from 'lucide-react'
 import { getTodayISO } from '../../utils/dateHelpers'
 import { DEFAULT_WEEKS_TO_SHOW } from '../../utils/constants'
 import PullToRefresh from 'react-simple-pull-to-refresh'
 import Confetti, { celebratePerfectAttendance, celebrateMilestone } from '../shared/Confetti'
 
 export default function AttendanceView() {
-  const { courses, undoHistory, undo } = useApp()
+  const { courses, undoHistory, undo, addCourse } = useApp()
   const [refreshing, setRefreshing] = useState(false)
   const [showCourseForm, setShowCourseForm] = useState(false)
+  const [showTimetableSelector, setShowTimetableSelector] = useState(false)
   const [editingCourse, setEditingCourse] = useState(null)
   const [toast, setToast] = useState(null) // { message, type, action }
   const [showAllControls, setShowAllControls] = useState(false) // Track if ALL controls are visible
@@ -223,16 +225,28 @@ export default function AttendanceView() {
           <option value={getSemesterWeeks()}>All ({getSemesterWeeks()}w)</option>
         </select>
 
-        {/* Add Course Button */}
+        {/* Add Course Buttons */}
         <button
           onClick={() => {
+            vibrate([10])
+            setShowTimetableSelector(true)
+          }}
+          className="ml-auto bg-accent/20 text-accent border border-accent/30 font-medium px-2.5 md:px-3 py-1.5 rounded-lg transition-all hover:scale-[1.02] active:scale-95 inline-flex items-center gap-1.5 text-xs flex-shrink-0"
+        >
+          <BookOpen className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">From Timetable</span>
+        </button>
+
+        <button
+          onClick={() => {
+            vibrate([10])
             setEditingCourse(null)
             setShowCourseForm(true)
           }}
-          className="ml-auto bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-medium px-2.5 md:px-3 py-1.5 rounded-lg transition-all duration-200 shadow-accent hover:scale-[1.02] active:scale-95 inline-flex items-center gap-1.5 text-xs flex-shrink-0"
+          className="bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-medium px-2.5 md:px-3 py-1.5 rounded-lg transition-all duration-200 shadow-accent hover:scale-[1.02] active:scale-95 inline-flex items-center gap-1.5 text-xs flex-shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Add</span>
+          <span className="hidden sm:inline">Manual</span>
         </button>
       </div>
       )}
@@ -253,6 +267,22 @@ export default function AttendanceView() {
           existingCourse={editingCourse}
           onClose={handleCloseForm}
           onSave={handleSaveCourse}
+        />
+      )}
+
+      {/* Timetable Selector Modal */}
+      {showTimetableSelector && (
+        <TimetableSelector
+          onCoursesSelected={(courses) => {
+            // Add all selected courses
+            courses.forEach(course => addCourse(course))
+            setShowTimetableSelector(false)
+            setToast({
+              message: `Added ${courses.length} course${courses.length > 1 ? 's' : ''} from timetable`,
+              type: 'success'
+            })
+          }}
+          onClose={() => setShowTimetableSelector(false)}
         />
       )}
 

@@ -1,0 +1,361 @@
+MONDAY,,,,,,,,,
+Slots,1,2,3,4,5,6,7,8,9
+Venues/time,08:00-8:50,08:55-09:45,09:50:-10:40,10:45-11:35,11:40-12:30,12:35-1:25,1:30-2:20,2:25-3:15,3:20-4:05
+CLASSROOMS,,,,,,,,,
+E-1 Academic Block I (50),,"DAA BCS-5B
+Fahad Sherwani","DAA BCS-5D
+Dr. Nasir Uddin","Reserved for Ms Faiza Mumtaz
+17 Nov Mid 2 review of FT-1A","DAA BCS-5A
+Muhammad Kashif","DBS BCS-5A
+Hajra Ahmed","TBW BSE-5A
+Atifa Batool","CN BCS-5A
+Dr. Farrukh Salim","SDA BCS-5A
+Engr. Abdul Rahman"
+E-2 Academic Block I (50),"DAA BCS-5C
+Dr. Nasir Uddin","Reserved for Dr Farrukh Salim 
+Shaikh Nov 17 CN BCS-5C","AP BCY-1B
+Javed Qureshi","SDA BCS-5G
+Sobia Iftikhar","DBS BCS-5B
+Javeria Farooq","DBS BCS-5C
+Atiya Jokhio","COAL BCS-3H
+Shoaib Rauf ","DAA BCS-5J        
+Dr. Fahad Sherwani",
+E-3 Academic Block I (50),"CN BCS-5D
+Shaheer Khan","DAA BCS-5E
+Muhammad Kashif",Reserved for Dr Farrukh hasan syed,"CN BCS-5C
+Dr. Farrukh Salim","Reserved for Dr Farrukh Salim 
+Shaikh Nov 17 CN BCS-5C","DAA BCS-5H
+Sandesh Kumar","DAA BCS-5F
+Sandesh Kumar","DBS BCS-5H
+Javeria Farooq",
+E-4 Academic Block I (50),"SDA BCS-5J        
+Ahmed Qaiser (VF)","SDA BCS-5J        
+Ahmed Qaiser (VF)","SDA BCS-5B
+Ahmed Qaiser (VF)","SDA BCS-5H
+Engr. Abdul Rahman","SDA BCS-5H
+Engr. Abdul Rahman","SDA BCS-5D
+Syed Ahmed Khan","Reserved for Mr Abdul Rehman
+Nov 17 SDA 5H ","DAA BCS-5D
+Dr. Nasir Uddin",
+E-5 Academic Block I (50),,"CN BCS-5F
+Shaheer Khan","DBS BCS-5G
+Dr. Farrukh Salim","DBS BCS-5E
+Basit Jasani","DBS BCS-5E
+Basit Jasani","CN BCS-5E
+Kashan Hussain","COAL BCS-3B
+ Atiya Jokhio ","SDA BCS-5E
+Farrukh Hasan Syed",
+E-6 Academic Block I (50),"CN BCS-5H
+Dr. Nadeem Kafi","CN BCS-5H
+Dr. Nadeem Kafi","DS BSE-3B
+ Dr. Anam Qureshi","Discrete BCS-3G
+Shoaib Raza","Discrete BCS-3B
+Shoaib Raza","Reserved for Ms Hira Tunio
+Discrete BSE-3A","Discrete BCS-3J        
+Shoaib Raza","Discrete BCS-3D
+Shoaib Raza","SDA BCS-5F
+Syed Ahmed Khan"
+R-11 Academic Block I (50),"DBS BAI-5A
+Huzaifa Khan (VF)","DBS BAI-5A
+Huzaifa Khan (VF)",,"Rerserved for Dr Fahad Samad
+Nov 17 Discrete BDS-3B",,"Discrete BDS-3B
+Dr. Fahad Samad",,"COAL BCS-3E
+Dr. Rabia Tabassum ",
+R-12 Academic Block I (70),"DAA BCS-5G
+Zulfiqar Ali","DS BCS-3A
+ Dr. Jawwad Shamsi","Discrete BDS-3A
+Dr. Fahad Samad","DAA BCS-5J        
+Dr. Fahad Sherwani","CN BCS-5J        
+Kashan Hussain","DBS BCS-5J	
+Dr. Zulfiqar Ali Memon","DBS BCS-5J	
+Dr. Zulfiqar Ali Memon","TBW BCY-5A
+Atifa Batool","IS BCY-5A
+Nouman Rajput"
+R-109 Academic Block I (50),Reserved for TGD TLC Till 21st November,,,,,,,,
+A-1 Academic Block II (50),,"TOA BCS-3K
+Shahar Bano ","DS BCS-3K
+Mubashra Fayyaz","DS BCS-3K
+Mubashra Fayyaz","DS BCS-3J        
+Mubashra Fayyaz ",,,"DBS BCS-5F
+Hajra Ahmed",
+A-2Academic Block II (50),"COAL BCS-3H
+Shoaib Rauf ","DS BCS-3H
+Fizza Aqeel",Reserved for ACM CY Nov 17,,"DS BSE-3A
+ Dr. Anam Qureshi",Reserved for Michael Simon 17 Nov,,,
+A-3 Academic Block II (50),,"TBW BCY-5B
+Atifa Batool","DAA BCY-5B
+Zulfiqar Ali","DAA BCY-5B
+Zulfiqar Ali","DAA BSE-5A
+Fizza Mansoor","DAA BSE-5A
+Fizza Mansoor","IS BCY-5B
+Nouman Rajput","DBS BCY-5B
+Ali Naseer Shah","DS BCS-3B
+ Fizza Aqeel"
+A-4 Academic Block II (50),Reserved,,,,,,,,
+A-5 Academic Block II (50),"ML BSE-5A
+Minhal Raza","SCD BSE-5A
+Ali Fatmi","SCD BSE-5A
+Ali Fatmi",,"TOA BCS-3G
+Bakhtawar Abbasi",,,"TOA BCS-3B
+ Ubaidullah",
+A-6 Academic Block II (50),,"IST / UoS BSFT-1C
+Muhammad Hasham","KRR BAI-5A
+Muhammad Rafi","CN BCS-5D
+Shaheer Khan","Reserved for S M Ibrahim 
+Farooqi (VF) Nov 17 CP BAI-1C","IS BCY-5A
+Nouman Rajput","ML BAI-5A
+Sania Urooj","TBW BAI-5A
+Nazia Imam",
+A-7 Academic Block II (50),"COAL BCS-3A
+ Aashir Mehboob ","LA BSE-3A
+Nadeem Khan","CAL BDS-1A
+Jamil Usmani",,"IST BSFT-1A
+Muhammad Hasham","Reserved for S M Ibrahim 
+Farooqi (VF) Nov 17 CP BAI-1A","AP BCY-1A
+Javed Qureshi ","ICP BCY-1B
+Jahan Ara (VF)",
+A-8 Academic Block II (53),"COAL BCS-3C
+Dr. Rabia Tabassum ","COAL BCS-3E
+ Dr. Rabia Tabassum","IST BSFT-1B
+Muhammad Hasham",,"Reserved for Ms Aleena Fayyaz
+Nov 17 MM BSFT-1C","FOA BSFT-1E
+Aleena Fayyaz ","TOA BCS-3D
+Muhammad Kashif","TOA BCS-3H
+Bakhtawar Abbasi","Discrete BCS-3E
+Bakhtawar Abbasi"
+B-9 Academic Block II (53),"BE BSFT-5A
+Dr. Anwar Mughees","BE BSFT-5A
+Dr. Anwar Mughees","Entrep BSFT-5A 
+Dr. Nazia Nazeer",,"EIS  BSFT-5A
+Dr. Anwar Mughees","MM BSFT-1A
+Asiya Zaheer","IT in Business 
+  BSFT-1C
+Mohsin Javaid ","IT in Business 
+  BSFT-1C
+Mohsin Javaid ","Eng-1 BSFT-1C
+Reema Brohi"
+B-10 Academic Block II (53),"BM1 BSFT-1D
+Ashad Ali","MM BSFT-1D
+Asiya Zaheer","BM1 BSFT-1C
+Dr. Khusro Mian","MM BSFT-1C
+Aleena Fayyaz","FOM BSBA-1B
+Dr. Nazia Nazeer","FOM BSBA-1A
+Dr. Nazia Nazeer","BM1 BSFT-1A 
+Dr. Khusro Mian","IST BSFT-1D
+Muhammad Hasham",
+B-11 Academic Block II (53),"Reserved for Ms Sharmeen Ismail
+17 Nov Eng-1 BSFT-1E","Eng-1 BSFT-1E
+Sharmeen Ismail","IST BSFT-1E
+Farhan Ali Memon","UoS BSFT-1E
+Farhan Ali Memon","MM BSFT-1B
+Asiya Zaheer","BM1 BSFT-1B
+Dr. Khusro Mian","Reserved for Ms Jahan Ara (VF)
+Nov 17 ICP BCY-1B
+","Eng-1 BSFT-1B
+Reema Brohi","MM BSFT-1B
+ Asiya Zaheer"
+C-12 Academic Block II (50),,AT BSEE-5AB Engr. Rukhsar Ali,TBW BSEE-7A Ms. Nazia Imam,"Reserved for Ms Quratulain Sohail
+Nov 17 BS CE 1B Applied Calculus",EM BSEE-7AB Dr. Burhan Khan,IST BSEE-1B Dr. Hassan Saeed,"Reserved for S M Ibrahim 
+Farooqi (VF) Nov 17 CP BAI-1B",,
+C-13 Academic Block II (50),ENA BSEE-3A Dr. Junaid Rabbani,ENA BSEE-3A Dr. Junaid Rabbani,ENG BSEE-1B Ms. Huma Hafeez,ENA BSEE-3B Dr. Junaid Rabbani,ENA BSEE-3B Dr. Junaid Rabbani,AC BSCE-1B + BSEE-1C Engr. Qurat ul Ain,,ENG BSCE-1B + BSEE-1C Ms. Tahira,ENG BSCE-1B + BSEE-1C Ms. Tahira
+C-14 Academic Block II (50),IST BSCE-1A Dr. Shahzad Shaikh,IST BSCE-1B + BSEE-1C Dr. Shahzad Shaikh,AC BSEE-1A Engr. Qurat ul Ain,IST BSEE-1B Dr. Hassan Saeed,ADC BSEE-5AB Dr. Atif Saleem,MVC BSEE-3B Dr. Atif Saleem,,UoS BSEE-1A                                                 Dr. Hassan Saeed,
+C-15 Academic Block II (50),ENG BSEE-1A Ms. Huma Hafeez,ENG BSEE-1A Ms. Huma Hafeez,ICP BSCE-1A Dr. Shahnawaz,ICP BSCE-1A Dr. Shahnawaz,IST BSCE-1B + BSEE-1C Dr. Shahzad Shaikh,IST BSCE-1A Dr. Shahzad Shaikh,,OODS BSEE-3A                                                 Dr. Burhan Khan,
+C-16 Academic Block II (50),"TOA BCS-3E
+Abeeha Sattar ","Discrete BCS-3C
+Dr. Nouman Durrani","TOA BCS-3F
+Abeeha Sattar","DS BAI-3A
+Sania Urooj","Discrete BCS-3A
+Dr. Nouman Durrani","Discrete BCS-3F
+Dr. Nouman Durrani","Discrete BSE-3B
+Aemon","Discrete BSE-3B
+Aemon","COAL BSE-3B
+Dr. Shakil"
+C-17 Academic Block II (59),"COAL BCS-3F
+Ubaidullah ",AML BSEE-7AB                                                 Ms. Sadafd Ayesha,"COAL BSE-3A
+ Shoaib Rauf","TOA BCS-3A
+ Ubaidullah ","LA BCY-3A
+Dr. Fahad Riaz","LA BCY-3A
+Dr. Fahad Riaz","COAL BDS-3B
+Dr. Muhammad Adeel","COAL BDS-3B
+Dr. Muhammad Adeel","Discrete BCS-3K
+Aemon"
+C-18 Academic Block II (50),"COAL BCS-3G
+Dr. Shakil","DS BCS-3G
+Sania Urooj",MVC BSEE-3A Dr. Atif Saleem,"Discrete BCY-3A
+Mahrukh Khan","DS BCS-3D
+Farrukh Hasan Syed",,"Discrete BAI-3A
+Mahrukh Khan","TOA BCS-3C
+Kashan Hussain ","LA BCS-3C
+Dr. Fahad Riaz"
+C-19 Academic Block II (50),,"Intro to D. Sci BDS-3A
+Mahrukh Khan",EMT BSEE-5AB Dr. Burhan Khan,EMT BSEE-5AB Dr. Burhan Khan,"DS BDS-3B
+Farooq Zaidi","Reserved for Ms Javeria Ahmed
+17 Nov FE Lab CS-1E","DS BCS-3F
+Basit Jasani","LA BCS-3F
+Urooj",
+C-21 Academic Block II (50),"Cyber Security BCY-3A
+Abeer Gauher","COAL BCY-3A
+Waseem Rauf","DS BCY-3A
+Nouman Rajput","LA BDS-3A
+Nadeem Khan","TOA BCS-3F
+ Abeeha Sattar","TOA BCS-3J        
+Muhammad Kashif",,Reserved for Ms Javeria Ahmed Nov 17 FE Lab CS-1K,
+D-22 Academic Block II (50),"DS BDS-3A
+Dr. Farooq Zaidi","CAL BCY-1B
+Aneesa Nawaz","Reserved for Mr Ishtiaq Ahmed
+Nov 17 AP BCS-1H ",,"LA BAI-3A
+Uzma Saleh","COAL BCS-3K
+Aashir Mehboob ","COAL BCS-3K
+Aashir Mehboob ",,
+D-23 Academic Block II (50),"PF BCS-1D
+Hajra Ahmed","FE BCS-1D
+Javeriya Ahmed",,,"AP BCS-1B
+Ishtiaq Ahmed","PF BCS-1B
+Sobia Iftikhar","PF BCS-1A
+Sobia Iftikhar","ICP BCS-1B
+Muhammad Adeel",
+D-24 Academic Block II (50),"PF BAI-1C
+Talha Shahid","PF BCS-1E
+Javeria Farooq","LA BCS-3G
+Uzma Saleh","ICP BCS-1D
+Muhammad Adeel","FE BCS-1C
+Faiza Mumtaz","PAI BAI-3A
+Talha Shahid","AP BCS-1C
+Muhammad Rahim","CAL BCS-1C
+Aneesa Nawaz","ICP BCS-1C
+Khushboo"
+D-25 Academic Block II (50),"CAL BCS-1H
+Asma Masood","PF BCS-1H
+Syed Ahmed Khan",,"FE BCS-1E
+Javeriya Ahmed","ICP BCS-1E
+Khushboo","AP BCS-1D
+Ishtiaq Ahmed","IST BCS-1D
+Farhan Ali Memon","FE BCS-1J
+Qurat ul Ain","ICP BCS-1J
+Jahan Ara (VF)"
+D-26 Academic Block II (50),"PF BCS-1J
+Syed Ahmed Khan","IST BCS-1J
+Dr. Hassan Saeed",,"ICP BCS-1K
+Jahan Ara (VF)","AP BCS-1A
+Muhammad Rahim","CAL BCS-1A
+Aneesa Nawaz",,"IST BCS-1H
+Farhan Ali Memon",
+D-27 Academic Block II (50),,"IST BCS-1K
+Abdullah Siddqui","CAL BCS-1K
+Asma Masood",,"PF BCS-1F
+Saif ur Rehman","CAL BCS-1F
+Asma Masood","Reserved for Ms Asma Masood
+Cal BCS-1F Nov 17","AP BCS-1F
+Ishtiaq Ahmed",
+D-28 Academic Block II (50),"ICP BAI-1A
+Ibrahim Farooqi (VF)","PF BAI-1A
+Talha Shahid",,,"CAL BCS-1G
+Syed Ashad Ali","AP BCS-1G
+Muhammad Rahim","PF BCS-1G
+Saif ur Rehman",,"IST BCS-1G
+Abdullah Siddqui"
+E-29Academic Block II (52),,"PF BAI-1B
+Syed Faisal Ali","ICP BAI-1B
+Ibrahim Farooqi (VF)","FE BAI-1C
+Nazia Imam","ICP BCS-1D
+Muhammad Adeel","FE BCS-1K
+Javeria Ali Wadho","FE BCS-1K
+Javeria Ali Wadho",,"IST BSE-1B
+ Imad Uddin"
+E-30 Academic Block II (52),"PF BSE-1B
+Fizza Mansoor","ICP BSE-1B
+Wajiha Najam (VF)",,"ICP BSE-1A
+Wajiha Najam (VF)","ICP BCY-1A
+Wajiha Najam (VF)",,"CAL BAI-1C
+Alishba Tariq","IST BAI-1C
+Abdullah Siddqui",
+E-31 Academic Block II (52),,"Reserved for Ms Quratulain Sohail
+Nov 17 BS CE 1A Applied Calculus",,"CAL BAI-1A
+Alishba Tariq","IST BDS-1A
+ Imad Uddin",,,"PF BCY-1A
+Abuzar Zafar",
+E-32 Academic Block II (52),"AP BAI-1B
+Sana","ICP BAI-1C
+Ibrahim Farooqi (VF)",,,"AP BAI-1A
+Sana","AP BAI-1C
+Sana",,"CAL BAI-1B
+Alishba Tariq",
+E-33 Academic Block II (52),,,,,,,,,"Reserved for Ms Sana Naz Nov 17
+BAI-1C Paper Review Mid II"
+E-34 Academic Block II (52),,"AP BDS-1A
+Miqdad Khan ","AP BSE-1A
+Miqdad Khan",,,,,"AP BSE-1B
+Miqdad Khan",
+E-35 Academic Block II (52),"FE BSE-1A
+Wajiha Akber ","Reserved for Mr Wajiha Akber 
+Nov 17 FE Theory BSE-1A",,,,,,,
+LLC Academic Block I (R7) (50),"FE Lab BCS-1F
+Tahira Abdul Hakeem",,,"FE Lab BCY-1B
+Khadija Shireen",,,"FE Lab BAI-1A
+Madiha Rehman",,
+C-20 Academic Block II (50),"FE Lab BCS-1G
+Qurat ul Ain",,,"FE Lab BSE-1B
+Maimoona",,,"Eng-1 Lab BSBA-1A
+Sharmeen Ismail",,
+Eng Lang Room  Academic Block II (50),"Eng-1 Lab BSFT-1A
+Faiza Mumtaz",,,"Eng-1 Lab BSFT-1D
+Reema Brohi",,,,,
+S-2 Academic Block I (100),,,,,Reserved for Procom Nov 17,,,,
+COMPUTING LABS,,,,,,,,,
+Academic Block I LAB-1 (49),"COAL Lab BCS-3J
+ Seema Hashwani ",,,"DS Lab BCS-3E
+Abdullah Yaqoob",,,"BE Lab BSFT-5A
+ Nighat Jahan",,
+Academic Block I CY LAB-2 (48),"COAL Lab BCS-3B
+Abdullah Shaikh",,,Reserved for Coders Cup Nov 17,,,"DS Lab BCS-3A
+Shafique Rehman ",,
+Academic Block I LAB-3 (47),"COAL Lab BCS-3D
+ Muhammad Owais",,,Reserved for Coders Cup 2025 Nov 17,,,"ICT Lab BCS-1E
+Osama Tahir ",,
+Academic Block I LAB-4 (46),"DS-Lab BDS-3B
+Alishba Subhani ",,,"DS Lab BCS-3H
+Seema Hashwani",,,,,
+Academic Block III LAB-5 (52),"DBS Lab BCS-5A
+Sadaf Zehra ",,,"DS Lab BSE-3B
+Zainab Asif",,,"Intro to D. Sci Lab BDS-3A
+Ramsha Jatt",,
+Academic Block II DS LAB-6 (52),"IT in Business lab BSBA-1A
+Muhammad Ali Asghar",,,"COAL Lab BCS-3C
+ Waseem Rauf",,,"DBS Lab BCS-5B
+Ramsha Iqbal",,
+Academic Block II LAB-7 (45),Reserved for Mr Osama Tahir Nov 24 ,,,Reserved for Coders Cup 2025 Nov 17,,,Reserved for Mr Nadeem COAL Lab Final Examination Dec 01,,
+Academic Block II CY LAB-8 (49),"DF Lab BCY-5A
+Saqib",,,Reserved for Coders Cup 2025 Nov 17 ,,,"CN Lab BCS-5G
+Sadaf Zehra ",,
+Academic Block II AI/ML LAB-9 (47),"COAL Lab BAI-3A
+Jahanzaib",,,Reserved for Coders Cup 2025 Nov  17,,,"COAL Lab BSE-3A
+Muhammad Nadeem",,
+Academic Block II LAB-10 (44),"Electrical Network Analysis lab BSEE-3B
+Engr. Bushra",,,"Object Oriented Data Structures lab BSEE-3A
+Engr. Rukhsar Ali",,,"Computer Architecture lab BSEE-7AB
+Engr. Zohaib",,
+Academic Block II LAB-11 (46),"PF Lab BCS-1A
+Saira Ayub",,,"CN Lab BCS-5F
+Sameer Faisal",,,"PF Lab BSE-1A
+Syeda Ravia Ijaz",,
+Academic Block II Lab-12 (47),"ICT Lab BCS-1B
+Fatima Malik (Visiting)",,,"ICT Lab BAI-1B
+Fatima Malik (VF)",,,"CN Lab BCS-5C
+Abdullah Shaikh",,
+Academic Block II Lab-13 (47),"PF Lab BCS-1C
+Kinza Mushtaq",,,"PF Lab BCS-1H
+Muhammad Qasim Keeryo",,,"PF Lab BDS-1A
+Jahanzaib",,
+Academic Block II Lab-14 (43),"ICT Lab BCY-1A
+Rabia Ahmed Ansari",,,"PF Lab BCS-1J
+Sheeraz Iqbal",,,Reserved for Coders Cup 2025 Nov 17,,
+ENGINEERING LABS,,,,,,,,,
+Academic Block II Microprocessor and Interfacing Lab,,,,,,,,,
+Academic Block II Electronics Lab,"Electrical Network Analysis lab BSEE-3B
+Engr. Bushra",,,,,,,,
+Academic Block II Engineering Workshop Lab,,,,,,, ,,
+Academic Block II Electromechanical Systems Lab,,,,,,,,,
+Academic Block II Power Lab,,,,,,,,,
+Academic Block II Physics Lab,,,,"Applied Physics lab BSEE-1A
+Engr. Zohaib Ahmed",,,"Analog and Digital Communication lab BSEE-5AB
+Engr. Sadaf Ayesha",,
