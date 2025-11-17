@@ -34,6 +34,7 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
 
   const [formData, setFormData] = useState({
     name: existingCourse?.name || '',
+    shortName: existingCourse?.shortName || '',
     creditHours: existingCourse?.creditHours || 2,
     weekdays: existingCourse?.weekdays || [],
     initialAbsences: existingCourse?.initialAbsences || 0,
@@ -107,6 +108,13 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
     const newErrors = {}
 
     if (!formData.name.trim()) newErrors.name = 'Course name is required'
+    if (!formData.shortName.trim()) {
+      newErrors.shortName = 'Short name is required'
+    } else if (formData.shortName.length < 2) {
+      newErrors.shortName = 'Short name must be at least 2 characters'
+    } else if (formData.shortName.length > 6) {
+      newErrors.shortName = 'Short name must not exceed 6 characters'
+    }
     if (formData.weekdays.length !== formData.creditHours) {
       newErrors.weekdays = `Select ${formData.creditHours} session day(s)`
     }
@@ -227,6 +235,30 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
             />
             {errors.name && (
               <p className="text-xs text-attendance-danger mt-1.5">{errors.name}</p>
+            )}
+          </div>
+
+          {/* Short Name */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-2">
+              Short Name * <span className="text-content-tertiary font-normal text-xs">({formData.shortName.length}/6 characters)</span>
+            </label>
+            <input
+              type="text"
+              value={formData.shortName}
+              onChange={(e) => {
+                const value = e.target.value.toUpperCase().slice(0, 6)
+                setFormData({ ...formData, shortName: value })
+              }}
+              maxLength={6}
+              className="w-full px-4 py-2.5 bg-dark-bg/50 border border-dark-border/50 rounded-xl text-content-primary placeholder-content-disabled focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all uppercase"
+              placeholder="e.g., DSA or TOA"
+            />
+            <p className="text-xs text-content-tertiary mt-1.5">
+              Short form for column display (2-6 characters)
+            </p>
+            {errors.shortName && (
+              <p className="text-xs text-attendance-danger mt-1.5">{errors.shortName}</p>
             )}
           </div>
 

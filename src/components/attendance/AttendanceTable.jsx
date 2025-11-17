@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext'
 import { generateWeeks, formatDateShort, courseHasClassOnDate } from '../../utils/dateHelpers'
 import { getDayStatus, getSessionStatus, calculateAttendanceStats } from '../../utils/attendanceCalculator'
 import { SESSION_STATUS, COURSE_COLORS } from '../../utils/constants'
-import { Check, X, Minus, Circle, Edit2, Trash2, CheckSquare, Square } from 'lucide-react'
+import { Check, X, Minus, Circle, Edit2, Trash2, CheckSquare, Square, MoreVertical, ArrowLeft, ArrowRight, ArrowLeftRight } from 'lucide-react'
 import { useSwipeable } from 'react-swipeable'
 import QuickMarkToday from './QuickMarkToday'
 
@@ -21,12 +21,14 @@ const getCourseColor = (course) => {
 }
 
 export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, onDeleteCourse, onBulkMarkComplete }) {
-  const { courses, attendance, toggleDay, toggleSession, deleteCourse, markDaysAbsent } = useApp()
+  const { courses, attendance, toggleDay, toggleSession, deleteCourse, markDaysAbsent, reorderCourse } = useApp()
   const [deleteConfirm, setDeleteConfirm] = useState(null) // { course }
   const [longPressTimer, setLongPressTimer] = useState(null)
   const [bulkSelectMode, setBulkSelectMode] = useState(false)
   const [selectedDates, setSelectedDates] = useState([])
   const [swipedCourse, setSwipedCourse] = useState(null) // Track swiped course for delete reveal
+  const [openMenuCourse, setOpenMenuCourse] = useState(null) // Track which course menu is open
+  const [reorderMode, setReorderMode] = useState(false) // Track reorder mode
 
   // Get latest course end date
   const getLatestEndDate = () => {
@@ -192,32 +194,28 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
   return (
     <div className="card p-0">
       {/* Bulk Select Mode Toggle */}
-      <div className="px-3 md:px-4 py-2 border-b border-dark-border bg-dark-surface-raised/50">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
+      <div className="px-3 md:px-4 py-2.5 border-b border-dark-border bg-dark-surface-raised/50">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             <button
               onClick={toggleBulkSelectMode}
               className={`
-                flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 flex-shrink-0
                 ${bulkSelectMode
-                  ? 'text-white'
-                  : 'bg-dark-bg border border-dark-border text-content-secondary hover:bg-dark-surface-raised hover:text-content-primary'
+                  ? 'bg-accent text-dark-bg shadow-accent'
+                  : 'bg-dark-bg border border-dark-border text-content-secondary hover:bg-dark-surface-raised hover:text-content-primary hover:border-accent/30'
                 }
               `}
-              style={bulkSelectMode ? {
-                backgroundColor: 'var(--color-secondary)',
-                boxShadow: 'var(--shadow-secondary)'
-              } : {}}
             >
               {bulkSelectMode ? (
                 <>
                   <CheckSquare className="w-3.5 h-3.5" />
-                  <span>Bulk Select Active</span>
+                  <span className="whitespace-nowrap">Bulk Select Active</span>
                 </>
               ) : (
                 <>
                   <Square className="w-3.5 h-3.5" />
-                  <span>Select Multiple Dates</span>
+                  <span className="whitespace-nowrap">Select Multiple</span>
                 </>
               )}
             </button>
@@ -226,8 +224,8 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
             {!bulkSelectMode && <QuickMarkToday inline />}
           </div>
           {bulkSelectMode && selectedDates.length > 0 && (
-            <span className="text-xs text-content-tertiary">
-              {selectedDates.length} date{selectedDates.length > 1 ? 's' : ''} selected
+            <span className="text-xs text-content-tertiary font-medium flex-shrink-0 tabular-nums">
+              {selectedDates.length} selected
             </span>
           )}
         </div>
@@ -235,10 +233,13 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
 
       <div className="overflow-auto max-h-[calc(100vh-14rem)] md:max-h-[calc(100vh-15rem)] scroll-smooth pb-4">
         <table className="attendance-table w-full min-w-full">
-          <thead>
+          <thead className="sticky top-0 z-10 bg-dark-surface border-b border-dark-border">
             <tr>
-              <th className="text-left min-w-[70px] md:min-w-[100px] px-1.5 md:px-2">
-                <span className="text-xs">Date</span>
+              <th className="text-left min-w-[60px] md:min-w-[80px] px-1.5 md:px-2 py-3">
+                <div className="flex flex-col justify-center gap-1.5 h-full">
+                  <span className="text-xs md:text-sm font-semibold text-content-primary">Date</span>
+                  <div className="w-8 h-px bg-accent/30"></div>
+                </div>
               </th>
               {courses.map((course, index) => {
                 const stats = calculateAttendanceStats(course, attendance)
@@ -269,15 +270,17 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
 
                 const isSwipedOpen = swipedCourse === course.id
 
+                const isMenuOpen = openMenuCourse === course.id
+
                 return (
                   <th
                     key={course.id}
-                    className="min-w-[70px] md:min-w-[80px] text-center px-2 relative overflow-hidden"
+                    className="min-w-[64px] max-w-[64px] md:min-w-[74px] md:max-w-[74px] text-center px-1 md:px-1.5 relative overflow-visible"
                     {...swipeHandlers}
                   >
                     {/* Swipe reveal delete button background */}
                     {isSwipedOpen && (
-                      <div className="absolute inset-0 bg-attendance-danger flex items-center justify-center">
+                      <div className="absolute inset-0 bg-attendance-danger flex items-center justify-center z-10">
                         <button
                           onClick={() => {
                             vibrate([10])
@@ -291,50 +294,61 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
                       </div>
                     )}
 
-                    <div className={`space-y-1.5 transition-transform duration-200 ${isSwipedOpen ? '-translate-x-full' : 'translate-x-0'}`}>
-                      {/* Course name with subtle color dot - minimal and professional */}
-                      <div className="flex items-center justify-center gap-1">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          {/* Tiny colored dot for visual identification */}
-                          <div
-                            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: courseColor.hex }}
-                          />
-                          <div
-                            className="text-xs font-medium truncate text-content-primary"
-                            title={course.name}
-                          >
-                            {course.name}
-                          </div>
-                        </div>
-                        <div className="flex gap-1 flex-shrink-0">
-                          <button
-                            onClick={() => {
-                              vibrate([10])
-                              onEditCourse(course)
-                              setSwipedCourse(null)
-                            }}
-                            className="p-1.5 hover:bg-dark-surface-raised rounded transition-colors"
-                            title="Edit course"
-                          >
-                            <Edit2 className="w-4 h-4 text-content-tertiary hover:text-accent" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              vibrate([10])
-                              setDeleteConfirm(course)
-                              setSwipedCourse(null)
-                            }}
-                            className="p-1.5 hover:bg-dark-surface-raised rounded transition-colors"
-                            title="Delete course"
-                          >
-                            <Trash2 className="w-4 h-4 text-content-tertiary hover:text-attendance-danger" />
-                          </button>
+                    <div className={`py-3 px-0.5 transition-transform duration-200 ${isSwipedOpen ? '-translate-x-full' : 'translate-x-0'}`}>
+                      {/* Badge Style with Status - Modern & Polished */}
+
+                      {/* Course name with colored dot - TOP */}
+                      <div className="flex items-center justify-center gap-1 min-w-0 mb-1.5">
+                        <div
+                          className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: courseColor.hex }}
+                        />
+                        <div
+                          className="text-[11px] md:text-sm font-bold truncate text-content-primary max-w-[48px] md:max-w-[58px]"
+                          title={course.name}
+                        >
+                          {course.shortName || course.name}
                         </div>
                       </div>
-                      {/* Stats - THE STAR OF THE SHOW - Large, bold, status color */}
-                      <div className={`text-sm md:text-base font-bold tabular-nums ${statusColor}`}>
+
+                      {/* Horizontal divider */}
+                      <div className="w-full h-px bg-dark-border/40 mb-1.5"></div>
+
+                      {/* Stats with status background - MIDDLE */}
+                      <div className={`
+                        px-1.5 py-1 md:py-1.5 rounded-md mb-1.5 text-[10px] md:text-xs font-bold tabular-nums
+                        ${percentage < 60
+                          ? 'bg-attendance-safe/15 text-attendance-safe border border-attendance-safe/20'
+                          : percentage < 85
+                            ? 'bg-attendance-warning/15 text-attendance-warning border border-attendance-warning/20'
+                            : 'bg-attendance-danger/15 text-attendance-danger border border-attendance-danger/20'
+                        }
+                      `}>
                         {absencesUsed}/{absencesAllowed}
+                      </div>
+
+                      {/* Action buttons - BOTTOM */}
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          onClick={() => {
+                            vibrate([10])
+                            onEditCourse(course)
+                          }}
+                          className="p-1 md:p-1.5 hover:bg-dark-surface-raised rounded transition-colors border border-dark-border/30 hover:border-accent/40"
+                          title="Edit course"
+                        >
+                          <Edit2 className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-accent" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            vibrate([10])
+                            setDeleteConfirm(course)
+                          }}
+                          className="p-1 md:p-1.5 hover:bg-dark-surface-raised rounded transition-colors border border-dark-border/30 hover:border-attendance-danger/40"
+                          title="Delete course"
+                        >
+                          <Trash2 className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-attendance-danger" />
+                        </button>
                       </div>
                     </div>
                   </th>
@@ -478,24 +492,24 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
         </div>
       )}
 
-      {/* Professional Footer */}
+      {/* Professional Footer - Consistent for dark/light themes */}
       {!bulkSelectMode && (
-        <div className="border-t border-dark-border bg-dark-surface-raised backdrop-blur-sm">
-          <div className="px-4 py-3 flex items-center justify-center">
-            <div className="flex items-center gap-3 text-xs text-content-secondary">
+        <div className="border-t border-dark-border bg-dark-surface backdrop-blur-sm">
+          <div className="px-4 py-2.5 flex items-center justify-center min-h-[44px]">
+            <div className="flex items-center gap-3 md:gap-4 text-xs">
               <div className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-attendance-safe" />
-                <span>Present</span>
+                <Check className="w-3.5 h-3.5 text-attendance-safe flex-shrink-0" />
+                <span className="text-content-secondary font-medium">Present</span>
               </div>
-              <span className="text-content-disabled">•</span>
+              <span className="text-content-disabled/50">•</span>
               <div className="flex items-center gap-1.5">
-                <X className="w-3.5 h-3.5 text-attendance-danger" />
-                <span>Absent</span>
+                <X className="w-3.5 h-3.5 text-attendance-danger flex-shrink-0" />
+                <span className="text-content-secondary font-medium">Absent</span>
               </div>
-              <span className="text-content-disabled">•</span>
+              <span className="text-content-disabled/50">•</span>
               <div className="flex items-center gap-1.5">
-                <Circle className="w-3.5 h-3.5 text-attendance-warning" />
-                <span>Cancelled</span>
+                <Circle className="w-3.5 h-3.5 text-attendance-warning flex-shrink-0" />
+                <span className="text-content-secondary font-medium">Cancelled</span>
               </div>
             </div>
           </div>

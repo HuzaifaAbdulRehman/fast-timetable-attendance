@@ -162,6 +162,37 @@ export function AppProvider({ children }) {
     setAttendance(prev => prev.filter(record => record.courseId !== courseId))
   }, [setCourses, setAttendance])
 
+  /**
+   * Reorder course columns (move left or right)
+   */
+  const reorderCourse = useCallback((courseId, direction) => {
+    setCourses(prev => {
+      const currentIndex = prev.findIndex(c => c.id === courseId && c.semesterId === activeSemesterId)
+      if (currentIndex === -1) return prev
+
+      const semesterCourses = prev.filter(c => c.semesterId === activeSemesterId)
+      const otherCourses = prev.filter(c => c.semesterId !== activeSemesterId)
+
+      const newIndex = direction === 'left' ? currentIndex - 1 : currentIndex + 1
+
+      // Check bounds
+      if (newIndex < 0 || newIndex >= semesterCourses.length) return prev
+
+      // Swap courses
+      const temp = semesterCourses[currentIndex]
+      semesterCourses[currentIndex] = semesterCourses[newIndex]
+      semesterCourses[newIndex] = temp
+
+      // Update order field for persistence
+      const reorderedCourses = semesterCourses.map((c, idx) => ({
+        ...c,
+        order: idx
+      }))
+
+      return [...otherCourses, ...reorderedCourses]
+    })
+  }, [setCourses, activeSemesterId])
+
   // ============================================
   // ATTENDANCE MANAGEMENT
   // ============================================
@@ -435,6 +466,7 @@ export function AppProvider({ children }) {
     addCourse,
     updateCourse,
     deleteCourse,
+    reorderCourse,
 
     // Attendance management
     toggleSession,
