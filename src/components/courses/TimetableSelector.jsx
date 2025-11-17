@@ -388,7 +388,17 @@ export default function TimetableSelector({ onCoursesSelected, onClose }) {
     }
 
     // Add courses using context
-    appCourses.forEach(course => addCourse(course))
+    console.log('🚀 Adding courses to context:', appCourses)
+    appCourses.forEach((course, index) => {
+      console.log(`  📝 Course ${index + 1}:`, {
+        name: course.name,
+        hasSchedule: !!course.schedule,
+        scheduleLength: Array.isArray(course.schedule) ? course.schedule.length : 'N/A',
+        schedule: course.schedule
+      })
+      const added = addCourse(course)
+      console.log(`  ✅ Added course:`, added)
+    })
 
     onCoursesSelected(appCourses)
     vibrate([10, 50, 10])
@@ -431,14 +441,29 @@ export default function TimetableSelector({ onCoursesSelected, onClose }) {
       .map(s => {
         const [startTime, endTime] = s.timeSlot.split('-')
         // Normalize day name to match TimetableView format
+        // Input might be "Monday", "MONDAY", "monday" - normalize to "Monday"
         const dayName = s.day.charAt(0).toUpperCase() + s.day.slice(1).toLowerCase()
-        return {
+        const formatted = {
           day: dayName,
           startTime: formatTimeTo12Hour(startTime.trim()),
           endTime: formatTimeTo12Hour(endTime.trim())
         }
+        console.log('📅 Creating schedule slot:', {
+          originalDay: s.day,
+          normalizedDay: dayName,
+          timeSlot: s.timeSlot,
+          formatted: formatted
+        })
+        return formatted
       })
       .filter(s => s.day && s.startTime && s.endTime) // Ensure all fields are valid
+
+    console.log('📚 Course schedule array created:', {
+      courseName: course.courseName,
+      courseCode: course.courseCode,
+      scheduleLength: schedule.length,
+      schedule: schedule
+    })
 
     return {
       name: course.courseName,

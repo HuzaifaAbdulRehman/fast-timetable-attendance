@@ -3,32 +3,41 @@ import { useApp } from '../../context/AppContext'
 import { BookOpen, Calendar, AlertCircle, CheckCircle2, Plus, Trash2, Edit } from 'lucide-react'
 import TimetableSelector from './TimetableSelector'
 import CourseForm from './CourseForm'
+import ConfirmModal from '../shared/ConfirmModal'
 
 export default function CoursesView() {
-  const { courses, deleteCourse, deleteAllCourses } = useApp()
+  const { courses, deleteCourse, deleteAllCourses, updateCourse, addCourse } = useApp()
   const [showTimetableSelector, setShowTimetableSelector] = useState(false)
   const [showCourseForm, setShowCourseForm] = useState(false)
   const [editingCourse, setEditingCourse] = useState(null)
   const [deletingCourseId, setDeletingCourseId] = useState(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
+  const [courseToDelete, setCourseToDelete] = useState(null)
 
   const handleEditCourse = (course) => {
     setEditingCourse(course)
     setShowCourseForm(true)
   }
 
-  const handleDeleteCourse = (courseId) => {
-    setDeletingCourseId(courseId)
-    // Smooth delete without alert - just delete directly
-    setTimeout(() => {
-      deleteCourse(courseId)
-      setDeletingCourseId(null)
-    }, 100)
+  const handleDeleteCourse = (course) => {
+    setCourseToDelete(course)
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDeleteCourse = () => {
+    if (courseToDelete) {
+      deleteCourse(courseToDelete.id)
+      setCourseToDelete(null)
+    }
   }
 
   const handleDeleteAll = () => {
-    if (window.confirm('Are you sure you want to delete all courses? This action cannot be undone.')) {
-      deleteAllCourses()
-    }
+    setShowDeleteAllConfirm(true)
+  }
+
+  const confirmDeleteAll = () => {
+    deleteAllCourses()
   }
 
   return (
@@ -183,9 +192,8 @@ export default function CoursesView() {
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDeleteCourse(course.id)}
-                        disabled={deletingCourseId === course.id}
-                        className="p-2 bg-dark-bg hover:bg-red-500/10 text-content-secondary hover:text-red-400 rounded-lg transition-all disabled:opacity-50"
+                        onClick={() => handleDeleteCourse(course)}
+                        className="p-2 bg-dark-bg hover:bg-red-500/10 text-content-secondary hover:text-red-400 rounded-lg transition-all"
                         title="Delete course"
                         aria-label="Delete course"
                       >
