@@ -64,9 +64,9 @@ export function AppProvider({ children }) {
     })
   }, [activeSemesterId, setAllAttendance])
 
-  // Migrate existing courses to have colors and semesterIds
+  // Migrate existing courses to have colors, semesterIds, and shortNames
   useEffect(() => {
-    const coursesNeedingMigration = allCourses.filter(c => !c.semesterId || !c.color || !c.colorHex)
+    const coursesNeedingMigration = allCourses.filter(c => !c.semesterId || !c.color || !c.colorHex || !c.shortName)
     if (coursesNeedingMigration.length > 0 && activeSemesterId) {
       setAllCourses(prev => prev.map((course, index) => {
         const updates = { ...course }
@@ -75,6 +75,11 @@ export function AppProvider({ children }) {
           const assignedColor = COURSE_COLORS[index % COURSE_COLORS.length]
           updates.color = assignedColor.name
           updates.colorHex = assignedColor.hex
+        }
+        if (!course.shortName) {
+          // Auto-generate short name from first letters of each word, max 6 chars
+          const words = course.name.trim().split(/\s+/)
+          updates.shortName = words.map(w => w[0]).join('').toUpperCase().slice(0, 6)
         }
         return updates
       }))
