@@ -16,7 +16,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 sticky top-0 z-30 shadow-lg w-screen left-0 right-0">
+      <header className="bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 sticky top-0 z-30 shadow-lg w-full max-w-none inset-x-0">
         <div className="w-full px-4 md:px-6 py-3.5 md:py-2.5">
           <div className="flex items-center justify-between gap-2 w-full">
             <div className="flex items-center gap-2 flex-1 min-w-0">
