@@ -4,7 +4,7 @@ import AttendanceTable from './AttendanceTable'
 import CourseForm from '../courses/CourseForm'
 import Toast from '../shared/Toast'
 import SemesterSelector from '../shared/SemesterSelector'
-import { Plus, AlertCircle, CheckCircle2, Calendar, AlertTriangle } from 'lucide-react'
+import { Plus, AlertCircle, CheckCircle2, Calendar, AlertTriangle, Menu, ChevronUp } from 'lucide-react'
 import { getTodayISO } from '../../utils/dateHelpers'
 import { DEFAULT_WEEKS_TO_SHOW } from '../../utils/constants'
 import PullToRefresh from 'react-simple-pull-to-refresh'
@@ -16,6 +16,7 @@ export default function AttendanceView() {
   const [showCourseForm, setShowCourseForm] = useState(false)
   const [editingCourse, setEditingCourse] = useState(null)
   const [toast, setToast] = useState(null) // { message, type, action }
+  const [showControls, setShowControls] = useState(false) // Track if semester controls are visible
 
   // Show undo toast when action is performed
   useEffect(() => {
@@ -170,9 +171,26 @@ export default function AttendanceView() {
   }
 
   const renderContent = () => (
-    <div>
+    <div className="relative">
+      {/* Toggle button for controls */}
+      <button
+        onClick={() => setShowControls(!showControls)}
+        className={`
+          absolute top-0 left-0 z-10 p-2 rounded-full shadow-lg transition-all duration-200
+          ${showControls
+            ? 'bg-accent text-dark-bg rotate-180'
+            : 'bg-dark-surface-raised text-accent border border-accent/30'
+          }
+        `}
+        title={showControls ? "Hide controls" : "Show controls"}
+        aria-label={showControls ? "Hide controls" : "Show controls"}
+      >
+        {showControls ? <ChevronUp className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+      </button>
+
       {/* Unified Controls Row - Semester + Weeks + Add Course */}
-      <div className="mb-3 flex flex-wrap items-center gap-2">
+      {showControls && (
+      <div className="mb-3 flex flex-wrap items-center gap-2 pt-12 md:pt-0">
         {/* Compact Semester Selector */}
         <SemesterSelector compact />
 
@@ -201,6 +219,7 @@ export default function AttendanceView() {
           <span className="hidden sm:inline">Add</span>
         </button>
       </div>
+      )}
 
       {/* Attendance Table */}
       <AttendanceTable
