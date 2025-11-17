@@ -9,15 +9,16 @@ export default defineConfig({
     tailwindcss(),
     react(),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png'],
       injectRegister: 'auto',
       manifest: {
+        id: '/',
         name: 'Absence Tracker',
         short_name: 'Absence',
         description: 'Track your university course absences and stay above 80% attendance',
         theme_color: '#3B82F6',
-        background_color: '#09090b',
+        background_color: '#1a1a1e',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
@@ -27,13 +28,25 @@ export default defineConfig({
             src: '/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: '/icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
           },
           {
             src: '/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: '/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ],
         categories: ['education', 'productivity', 'utilities']
