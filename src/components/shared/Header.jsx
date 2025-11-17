@@ -19,13 +19,14 @@ export default function Header() {
       <header className="bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 sticky top-0 z-30 shadow-lg">
         <div className="container mx-auto max-w-7xl px-3 md:px-4 py-2">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
               <div className="p-1 bg-gradient-to-br from-accent/20 to-accent/10 rounded-lg border border-accent/20 flex-shrink-0">
                 <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 text-accent" />
               </div>
-              <div className="min-w-0">
-                <h1 className="text-sm md:text-base font-semibold text-content-primary truncate">
-                  FAST Absence & Timetable Tracker
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xs sm:text-sm md:text-base font-semibold text-content-primary truncate">
+                  <span className="hidden sm:inline">FAST Absence & Timetable Tracker</span>
+                  <span className="sm:hidden">FAST Planner</span>
                 </h1>
                 <p className="text-[9px] md:text-[10px] text-content-tertiary truncate hidden sm:block">
                   Track absences • Stay above 80%
