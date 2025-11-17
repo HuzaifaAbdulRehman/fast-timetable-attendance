@@ -568,52 +568,53 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
         )}
 
         {/* Header */}
-        <div className="sticky top-0 bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 p-4 md:p-5 z-10 rounded-t-3xl md:rounded-t-2xl">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-gradient-to-br from-accent/20 to-accent/10 rounded-xl border border-accent/20">
-                <BookOpen className="w-5 h-5 text-accent" />
+        <div className="sticky top-0 bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 p-2 sm:p-3 md:p-5 z-10 rounded-t-3xl md:rounded-t-2xl">
+          <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="p-1.5 sm:p-2 bg-gradient-to-br from-accent/20 to-accent/10 rounded-lg sm:rounded-xl border border-accent/20">
+                <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
               </div>
               <div>
-                <h2 className="text-lg md:text-xl font-bold text-content-primary">
+                <h2 className="text-xs sm:text-sm md:text-lg lg:text-xl font-bold text-content-primary">
                   Select Courses from Timetable
                 </h2>
-                <p className="text-xs text-content-tertiary">
+                <p className="text-[10px] sm:text-xs text-content-tertiary hidden sm:block">
                   Choose your department and enter section
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               {showManualOption && (
                 <button
                   onClick={() => setShowManualForm(true)}
-                  className="px-3 py-2 text-sm bg-dark-bg border border-dark-border rounded-lg text-content-primary hover:bg-dark-surface-raised transition-all flex items-center gap-2"
+                  className="px-2 py-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-xs md:text-sm bg-dark-bg border border-dark-border rounded-lg text-content-primary hover:bg-dark-surface-raised transition-all flex items-center gap-1 sm:gap-2"
                 >
-                  <Plus className="w-4 h-4" />
-                  Add Manually
+                  <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Add Manually</span>
+                  <span className="sm:hidden">Add</span>
                 </button>
               )}
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-dark-surface-raised rounded-lg transition-colors"
+                className="p-1.5 sm:p-2 hover:bg-dark-surface-raised rounded-lg transition-colors"
                 aria-label="Close"
               >
-                <X className="w-5 h-5 text-content-secondary" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5 text-content-secondary" />
               </button>
             </div>
           </div>
 
           {/* Department and Section Search */}
-          <div className="space-y-2.5 mb-2">
+          <div className="space-y-1.5 sm:space-y-2 md:space-y-2.5 mb-1 sm:mb-2">
             {/* Department Dropdown */}
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1.5 block">
+              <label className="text-[10px] sm:text-xs font-medium text-content-secondary mb-1 sm:mb-1.5 block">
                 Department
               </label>
               <select
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
-                className="w-full px-4 py-3 bg-dark-bg border border-dark-border rounded-xl text-content-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
+                className="w-full px-2 py-2 sm:px-3 sm:py-2.5 md:px-4 md:py-3 bg-dark-bg border border-dark-border rounded-lg sm:rounded-xl text-xs sm:text-sm md:text-base text-content-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
               >
                 {DEPARTMENTS.map(dept => (
                   <option key={dept.code} value={dept.code}>
@@ -625,12 +626,12 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
 
             {/* Section Input + Search Button */}
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1.5 block">
+              <label className="text-[10px] sm:text-xs font-medium text-content-secondary mb-1 sm:mb-1.5 block">
                 Section (e.g., 5F, 3A, 7B)
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 sm:gap-2">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-tertiary" />
+                  <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-content-tertiary" />
                   <input
                     type="text"
                     value={section}
@@ -642,19 +643,19 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                     }}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     placeholder="e.g., 5F"
-                    className="w-full pl-10 pr-4 py-3 bg-dark-bg border border-dark-border rounded-xl text-content-primary placeholder-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all uppercase"
+                    className="w-full pl-8 sm:pl-10 pr-2 sm:pr-4 py-2 sm:py-2.5 md:py-3 bg-dark-bg border border-dark-border rounded-lg sm:rounded-xl text-xs sm:text-sm md:text-base text-content-primary placeholder-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all uppercase"
                     autoFocus
                   />
                 </div>
                 <button
                   onClick={handleSearch}
                   disabled={!section.trim() || loading}
-                  className="px-5 py-3 bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-semibold rounded-xl transition-all hover:shadow-accent-lg hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-3 bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-semibold text-xs sm:text-sm md:text-base rounded-lg sm:rounded-xl transition-all hover:shadow-accent-lg hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
                 >
                   Search
                 </button>
               </div>
-              <p className="text-xs text-content-tertiary mt-1.5">
+              <p className="text-[10px] sm:text-xs text-content-tertiary mt-1 sm:mt-1.5">
                 Searching: <span className="text-accent font-medium">{department}-{section || '___'}</span>
               </p>
             </div>
@@ -663,15 +664,16 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
           {/* Clear Cache Button */}
           <button
             onClick={clearCache}
-            className="text-xs text-content-tertiary hover:text-accent transition-colors flex items-center gap-1"
+            className="text-[10px] sm:text-xs text-content-tertiary hover:text-accent transition-colors flex items-center gap-1"
           >
-            <RefreshCw className="w-3 h-3" />
-            Clear cache & reload timetable
+            <RefreshCw className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+            <span className="hidden sm:inline">Clear cache & reload timetable</span>
+            <span className="sm:hidden">Clear cache</span>
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-5">
+        <div className="flex-1 overflow-y-auto p-2 sm:p-3 md:p-5">
           {step === 'configure' ? (
             // Step 2: Date Configuration
             <div className="space-y-5">
@@ -916,8 +918,8 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
           )}
 
           {!loading && filteredCourses.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-sm text-content-secondary mb-3">
+            <div className="space-y-1.5 sm:space-y-2 md:space-y-3">
+              <p className="text-xs sm:text-sm text-content-secondary mb-1.5 sm:mb-2 md:mb-3">
                 Found {filteredCourses.length} course{filteredCourses.length > 1 ? 's' : ''} for {section}
               </p>
 
@@ -928,41 +930,41 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                   <div
                     key={course.courseCode}
                     onClick={() => toggleCourse(course)}
-                    className={`relative bg-dark-surface-raised border-2 rounded-xl p-4 cursor-pointer transition-all ${
+                    className={`relative bg-dark-surface-raised border-2 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 cursor-pointer transition-all ${
                       isSelected
                         ? 'border-accent/50 bg-accent/5'
                         : 'border-dark-border hover:border-accent/30'
                     }`}
                   >
                     {/* Checkbox */}
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4">
                       <div
-                        className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+                        className={`w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-md sm:rounded-lg border-2 flex items-center justify-center transition-all ${
                           isSelected
                             ? 'bg-accent border-accent'
                             : 'border-dark-border bg-dark-surface'
                         }`}
                       >
-                        {isSelected && <Check className="w-4 h-4 text-dark-bg" />}
+                        {isSelected && <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-dark-bg" />}
                       </div>
                     </div>
 
                     {/* Course Info */}
-                    <div className="pr-10">
-                      <div className="flex items-start gap-2 mb-2">
-                        <span className="px-2 py-0.5 bg-accent/20 text-accent text-xs font-mono font-semibold rounded">
+                    <div className="pr-8 sm:pr-9 md:pr-10">
+                      <div className="flex items-start gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                        <span className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-accent/20 text-accent text-[10px] sm:text-xs font-mono font-semibold rounded">
                           {course.courseCode}
                         </span>
-                        <h3 className="text-base font-semibold text-content-primary leading-tight">
+                        <h3 className="text-xs sm:text-sm md:text-base font-semibold text-content-primary leading-tight">
                           {course.courseName}
                         </h3>
                       </div>
 
                       {/* Details Grid */}
-                      <div className="space-y-2 mt-3">
-                        <div className="flex items-center gap-1.5">
-                          <User className="w-3.5 h-3.5 text-content-tertiary flex-shrink-0" />
-                          <span className="text-xs text-content-secondary truncate">
+                      <div className="space-y-1 sm:space-y-1.5 md:space-y-2 mt-1.5 sm:mt-2 md:mt-3">
+                        <div className="flex items-center gap-1 sm:gap-1.5">
+                          <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-content-tertiary flex-shrink-0" />
+                          <span className="text-[10px] sm:text-xs text-content-secondary truncate">
                             {course.instructor}
                           </span>
                         </div>
@@ -991,13 +993,13 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                             const room = sortedSessions[0].room
 
                             return (
-                              <div key={day} className="flex items-start gap-1.5 text-xs">
-                                <Calendar className="w-3.5 h-3.5 text-content-tertiary flex-shrink-0 mt-0.5" />
+                              <div key={day} className="flex items-start gap-1 sm:gap-1.5 text-[10px] sm:text-xs">
+                                <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-content-tertiary flex-shrink-0 mt-0.5" />
                                 <div className="flex-1">
                                   <span className="text-content-primary font-medium">{day.slice(0, 3)}</span>
-                                  <span className="text-content-tertiary mx-1">•</span>
+                                  <span className="text-content-tertiary mx-0.5 sm:mx-1">•</span>
                                   <span className="text-content-secondary">{timeRange}</span>
-                                  <span className="text-content-tertiary mx-1">•</span>
+                                  <span className="text-content-tertiary mx-0.5 sm:mx-1">•</span>
                                   <span className="text-content-secondary">{room}</span>
                                 </div>
                               </div>
@@ -1016,11 +1018,11 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-dark-surface/98 backdrop-blur-lg border-t border-dark-border/50 p-4 md:p-5 shadow-2xl rounded-b-3xl md:rounded-b-2xl">
-          <div className="flex gap-3">
+        <div className="sticky bottom-0 bg-dark-surface/98 backdrop-blur-lg border-t border-dark-border/50 p-2 sm:p-3 md:p-5 shadow-2xl rounded-b-3xl md:rounded-b-2xl">
+          <div className="flex gap-1.5 sm:gap-2 md:gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-5 py-3 bg-dark-bg border border-dark-border rounded-xl text-content-primary font-medium hover:bg-dark-surface-raised transition-all hover:scale-[1.02] active:scale-95"
+              className="flex-1 px-2 py-2 sm:px-3 sm:py-2.5 md:px-5 md:py-3 bg-dark-bg border border-dark-border rounded-lg sm:rounded-xl text-[10px] sm:text-xs md:text-sm text-content-primary font-medium hover:bg-dark-surface-raised transition-all hover:scale-[1.02] active:scale-95"
             >
               Cancel
             </button>
@@ -1028,27 +1030,29 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                 <button
                   onClick={handleNextToConfiguration}
                   disabled={selectedCourses.length === 0}
-                  className="flex-1 px-5 py-3 bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-semibold rounded-xl transition-all hover:shadow-accent-lg hover:scale-[1.02] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                  className="flex-1 px-2 py-2 sm:px-3 sm:py-2.5 md:px-5 md:py-3 bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-semibold text-[10px] sm:text-xs md:text-sm rounded-lg sm:rounded-xl transition-all hover:shadow-accent-lg hover:scale-[1.02] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-1 sm:gap-2"
                 >
-                  Next: Configure Dates
-                  <ArrowRight className="w-4 h-4" />
+                  <span className="hidden sm:inline">Next: Configure Dates</span>
+                  <span className="sm:hidden">Next</span>
+                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
                 </button>
             ) : (
               <>
                 <button
                   onClick={handleBackToSelection}
-                  className="flex-1 px-5 py-3 bg-dark-bg border border-dark-border rounded-xl text-content-primary font-medium hover:bg-dark-surface-raised transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                  className="flex-1 px-2 py-2 sm:px-3 sm:py-2.5 md:px-5 md:py-3 bg-dark-bg border border-dark-border rounded-lg sm:rounded-xl text-[10px] sm:text-xs md:text-sm text-content-primary font-medium hover:bg-dark-surface-raised transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-1 sm:gap-2"
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
                   Back
                 </button>
                 <button
                   onClick={handleFinalSubmit}
                   disabled={selectedCourses.length === 0}
-                  className="flex-1 px-5 py-3 bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-semibold rounded-xl transition-all hover:shadow-accent-lg hover:scale-[1.02] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                  className="flex-1 px-2 py-2 sm:px-3 sm:py-2.5 md:px-5 md:py-3 bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-semibold text-[10px] sm:text-xs md:text-sm rounded-lg sm:rounded-xl transition-all hover:shadow-accent-lg hover:scale-[1.02] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-1 sm:gap-2"
                 >
-                  <Check className="w-4 h-4" />
-                  Add {selectedCourses.length} Course{selectedCourses.length > 1 ? 's' : ''}
+                  <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Add {selectedCourses.length} Course{selectedCourses.length > 1 ? 's' : ''}</span>
+                  <span className="sm:hidden">Add {selectedCourses.length}</span>
                 </button>
               </>
             )}
