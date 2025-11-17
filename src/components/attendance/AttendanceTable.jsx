@@ -222,28 +222,28 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
 
   return (
     <div className="card p-0 relative">
-      {/* Floating Action Button to toggle actions */}
+      {/* Floating Action Button to toggle actions - Fixed position */}
       <button
         onClick={() => {
           vibrate([10])
           setShowActions(!showActions)
         }}
         className={`
-          absolute top-2 right-2 z-20 p-2 rounded-full shadow-lg transition-all duration-200
+          fixed bottom-20 right-4 z-30 p-3 rounded-full shadow-2xl transition-all duration-200
           ${showActions
             ? 'bg-accent text-dark-bg rotate-180'
-            : 'bg-dark-surface-raised text-accent border border-accent/30'
+            : 'bg-dark-surface-raised text-accent border-2 border-accent/50'
           }
         `}
         title={showActions ? "Hide actions" : "Show actions"}
         aria-label={showActions ? "Hide actions" : "Show actions"}
       >
-        {showActions ? <ChevronUp className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+        {showActions ? <ChevronUp className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
       <div className="overflow-auto max-h-[calc(100vh-13rem)] md:max-h-[calc(100vh-14rem)] scroll-smooth pb-4">
         <table className="attendance-table w-full min-w-full">
-          <thead className="sticky top-0 z-10 bg-dark-surface">
+          <thead className="sticky top-0 z-[5] bg-dark-surface">
             {/* Row 1: Action Buttons - Collapsible */}
             {showActions && (
             <tr>

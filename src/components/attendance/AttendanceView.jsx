@@ -172,25 +172,25 @@ export default function AttendanceView() {
 
   const renderContent = () => (
     <div className="relative">
-      {/* Toggle button for controls */}
+      {/* Toggle button for controls - Fixed position */}
       <button
         onClick={() => setShowControls(!showControls)}
         className={`
-          absolute top-0 left-0 z-10 p-2 rounded-full shadow-lg transition-all duration-200
+          fixed bottom-20 left-4 z-30 p-3 rounded-full shadow-2xl transition-all duration-200
           ${showControls
             ? 'bg-accent text-dark-bg rotate-180'
-            : 'bg-dark-surface-raised text-accent border border-accent/30'
+            : 'bg-dark-surface-raised text-accent border-2 border-accent/50'
           }
         `}
         title={showControls ? "Hide controls" : "Show controls"}
         aria-label={showControls ? "Hide controls" : "Show controls"}
       >
-        {showControls ? <ChevronUp className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+        {showControls ? <ChevronUp className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
       {/* Unified Controls Row - Semester + Weeks + Add Course */}
       {showControls && (
-      <div className="mb-3 flex flex-wrap items-center gap-2 pt-12 md:pt-0">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         {/* Compact Semester Selector */}
         <SemesterSelector compact />
 
