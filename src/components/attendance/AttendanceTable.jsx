@@ -285,7 +285,7 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
       )}
 
       {/* Scrollable Table Container */}
-      <div className={`overflow-auto ${showActions ? 'max-h-[calc(100vh-16.5rem)]' : 'max-h-[calc(100vh-13rem)]'} md:${showActions ? 'max-h-[calc(100vh-17rem)]' : 'max-h-[calc(100vh-14rem)]'} scroll-smooth pb-4`}>
+      <div className={`overflow-auto ${showActions ? 'max-h-[calc(100vh-16.5rem)]' : 'max-h-[calc(100vh-13rem)]'} md:${showActions ? 'max-h-[calc(100vh-17rem)]' : 'max-h-[calc(100vh-14rem)]'} scroll-smooth pb-20`}>
         <table className="attendance-table w-full min-w-full">
           <thead className="sticky top-0 z-[5] bg-dark-surface">
             <tr className="border-b border-dark-border">
@@ -411,10 +411,10 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
       </div>
       {/* End Scrollable Container */}
 
-      {/* Bulk Select Action Bar */}
+      {/* Bulk Select Action Bar - Fixed at bottom */}
       {bulkSelectMode && (
-        <div className="border-t border-dark-border bg-dark-surface-raised/98 backdrop-blur-lg z-20 px-4 py-3">
-          <div className="flex items-center justify-between gap-3">
+        <div className="fixed bottom-0 left-0 right-0 border-t border-dark-border bg-dark-surface-raised/98 backdrop-blur-lg z-30 px-4 py-3 shadow-2xl">
+          <div className="flex items-center justify-between gap-3 max-w-7xl mx-auto">
             <div className="text-sm text-content-secondary">
               {selectedDates.length === 0
                 ? 'Select dates to mark absent'
@@ -446,10 +446,10 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
         </div>
       )}
 
-      {/* Professional Footer - Consistent for dark/light themes */}
+      {/* Professional Footer - Fixed at bottom */}
       {!bulkSelectMode && (
-        <div className="border-t border-dark-border bg-dark-surface backdrop-blur-sm">
-          <div className="px-4 py-2.5 flex items-center justify-center min-h-[44px]">
+        <div className="fixed bottom-0 left-0 right-0 border-t border-dark-border bg-dark-surface/98 backdrop-blur-lg z-30 shadow-2xl">
+          <div className="px-4 py-2.5 flex items-center justify-center min-h-[44px] max-w-7xl mx-auto">
             <div className="flex items-center gap-3 md:gap-4 text-xs">
               <div className="flex items-center gap-1.5">
                 <Check className="w-3.5 h-3.5 text-attendance-safe flex-shrink-0" />
