@@ -4,7 +4,7 @@ import AttendanceTable from './AttendanceTable'
 import CourseForm from '../courses/CourseForm'
 import Toast from '../shared/Toast'
 import SemesterSelector from '../shared/SemesterSelector'
-import { Plus, AlertCircle, CheckCircle2, Calendar, AlertTriangle, Menu, ChevronUp } from 'lucide-react'
+import { Plus, AlertCircle, CheckCircle2, Calendar, AlertTriangle, ChevronUp, ChevronDown } from 'lucide-react'
 import { getTodayISO } from '../../utils/dateHelpers'
 import { DEFAULT_WEEKS_TO_SHOW } from '../../utils/constants'
 import PullToRefresh from 'react-simple-pull-to-refresh'
@@ -16,7 +16,14 @@ export default function AttendanceView() {
   const [showCourseForm, setShowCourseForm] = useState(false)
   const [editingCourse, setEditingCourse] = useState(null)
   const [toast, setToast] = useState(null) // { message, type, action }
-  const [showControls, setShowControls] = useState(false) // Track if semester controls are visible
+  const [showAllControls, setShowAllControls] = useState(false) // Track if ALL controls are visible
+
+  // Haptic feedback
+  const vibrate = (pattern) => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(pattern)
+    }
+  }
 
   // Show undo toast when action is performed
   useEffect(() => {
@@ -172,24 +179,33 @@ export default function AttendanceView() {
 
   const renderContent = () => (
     <div className="relative">
-      {/* Toggle button for controls - Fixed position */}
-      <button
-        onClick={() => setShowControls(!showControls)}
-        className={`
-          fixed bottom-20 left-4 z-30 p-3 rounded-full shadow-2xl transition-all duration-200
-          ${showControls
-            ? 'bg-accent text-dark-bg rotate-180'
-            : 'bg-dark-surface-raised text-accent border-2 border-accent/50'
-          }
-        `}
-        title={showControls ? "Hide controls" : "Show controls"}
-        aria-label={showControls ? "Hide controls" : "Show controls"}
+      {/* Unified Toggle Bar for ALL controls */}
+      <div
+        onClick={() => {
+          vibrate([10])
+          setShowAllControls(!showAllControls)
+        }}
+        className="mb-2 flex items-center justify-center py-1.5 bg-dark-surface border border-dark-border rounded-lg cursor-pointer hover:bg-dark-surface-raised transition-all"
       >
-        {showControls ? <ChevronUp className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-      </button>
+        <div className="flex items-center gap-2 text-content-secondary hover:text-content-primary">
+          {showAllControls ? (
+            <>
+              <ChevronDown className="w-4 h-4" />
+              <span className="text-xs font-medium">Hide Controls</span>
+              <ChevronDown className="w-4 h-4" />
+            </>
+          ) : (
+            <>
+              <ChevronUp className="w-4 h-4" />
+              <span className="text-xs font-medium">Show Controls</span>
+              <ChevronUp className="w-4 h-4" />
+            </>
+          )}
+        </div>
+      </div>
 
       {/* Unified Controls Row - Semester + Weeks + Add Course */}
-      {showControls && (
+      {showAllControls && (
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {/* Compact Semester Selector */}
         <SemesterSelector compact />
@@ -228,6 +244,7 @@ export default function AttendanceView() {
         onEditCourse={handleEditCourse}
         onDeleteCourse={handleDeleteCourse}
         onBulkMarkComplete={handleBulkMarkComplete}
+        showActions={showAllControls}
       />
 
       {/* Course Form Modal */}

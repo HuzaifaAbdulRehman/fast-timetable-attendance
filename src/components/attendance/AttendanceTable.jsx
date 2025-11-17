@@ -20,7 +20,7 @@ const getCourseColor = (course) => {
   return color
 }
 
-export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, onDeleteCourse, onBulkMarkComplete }) {
+export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, onDeleteCourse, onBulkMarkComplete, showActions = false }) {
   const { courses, attendance, toggleDay, toggleSession, deleteCourse, markDaysAbsent, reorderCourse } = useApp()
   const [deleteConfirm, setDeleteConfirm] = useState(null) // { course }
   const [longPressTimer, setLongPressTimer] = useState(null)
@@ -29,7 +29,6 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
   const [swipedCourse, setSwipedCourse] = useState(null) // Track swiped course for delete reveal
   const [openMenuCourse, setOpenMenuCourse] = useState(null) // Track which course menu is open
   const [reorderMode, setReorderMode] = useState(false) // Track reorder mode
-  const [showActions, setShowActions] = useState(false) // Track if action buttons are visible
 
   // Close swipe when clicking outside
   useEffect(() => {
