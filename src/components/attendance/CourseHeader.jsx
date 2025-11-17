@@ -86,7 +86,7 @@ export default function CourseHeader({
       )}
 
       <div
-        className={`py-1 px-0.5 transition-transform duration-200 relative z-10 bg-dark-surface ${isSwipedOpen ? '-translate-x-full' : 'translate-x-0'}`}
+        className={`py-1 px-0.5 transition-transform duration-200 relative z-10 bg-dark-surface ${isSwipedOpen ? '-translate-x-[calc(100%+6px)]' : 'translate-x-0'}`}
         {...swipeHandlers}
       >
         {/* Badge Style with Status - Modern & Polished */}

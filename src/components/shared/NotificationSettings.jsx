@@ -24,20 +24,30 @@ export default function NotificationSettings({ onClose }) {
     // Check if already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+    const isIOSStandalone = window.navigator.standalone
 
-    // Listen for install prompt
+    console.log('PWA Install Detection:', { isStandalone, isIOS, isIOSStandalone })
+
+    // Don't show install button if already installed
+    if (isStandalone || isIOSStandalone) {
+      console.log('App already installed, hiding button')
+      setCanInstall(false)
+      return
+    }
+
+    // Default: Show install button (we're NOT installed)
+    setCanInstall(true)
+    console.log('App not installed, showing button')
+
+    // Listen for install prompt (Android/Chrome)
     const handleBeforeInstallPrompt = (e) => {
+      console.log('beforeinstallprompt event fired')
       e.preventDefault()
       setDeferredPrompt(e)
       setCanInstall(true)
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-
-    // For iOS or if not installed, show install option
-    if ((isIOS && !window.navigator.standalone) || !isStandalone) {
-      setCanInstall(true)
-    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -86,9 +96,16 @@ export default function NotificationSettings({ onClose }) {
 
   const handleInstall = async () => {
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+
+    // Check if already installed
+    if (isStandalone || window.navigator.standalone) {
+      alert('✅ App is already installed! You can find it on your home screen.')
+      return
+    }
 
     if (isIOS) {
-      alert('To install on iOS: Tap the Share button, then "Add to Home Screen"')
+      alert('To install on iOS:\n\n1. Tap the Share button (⬆️)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to confirm')
       return
     }
 
@@ -99,11 +116,14 @@ export default function NotificationSettings({ onClose }) {
       if (outcome === 'accepted') {
         console.log('User accepted the install prompt')
         setCanInstall(false)
+        alert('✅ App installed successfully!')
+      } else {
+        alert('Installation cancelled')
       }
 
       setDeferredPrompt(null)
     } else {
-      alert('App is already installed or installation is not available')
+      alert('⚠️ Installation prompt not ready yet.\n\nTry:\n1. Refresh the page\n2. Wait a few seconds\n3. Try again\n\nOr use browser menu: "Install app" or "Add to Home Screen"')
     }
   }
 
