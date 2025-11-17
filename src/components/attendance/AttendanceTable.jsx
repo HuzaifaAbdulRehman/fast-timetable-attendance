@@ -59,7 +59,14 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
   // Handle bulk select mode
   const toggleBulkSelectMode = () => {
     vibrate([10])
-    setBulkSelectMode(prev => !prev)
+    setBulkSelectMode(prev => {
+      const newValue = !prev
+      if (newValue) {
+        // Entering bulk select mode - exit reorder mode
+        setReorderMode(false)
+      }
+      return newValue
+    })
     setSelectedDates([]) // Clear selection when toggling mode
   }
 
@@ -194,7 +201,7 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
   return (
     <div className="card p-0">
       {/* Bulk Select Mode Toggle */}
-      <div className="px-3 md:px-4 py-2.5 border-b border-dark-border bg-dark-surface-raised/50">
+      <div className="px-3 md:px-4 py-2.5 border-b border-dark-border bg-dark-surface">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <button
@@ -220,14 +227,50 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
               )}
             </button>
 
-            {/* Quick Mark Today Button */}
-            {!bulkSelectMode && <QuickMarkToday inline />}
+            {/* Reorder Mode Toggle */}
+            {!bulkSelectMode && courses.length > 1 && (
+              <button
+                onClick={() => {
+                  vibrate([10])
+                  if (!reorderMode) {
+                    // Entering reorder mode - exit bulk select
+                    setBulkSelectMode(false)
+                    setSelectedDates([])
+                  }
+                  setReorderMode(!reorderMode)
+                }}
+                className={`
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 flex-shrink-0
+                  ${reorderMode
+                    ? 'bg-accent text-dark-bg shadow-accent'
+                    : 'bg-dark-bg border border-dark-border text-content-secondary hover:bg-dark-surface-raised hover:text-content-primary hover:border-accent/30'
+                  }
+                `}
+                title="Reorder courses"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5" />
+                <span className="whitespace-nowrap hidden sm:inline">Reorder</span>
+              </button>
+            )}
           </div>
-          {bulkSelectMode && selectedDates.length > 0 && (
-            <span className="text-xs text-content-tertiary font-medium flex-shrink-0 tabular-nums">
-              {selectedDates.length} selected
-            </span>
-          )}
+
+          {/* Right side content */}
+          <div className="flex items-center gap-2">
+            {bulkSelectMode && selectedDates.length > 0 && (
+              <span className="text-xs text-content-tertiary font-medium flex-shrink-0 tabular-nums">
+                {selectedDates.length} selected
+              </span>
+            )}
+
+            {reorderMode && (
+              <span className="text-xs text-accent font-medium flex-shrink-0">
+                Use arrows to reorder
+              </span>
+            )}
+
+            {/* Quick Mark Today Button - on the right */}
+            {!bulkSelectMode && !reorderMode && <QuickMarkToday inline />}
+          </div>
         </div>
       </div>
 
@@ -329,26 +372,65 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
 
                       {/* Action buttons - BOTTOM */}
                       <div className="flex items-center justify-center gap-1">
-                        <button
-                          onClick={() => {
-                            vibrate([10])
-                            onEditCourse(course)
-                          }}
-                          className="p-1 md:p-1.5 hover:bg-dark-surface-raised rounded transition-colors border border-dark-border/30 hover:border-accent/40"
-                          title="Edit course"
-                        >
-                          <Edit2 className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-accent" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            vibrate([10])
-                            setDeleteConfirm(course)
-                          }}
-                          className="p-1 md:p-1.5 hover:bg-dark-surface-raised rounded transition-colors border border-dark-border/30 hover:border-attendance-danger/40"
-                          title="Delete course"
-                        >
-                          <Trash2 className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-attendance-danger" />
-                        </button>
+                        {reorderMode ? (
+                          <>
+                            {/* Reorder arrows */}
+                            <button
+                              onClick={() => {
+                                vibrate([10])
+                                reorderCourse(course.id, 'left')
+                              }}
+                              disabled={index === 0}
+                              className={`p-1 md:p-1.5 rounded transition-colors border border-dark-border/30 ${
+                                index === 0
+                                  ? 'opacity-30 cursor-not-allowed'
+                                  : 'hover:bg-dark-surface-raised hover:border-accent/40'
+                              }`}
+                              title="Move left"
+                            >
+                              <ArrowLeft className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-accent" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                vibrate([10])
+                                reorderCourse(course.id, 'right')
+                              }}
+                              disabled={index === courses.length - 1}
+                              className={`p-1 md:p-1.5 rounded transition-colors border border-dark-border/30 ${
+                                index === courses.length - 1
+                                  ? 'opacity-30 cursor-not-allowed'
+                                  : 'hover:bg-dark-surface-raised hover:border-accent/40'
+                              }`}
+                              title="Move right"
+                            >
+                              <ArrowRight className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-accent" />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            {/* Edit/Delete buttons */}
+                            <button
+                              onClick={() => {
+                                vibrate([10])
+                                onEditCourse(course)
+                              }}
+                              className="p-1 md:p-1.5 hover:bg-dark-surface-raised rounded transition-colors border border-dark-border/30 hover:border-accent/40"
+                              title="Edit course"
+                            >
+                              <Edit2 className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-accent" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                vibrate([10])
+                                setDeleteConfirm(course)
+                              }}
+                              className="p-1 md:p-1.5 hover:bg-dark-surface-raised rounded transition-colors border border-dark-border/30 hover:border-attendance-danger/40"
+                              title="Delete course"
+                            >
+                              <Trash2 className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-attendance-danger" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </th>
