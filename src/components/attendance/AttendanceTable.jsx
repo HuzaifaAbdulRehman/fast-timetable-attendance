@@ -274,7 +274,7 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
         </div>
       </div>
 
-      <div className="overflow-auto max-h-[calc(100vh-11rem)] md:max-h-[calc(100vh-12rem)] scroll-smooth pb-4">
+      <div className="overflow-auto max-h-[calc(100vh-16rem)] md:max-h-[calc(100vh-17rem)] scroll-smooth pb-4">
         <table className="attendance-table w-full min-w-full">
           <thead className="sticky top-0 z-10 bg-dark-surface border-b border-dark-border">
             <tr>

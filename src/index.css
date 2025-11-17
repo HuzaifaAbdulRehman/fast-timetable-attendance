@@ -18,21 +18,21 @@
   --color-secondary-hover: #4F46E5; /* Indigo 600 */
   --color-secondary-light: #E0E7FF; /* Indigo 100 */
 
-  /* Dark theme backgrounds */
-  --color-dark-bg: #09090b;
-  --color-dark-bg-secondary: #18181b;
-  --color-dark-bg-tertiary: #27272a;
+  /* Dark theme backgrounds - Lighter & more comfortable */
+  --color-dark-bg: #1a1a1e;
+  --color-dark-bg-secondary: #25252a;
+  --color-dark-bg-tertiary: #2f2f35;
 
   /* Dark theme surfaces */
-  --color-dark-surface: #18181b;
-  --color-dark-surface-raised: #27272a;
-  --color-dark-surface-overlay: #3f3f46;
-  --color-dark-surface-hover: #52525b;
+  --color-dark-surface: #25252a;
+  --color-dark-surface-raised: #2f2f35;
+  --color-dark-surface-overlay: #4a4a52;
+  --color-dark-surface-hover: #5a5a62;
 
   /* Dark theme borders */
-  --color-dark-border: #27272a;
-  --color-dark-border-muted: #3f3f46;
-  --color-dark-border-strong: #52525b;
+  --color-dark-border: #3a3a42;
+  --color-dark-border-muted: #4a4a52;
+  --color-dark-border-strong: #5a5a62;
 
   /* Content/Text colors */
   --color-content-primary: #fafafa;
