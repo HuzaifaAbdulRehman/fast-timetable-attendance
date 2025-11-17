@@ -35,11 +35,14 @@ export default function NotificationSettings({ onClose }) {
       return
     }
 
-    // Default: Show install button (we're NOT installed)
-    setCanInstall(true)
-    console.log('App not installed, showing button')
+    // For iOS, show install button immediately (manual process)
+    if (isIOS && !isIOSStandalone) {
+      console.log('iOS detected, showing install instructions')
+      setCanInstall(true)
+      return
+    }
 
-    // Listen for install prompt (Android/Chrome)
+    // For Android/Chrome: Wait for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e) => {
       console.log('beforeinstallprompt event fired')
       e.preventDefault()
@@ -123,7 +126,8 @@ export default function NotificationSettings({ onClose }) {
 
       setDeferredPrompt(null)
     } else {
-      alert('⚠️ Installation prompt not ready yet.\n\nTry:\n1. Refresh the page\n2. Wait a few seconds\n3. Try again\n\nOr use browser menu: "Install app" or "Add to Home Screen"')
+      // For Android Chrome: Guide to browser menu
+      alert('To install this app:\n\n1. Tap the menu (⋮) in the top-right corner\n2. Select "Install app" or "Add to Home Screen"\n3. Follow the prompts\n\nNote: Some browsers don\'t support installation. Try Chrome or Edge for best results.')
     }
   }
 
