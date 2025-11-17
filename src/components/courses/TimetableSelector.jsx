@@ -767,7 +767,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose }) {
               </div>
 
               {/* Absences Configuration */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col">
                   <label className="text-sm font-medium text-content-primary mb-2 block">
                     Maximum Allowed Absences
