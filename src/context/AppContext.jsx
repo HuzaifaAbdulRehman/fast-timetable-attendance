@@ -253,6 +253,16 @@ export function AppProvider({ children }) {
       colorHex: assignedColor.hex,
       semesterId: semesterIdForCourse,
       createdAt: Date.now(),
+      
+      // Preserve timetable metadata for TimetableView
+      schedule: courseData.schedule || [],
+      instructor: courseData.instructor,
+      room: courseData.room || courseData.roomNumber,
+      roomNumber: courseData.roomNumber || courseData.room,
+      building: courseData.building,
+      courseCode: courseData.courseCode,
+      section: courseData.section,
+      timeSlot: courseData.timeSlot,
     }
 
     setCourses(prev => [...prev, newCourse])
