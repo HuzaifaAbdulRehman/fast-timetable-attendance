@@ -93,7 +93,7 @@ export default function QuickMarkToday({ inline = false }) {
       {isOpen && portalTarget && createPortal(
         (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] flex items-end md:items-center md:justify-center animate-fade-in"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999] flex items-end md:items-center md:justify-center animate-fade-in"
             onClick={() => setIsOpen(false)}
           >
             <div

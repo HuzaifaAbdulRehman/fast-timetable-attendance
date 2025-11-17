@@ -221,25 +221,6 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
 
   return (
     <div className="card p-0 relative">
-      {/* Floating Action Button to toggle actions - Fixed position */}
-      <button
-        onClick={() => {
-          vibrate([10])
-          setShowActions(!showActions)
-        }}
-        className={`
-          fixed bottom-20 right-4 z-30 p-3 rounded-full shadow-2xl transition-all duration-200
-          ${showActions
-            ? 'bg-accent text-dark-bg rotate-180'
-            : 'bg-dark-surface-raised text-accent border-2 border-accent/50'
-          }
-        `}
-        title={showActions ? "Hide actions" : "Show actions"}
-        aria-label={showActions ? "Hide actions" : "Show actions"}
-      >
-        {showActions ? <ChevronUp className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-      </button>
-
       <div className="overflow-auto max-h-[calc(100vh-13rem)] md:max-h-[calc(100vh-14rem)] scroll-smooth pb-4">
         {showActions && (
           <div className="sticky top-0 z-20 bg-dark-surface border-b border-dark-border px-2 md:px-4 py-2 flex flex-wrap items-center gap-2 justify-between">
