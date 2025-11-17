@@ -274,11 +274,11 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
         </div>
       </div>
 
-      <div className="overflow-auto max-h-[calc(100vh-14rem)] md:max-h-[calc(100vh-15rem)] scroll-smooth pb-4">
+      <div className="overflow-auto max-h-[calc(100vh-11rem)] md:max-h-[calc(100vh-12rem)] scroll-smooth pb-4">
         <table className="attendance-table w-full min-w-full">
           <thead className="sticky top-0 z-10 bg-dark-surface border-b border-dark-border">
             <tr>
-              <th className="text-left min-w-[60px] md:min-w-[80px] px-3 md:px-4 py-3">
+              <th className="text-left min-w-[60px] md:min-w-[80px] px-3 md:px-4 py-2">
                 <span className="text-xs md:text-sm font-semibold text-content-primary">Date</span>
               </th>
               {courses.map((course, index) => {
@@ -334,7 +334,7 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
                       </div>
                     )}
 
-                    <div className={`py-3 px-0.5 transition-transform duration-200 ${isSwipedOpen ? '-translate-x-full' : 'translate-x-0'}`}>
+                    <div className={`py-2 px-0.5 transition-transform duration-200 ${isSwipedOpen ? '-translate-x-full' : 'translate-x-0'}`}>
                       {/* Badge Style with Status - Modern & Polished */}
 
                       {/* Course name with colored dot - TOP */}
