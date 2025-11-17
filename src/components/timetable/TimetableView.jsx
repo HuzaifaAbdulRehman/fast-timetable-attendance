@@ -2,6 +2,16 @@ import { useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import { Calendar, Clock, MapPin, User, BookOpen } from 'lucide-react'
 
+// Convert 24-hour time to 12-hour format
+const formatTimeTo12Hour = (time24) => {
+  if (!time24) return '9:00 AM'
+  const [hours, minutes] = time24.split(':')
+  const hour = parseInt(hours)
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  const hour12 = hour % 12 || 12
+  return `${hour12}:${minutes || '00'} ${ampm}`
+}
+
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 
 const DAYS_SHORT = {
@@ -23,26 +33,77 @@ export default function TimetableView() {
       schedule[day] = []
     })
 
-    courses.forEach(course => {
-      if (course.schedule && Array.isArray(course.schedule)) {
-        course.schedule.forEach(slot => {
+    console.log('📅 TimetableView - Total courses:', courses.length)
+    
+    courses.forEach((course, index) => {
+      // Build schedule from timetable data if available, otherwise from weekdays
+      let courseSchedule = []
+      
+      if (course.schedule && Array.isArray(course.schedule) && course.schedule.length > 0) {
+        // Use existing schedule from timetable
+        courseSchedule = course.schedule
+      } else if (course.weekdays && Array.isArray(course.weekdays) && course.weekdays.length > 0) {
+        // Build basic schedule from weekdays (for manually added courses)
+        const weekdayToDayName = {
+          0: 'Sunday',
+          1: 'Monday',
+          2: 'Tuesday',
+          3: 'Wednesday',
+          4: 'Thursday',
+          5: 'Friday',
+          6: 'Saturday'
+        }
+        
+        courseSchedule = course.weekdays
+          .filter(day => weekdayToDayName[day] && DAYS.includes(weekdayToDayName[day]))
+          .map(day => {
+            let startTime = '9:00 AM'
+            let endTime = '10:00 AM'
+            
+            if (course.timeSlot) {
+              const [start, end] = course.timeSlot.split('-')
+              // Convert 24-hour to 12-hour if needed
+              startTime = start.includes('AM') || start.includes('PM') 
+                ? start.trim() 
+                : formatTimeTo12Hour(start.trim())
+              endTime = end && (end.includes('AM') || end.includes('PM'))
+                ? end.trim()
+                : formatTimeTo12Hour(end?.trim() || '10:00')
+            }
+            
+            return {
+              day: weekdayToDayName[day],
+              startTime,
+              endTime
+            }
+          })
+        
+        console.log(`📚 Course "${course.name}" - Built schedule from weekdays:`, courseSchedule)
+      }
+      
+      if (courseSchedule.length > 0) {
+        courseSchedule.forEach(slot => {
           const day = slot.day
           if (schedule[day]) {
             schedule[day].push({
               courseName: course.name,
-              courseCode: course.courseCode,
-              instructor: course.instructor,
-              room: course.room,
-              building: course.building,
-              timeSlot: course.timeSlot,
+              courseCode: course.courseCode || course.shortName,
+              instructor: course.instructor || 'TBA',
+              room: course.room || course.roomNumber || 'TBA',
+              building: course.building || 'Academic Block',
+              timeSlot: course.timeSlot || `${slot.startTime}-${slot.endTime}`,
               startTime: slot.startTime,
               endTime: slot.endTime,
               day: slot.day
             })
           }
         })
+      } else {
+        console.warn(`  ⚠️ Course "${course.name}" has no schedule or weekdays`)
       }
     })
+    
+    console.log('📊 Final scheduleByDay:', schedule)
 
     // Sort each day's classes by start time
     Object.keys(schedule).forEach(day => {
@@ -59,16 +120,24 @@ export default function TimetableView() {
   // Convert 12-hour time to 24-hour for sorting
   function convertTo24Hour(time) {
     if (!time) return 0
-    const [timePart, period] = time.split(' ')
-    let [hours, minutes] = timePart.split(':').map(Number)
+    
+    // Handle both "9:00 AM" and "09:00-10:00" formats
+    if (time.includes(' ')) {
+      const [timePart, period] = time.split(' ')
+      let [hours, minutes] = timePart.split(':').map(Number)
 
-    if (period === 'PM' && hours !== 12) {
-      hours += 12
-    } else if (period === 'AM' && hours === 12) {
-      hours = 0
+      if (period === 'PM' && hours !== 12) {
+        hours += 12
+      } else if (period === 'AM' && hours === 12) {
+        hours = 0
+      }
+
+      return hours * 60 + minutes
+    } else {
+      // Handle 24-hour format "09:00"
+      const [hours, minutes] = time.split(':').map(Number)
+      return (hours || 0) * 60 + (minutes || 0)
     }
-
-    return hours * 60 + minutes
   }
 
   if (courses.length === 0) {
