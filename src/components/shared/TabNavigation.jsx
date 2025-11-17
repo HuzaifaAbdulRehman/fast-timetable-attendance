@@ -2,9 +2,9 @@ import { Table, GraduationCap, Calendar } from 'lucide-react'
 
 export default function TabNavigation({ activeTab, onTabChange }) {
   const tabs = [
+    { id: 'courses', label: 'Courses', icon: GraduationCap },
     { id: 'timetable', label: 'Timetable', icon: Calendar },
     { id: 'attendance', label: 'Attendance', icon: Table },
-    { id: 'courses', label: 'Courses', icon: GraduationCap },
   ]
 
   return (

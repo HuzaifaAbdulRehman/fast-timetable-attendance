@@ -2,10 +2,9 @@ import { useState, useEffect, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import AttendanceTable from './AttendanceTable'
 import CourseForm from '../courses/CourseForm'
-import TimetableSelector from '../courses/TimetableSelector'
 import Toast from '../shared/Toast'
 import SemesterSelector from '../shared/SemesterSelector'
-import { Plus, AlertCircle, CheckCircle2, Calendar, AlertTriangle, ChevronUp, ChevronDown, BookOpen } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Calendar, AlertTriangle, ChevronUp, ChevronDown, BookOpen } from 'lucide-react'
 import { getTodayISO } from '../../utils/dateHelpers'
 import { DEFAULT_WEEKS_TO_SHOW } from '../../utils/constants'
 import PullToRefresh from 'react-simple-pull-to-refresh'
@@ -13,10 +12,9 @@ import Confetti, { celebratePerfectAttendance, celebrateMilestone } from '../sha
 import { vibrate } from '../../utils/uiHelpers'
 
 export default function AttendanceView() {
-  const { courses, undoHistory, undo, addCourse } = useApp()
+  const { courses, undoHistory, undo } = useApp()
   const [refreshing, setRefreshing] = useState(false)
   const [showCourseForm, setShowCourseForm] = useState(false)
-  const [showTimetableSelector, setShowTimetableSelector] = useState(false)
   const [editingCourse, setEditingCourse] = useState(null)
   const [toast, setToast] = useState(null) // { message, type, action }
   const [showAllControls, setShowAllControls] = useState(true) // Track if ALL controls are visible - default to true
@@ -112,117 +110,23 @@ export default function AttendanceView() {
 
   if (courses.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] px-4">
-        {/* Animated illustration */}
-        <div className="relative mb-8 animate-fade-in">
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-full blur-3xl"></div>
-          <div className="relative p-8 bg-gradient-to-br from-accent/15 to-accent/5 rounded-3xl border border-accent/20">
-            <AlertCircle className="w-16 h-16 text-accent" />
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="text-center max-w-sm">
+          <div className="w-20 h-20 bg-dark-card rounded-full flex items-center justify-center mx-auto mb-4">
+            <Calendar className="w-10 h-10 text-content-tertiary" />
+          </div>
+          <h3 className="text-xl font-semibold text-content-primary mb-2">
+            No Courses Yet
+          </h3>
+          <p className="text-content-secondary mb-6">
+            Select your courses first to start tracking attendance.
+            Go to the <span className="font-medium text-accent">Courses</span> tab to get started.
+          </p>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-lg text-sm">
+            <BookOpen className="w-4 h-4" />
+            <span>Go to Courses tab to add courses</span>
           </div>
         </div>
-
-        {/* Content */}
-        <div className="text-center max-w-sm space-y-4 animate-slide-in">
-          <h2 className="text-2xl font-bold text-content-primary">
-            FAST Absence Planner
-          </h2>
-          <p className="text-lg font-semibold text-accent">
-            + Timetable Scheduler
-          </p>
-          <p className="text-content-secondary leading-relaxed">
-            Your complete timetable. Track absences smartly. Plan your leaves strategically. Chill at home and still hit 80%! 
-          </p>
-
-          {/* Features list */}
-          <div className="pt-4 pb-6 space-y-3 text-left">
-            <div className="flex items-start gap-3">
-              <div className="p-1.5 bg-accent/10 rounded-lg mt-0.5 flex-shrink-0">
-                <BookOpen className="w-4 h-4 text-accent" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-content-primary">Complete Timetable</p>
-                <p className="text-xs text-content-tertiary">Import all courses with rooms, times, and instructors</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="p-1.5 bg-attendance-safe/10 rounded-lg mt-0.5 flex-shrink-0">
-                <CheckCircle2 className="w-4 h-4 text-attendance-safe" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-content-primary">Smart Absence Planning</p>
-                <p className="text-xs text-content-tertiary">See exactly how many absences you have left per course</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="p-1.5 bg-attendance-warning/10 rounded-lg mt-0.5 flex-shrink-0">
-                <AlertTriangle className="w-4 h-4 text-attendance-warning" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-content-primary">80% Alerts</p>
-                <p className="text-xs text-content-tertiary">Get warned when approaching attendance limits</p>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="space-y-3">
-            <button
-              onClick={() => {
-                vibrate([10])
-                setShowTimetableSelector(true)
-              }}
-              className="w-full bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-semibold px-6 py-4 rounded-xl transition-all duration-200 shadow-accent hover:shadow-accent-lg hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
-            >
-              <BookOpen className="w-5 h-5" />
-              Select from Timetable
-            </button>
-
-            <button
-              onClick={() => {
-                vibrate([10])
-                setShowCourseForm(true)
-              }}
-              className="w-full bg-dark-surface-raised border border-dark-border hover:border-accent/50 text-content-primary font-medium px-6 py-4 rounded-xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              Add Course Manually
-            </button>
-          </div>
-        </div>
-
-        {/* Course Form Modal */}
-        {showCourseForm && (
-          <CourseForm
-            existingCourse={editingCourse}
-            onClose={handleCloseForm}
-            onSave={handleSaveCourse}
-          />
-        )}
-
-        {/* Timetable Selector Modal */}
-        {showTimetableSelector && (
-          <TimetableSelector
-            onCoursesSelected={(courses) => {
-              courses.forEach(course => addCourse(course))
-              setShowTimetableSelector(false)
-              setToast({
-                message: `Added ${courses.length} course${courses.length > 1 ? 's' : ''} from timetable`,
-                type: 'success'
-              })
-            }}
-            onClose={() => setShowTimetableSelector(false)}
-          />
-        )}
-
-        {/* Toast Notifications */}
-        {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            action={toast.action}
-            onClose={() => setToast(null)}
-          />
-        )}
       </div>
     )
   }
@@ -254,7 +158,7 @@ export default function AttendanceView() {
         )}
       </div>
 
-      {/* Unified Controls Row - Semester + Weeks + Add Course */}
+      {/* Unified Controls Row - Semester + Weeks */}
       {showAllControls && (
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {/* Compact Semester Selector */}
@@ -272,30 +176,6 @@ export default function AttendanceView() {
           <option value={16}>16w</option>
           <option value={semesterWeeks}>All ({semesterWeeks}w)</option>
         </select>
-
-        {/* Add Course Buttons */}
-        <button
-          onClick={() => {
-            vibrate([10])
-            setShowTimetableSelector(true)
-          }}
-          className="ml-auto bg-accent/20 text-accent border border-accent/30 font-medium px-2.5 md:px-3 py-1.5 rounded-lg transition-all hover:scale-[1.02] active:scale-95 inline-flex items-center gap-1.5 text-xs flex-shrink-0"
-        >
-          <BookOpen className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">From Timetable</span>
-        </button>
-
-        <button
-          onClick={() => {
-            vibrate([10])
-            setEditingCourse(null)
-            setShowCourseForm(true)
-          }}
-          className="bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-medium px-2.5 md:px-3 py-1.5 rounded-lg transition-all duration-200 shadow-accent hover:scale-[1.02] active:scale-95 inline-flex items-center gap-1.5 text-xs flex-shrink-0"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Manual</span>
-        </button>
       </div>
       )}
 
@@ -315,22 +195,6 @@ export default function AttendanceView() {
           existingCourse={editingCourse}
           onClose={handleCloseForm}
           onSave={handleSaveCourse}
-        />
-      )}
-
-      {/* Timetable Selector Modal */}
-      {showTimetableSelector && (
-        <TimetableSelector
-          onCoursesSelected={(courses) => {
-            // Add all selected courses
-            courses.forEach(course => addCourse(course))
-            setShowTimetableSelector(false)
-            setToast({
-              message: `Added ${courses.length} course${courses.length > 1 ? 's' : ''} from timetable`,
-              type: 'success'
-            })
-          }}
-          onClose={() => setShowTimetableSelector(false)}
         />
       )}
 
