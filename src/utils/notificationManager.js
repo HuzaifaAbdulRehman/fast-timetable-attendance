@@ -46,7 +46,7 @@ export function sendTestNotification() {
 
   try {
     const notification = new Notification('Absence Tracker', {
-      body: 'Time to mark your attendance! 📚',
+      body: 'Time to mark your attendance!',
       icon: '/icon-192.png',
       badge: '/icon-192.png',
       tag: 'attendance-reminder',
@@ -77,7 +77,7 @@ export function sendDailyReminder() {
   }
 
   try {
-    const notification = new Notification('Time to mark your attendance! 📚', {
+    const notification = new Notification('Time to mark your attendance!', {
       body: 'Don\'t forget to track today\'s classes in Absence Tracker.',
       icon: '/icon-192.png',
       badge: '/icon-192.png',

@@ -269,11 +269,11 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
     // Combine department and section (e.g., BCS + 5F = BCS-5F)
     const fullSection = `${department}-${section.toUpperCase().trim()}`
     console.log('🔍 Searching for section:', fullSection)
-    console.log('📚 Available sections:', timetable ? Object.keys(timetable) : [])
+    console.log('Available sections:', timetable ? Object.keys(timetable) : [])
     console.log('📖 Timetable data:', timetable)
 
     const courses = (timetable && timetable[fullSection]) || []
-    console.log('✅ Found courses:', courses)
+    console.log('Found courses:', courses)
 
     // Validate courses is an array
     if (!Array.isArray(courses)) {
@@ -302,7 +302,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
       }
     })
 
-    console.log('🎯 Filtered courses:', Object.values(uniqueCourses))
+    console.log('Filtered courses:', Object.values(uniqueCourses))
     setFilteredCourses(Object.values(uniqueCourses))
     vibrate([10])
   }
@@ -395,7 +395,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
     }
 
     // Add courses using context - use batch add function for multiple courses
-    console.log('🚀 Adding courses to context:', appCourses)
+    console.log('Adding courses to context:', appCourses)
     console.log(`📊 Total courses to add: ${appCourses.length}`)
     
     try {
@@ -405,18 +405,18 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
         : [addCourse(appCourses[0])].filter(Boolean)
       
       if (addedCourses.length > 0) {
-        console.log(`✅ Successfully added ${addedCourses.length}/${appCourses.length} courses:`, 
+        console.log(`Successfully added ${addedCourses.length}/${appCourses.length} courses:`, 
           addedCourses.map(c => ({ id: c.id, name: c.name, courseCode: c.courseCode }))
         )
         
         onCoursesSelected(appCourses)
         vibrate([10, 50, 10])
       } else {
-        console.error('❌ Failed to add any courses')
+        console.error('Failed to add any courses')
         setError('Failed to add courses. Please check the console for details.')
       }
     } catch (error) {
-      console.error('❌ Error adding courses:', error)
+      console.error('Error adding courses:', error)
       setError('An error occurred while adding courses. Please try again.')
     }
   }
@@ -465,7 +465,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
           startTime: formatTimeTo12Hour(startTime.trim()),
           endTime: formatTimeTo12Hour(endTime.trim())
         }
-        console.log('📅 Creating schedule slot:', {
+        console.log('Creating schedule slot:', {
           originalDay: s.day,
           normalizedDay: dayName,
           timeSlot: s.timeSlot,
@@ -475,7 +475,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
       })
       .filter(s => s.day && s.startTime && s.endTime) // Ensure all fields are valid
 
-    console.log('📚 Course schedule array created:', {
+    console.log('Course schedule array created:', {
       courseName: course.courseName,
       courseCode: course.courseCode,
       scheduleLength: schedule.length,

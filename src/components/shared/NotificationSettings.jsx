@@ -114,7 +114,7 @@ export default function NotificationSettings({ onClose }) {
         if (outcome === 'accepted') {
           console.log('User accepted the install prompt')
           setCanInstall(false)
-          alert('✅ App installed successfully! Check your home screen.')
+          alert('App installed successfully! Check your home screen.')
         } else {
           console.log('User dismissed the install prompt')
         }
@@ -372,7 +372,7 @@ export default function NotificationSettings({ onClose }) {
             <div className="p-4 md:p-5 space-y-4">
               <div className="bg-attendance-danger/10 border border-attendance-danger/30 rounded-lg p-4">
                 <p className="text-sm font-semibold text-attendance-danger mb-2">
-                  ⚠️ WARNING: This action cannot be undone!
+                  WARNING: This action cannot be undone!
                 </p>
                 <p className="text-xs text-content-secondary leading-relaxed">
                   This will permanently delete:

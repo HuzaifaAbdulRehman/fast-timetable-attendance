@@ -4,6 +4,7 @@ import { BookOpen, Calendar, AlertCircle, CheckCircle2, Plus, Trash2, Edit } fro
 import TimetableSelector from './TimetableSelector'
 import CourseForm from './CourseForm'
 import ConfirmModal from '../shared/ConfirmModal'
+import SemesterSelector from '../shared/SemesterSelector'
 
 export default function CoursesView() {
   const { courses, deleteCourse, deleteAllCourses, updateCourse, addCourse } = useApp()
@@ -113,13 +114,18 @@ export default function CoursesView() {
               </button>
             </div>
 
-            <p className="text-xs text-content-tertiary mt-6">
-              Plan Smart. Take Leaves. Chill at Home. Still Hit 80%. 🏠
+            <p className="text-xs text-content-tertiary mt-6 text-center">
+              Plan Smart. Take Leaves. Chill at Home. Still Hit 80%.
             </p>
           </div>
         ) : (
           // Course List - Courses Already Added
           <div>
+            {/* Semester Selector */}
+            <div className="mb-4">
+              <SemesterSelector compact={true} />
+            </div>
+
             {/* Header with Actions */}
             <div className="mb-6 flex items-start justify-between">
               <div>

@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import { Calendar, Clock, MapPin, User, BookOpen } from 'lucide-react'
+import SemesterSelector from '../shared/SemesterSelector'
 
 // Convert 24-hour time to 12-hour format
 const formatTimeTo12Hour = (time24) => {
@@ -33,7 +34,7 @@ export default function TimetableView() {
       schedule[day] = []
     })
 
-    console.log('📅 TimetableView - Total courses:', courses.length)
+    console.log('TimetableView - Total courses:', courses.length)
     
     courses.forEach((course, index) => {
       // Build schedule from timetable data if available, otherwise from weekdays
@@ -78,7 +79,7 @@ export default function TimetableView() {
             }
           })
         
-        console.log(`📚 Course "${course.name}" - Built schedule from weekdays:`, courseSchedule)
+        console.log(`Course "${course.name}" - Built schedule from weekdays:`, courseSchedule)
       }
       
       if (courseSchedule.length > 0) {
@@ -99,11 +100,11 @@ export default function TimetableView() {
           }
         })
       } else {
-        console.warn(`  ⚠️ Course "${course.name}" has no schedule or weekdays`)
+        console.warn(`Course "${course.name}" has no schedule or weekdays`)
       }
     })
     
-    console.log('📊 Final scheduleByDay:', schedule)
+    console.log('Final scheduleByDay:', schedule)
 
     // Sort each day's classes by start time
     Object.keys(schedule).forEach(day => {
@@ -166,6 +167,11 @@ export default function TimetableView() {
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="max-w-4xl mx-auto p-4 md:p-6 space-y-4">
+        {/* Semester Selector */}
+        <div className="mb-4">
+          <SemesterSelector compact={true} />
+        </div>
+
         {/* Header */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-content-primary mb-2">
@@ -309,7 +315,7 @@ export default function TimetableView() {
                     No classes scheduled
                   </p>
                   <p className="text-xs text-content-tertiary/60 mt-1">
-                    Enjoy your day off! 🏠
+                    Enjoy your day off!
                   </p>
                 </div>
               )}
@@ -319,8 +325,8 @@ export default function TimetableView() {
 
         {/* Footer Message */}
         <div className="mt-6 p-4 bg-accent/5 border border-accent/20 rounded-xl">
-          <p className="text-sm text-content-secondary text-center">
-            Plan Smart. Take Leaves. Chill at Home. Still Hit 80%. 🏠
+          <p className="text-sm text-content-secondary text-center font-medium">
+            Plan Smart. Take Leaves. Chill at Home. Still Hit 80%.
           </p>
         </div>
       </div>

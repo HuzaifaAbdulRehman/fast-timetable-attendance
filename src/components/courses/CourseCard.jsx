@@ -91,7 +91,7 @@ export default function CourseCard({ course }) {
       {stats.isAtRisk && (
         <div className="mt-4 p-2 bg-attendance-danger/10 border border-attendance-danger/20 rounded-lg">
           <p className="text-xs text-attendance-danger font-medium text-center">
-            ⚠️ Below 80% - Be careful!
+            Below 80% - Be careful!
           </p>
         </div>
       )}
