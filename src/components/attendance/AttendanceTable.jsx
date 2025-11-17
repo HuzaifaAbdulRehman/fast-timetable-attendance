@@ -278,7 +278,7 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
         <table className="attendance-table w-full min-w-full">
           <thead className="sticky top-0 z-10 bg-dark-surface border-b border-dark-border">
             <tr>
-              <th className="text-left min-w-[60px] md:min-w-[80px] px-1.5 md:px-2 py-3">
+              <th className="text-left min-w-[60px] md:min-w-[80px] px-3 md:px-4 py-3">
                 <div className="flex flex-col justify-center gap-1.5 h-full">
                   <span className="text-xs md:text-sm font-semibold text-content-primary">Date</span>
                   <div className="w-8 h-px bg-accent/30"></div>
