@@ -130,7 +130,7 @@ export default function AttendanceView() {
             + Timetable Scheduler
           </p>
           <p className="text-content-secondary leading-relaxed">
-            Import your timetable, track absences smartly, and stay above 80%. Plan your leaves strategically.
+            Your complete timetable. Track absences smartly. Plan your leaves strategically. Chill at home and still hit 80%! 🎯
           </p>
 
           {/* Features list */}
@@ -233,7 +233,7 @@ export default function AttendanceView() {
       {courses.length > 0 && (
         <div className="mb-3 text-center">
           <p className="text-xs md:text-sm text-content-tertiary/80 font-medium">
-            Your Complete Timetable + Smart Absence Planner. Stay Above 80%.
+            Plan Smart. Take Leaves. Chill at Home. Still Hit 80%. 🏠
           </p>
         </div>
       )}
