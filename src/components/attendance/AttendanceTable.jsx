@@ -279,10 +279,7 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
           <thead className="sticky top-0 z-10 bg-dark-surface border-b border-dark-border">
             <tr>
               <th className="text-left min-w-[60px] md:min-w-[80px] px-3 md:px-4 py-3">
-                <div className="flex flex-col justify-center gap-1.5 h-full">
-                  <span className="text-xs md:text-sm font-semibold text-content-primary">Date</span>
-                  <div className="w-8 h-px bg-accent/30"></div>
-                </div>
+                <span className="text-xs md:text-sm font-semibold text-content-primary">Date</span>
               </th>
               {courses.map((course, index) => {
                 const stats = calculateAttendanceStats(course, attendance)
