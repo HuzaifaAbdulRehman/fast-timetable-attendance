@@ -35,14 +35,11 @@ export default function NotificationSettings({ onClose }) {
       return
     }
 
-    // For iOS, show install button immediately (manual process)
-    if (isIOS && !isIOSStandalone) {
-      console.log('iOS detected, showing install instructions')
-      setCanInstall(true)
-      return
-    }
+    // Show install button immediately for all platforms (not installed)
+    console.log('App not installed, showing install button')
+    setCanInstall(true)
 
-    // For Android/Chrome: Wait for beforeinstallprompt event
+    // Listen for beforeinstallprompt event (Android/Chrome)
     const handleBeforeInstallPrompt = (e) => {
       console.log('beforeinstallprompt event fired')
       e.preventDefault()
