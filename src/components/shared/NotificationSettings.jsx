@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Bell, BellOff, Send } from 'lucide-react'
+import { X, Bell, BellOff, Send, Download } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import {
   requestNotificationPermission,
@@ -12,12 +12,36 @@ export default function NotificationSettings({ onClose }) {
   const [localSettings, setLocalSettings] = useState(notificationSettings)
   const [permissionGranted, setPermissionGranted] = useState(canSendNotifications())
   const [testSent, setTestSent] = useState(false)
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
+  const [canInstall, setCanInstall] = useState(false)
 
   // Mobile detection
   const isMobile = window.innerWidth < 768
 
   useEffect(() => {
     setPermissionGranted(canSendNotifications())
+
+    // Check if already installed
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+
+    // Listen for install prompt
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+      setCanInstall(true)
+    }
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+
+    // For iOS or if not installed, show install option
+    if ((isIOS && !window.navigator.standalone) || !isStandalone) {
+      setCanInstall(true)
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    }
   }, [])
 
   const handleEnableToggle = async () => {
@@ -57,6 +81,29 @@ export default function NotificationSettings({ onClose }) {
       }
     } else {
       alert('Please enable notifications first.')
+    }
+  }
+
+  const handleInstall = async () => {
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+
+    if (isIOS) {
+      alert('To install on iOS: Tap the Share button, then "Add to Home Screen"')
+      return
+    }
+
+    if (deferredPrompt) {
+      deferredPrompt.prompt()
+      const { outcome } = await deferredPrompt.userChoice
+
+      if (outcome === 'accepted') {
+        console.log('User accepted the install prompt')
+        setCanInstall(false)
+      }
+
+      setDeferredPrompt(null)
+    } else {
+      alert('App is already installed or installation is not available')
     }
   }
 
@@ -175,6 +222,31 @@ export default function NotificationSettings({ onClose }) {
               {testSent ? 'Test Sent!' : 'Send Test Notification'}
             </button>
           </div>
+
+          {/* Install App */}
+          {canInstall && (
+            <div className="pt-2 border-t border-dark-border">
+              <div className="space-y-2 pt-4">
+                <div className="flex items-center gap-2">
+                  <Download className="w-4 h-4 text-accent" />
+                  <p className="text-sm font-medium text-content-primary">Install App</p>
+                </div>
+                <p className="text-xs text-content-tertiary">
+                  Install Absence Tracker for quick access and offline use
+                </p>
+                <button
+                  onClick={() => {
+                    vibrate(15)
+                    handleInstall()
+                  }}
+                  className="w-full bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-semibold rounded-lg px-4 py-2.5 transition-all shadow-accent hover:shadow-accent-lg hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Install Now
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}

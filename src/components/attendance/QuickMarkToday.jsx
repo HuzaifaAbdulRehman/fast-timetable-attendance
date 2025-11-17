@@ -72,7 +72,7 @@ export default function QuickMarkToday({ inline = false }) {
       {/* Bottom Sheet Modal */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-end md:items-center md:justify-center animate-fade-in"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-end md:items-center md:justify-center animate-fade-in"
           onClick={() => setIsOpen(false)}
         >
           <div

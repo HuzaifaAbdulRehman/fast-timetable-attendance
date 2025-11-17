@@ -361,12 +361,11 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
                   <th
                     key={course.id}
                     data-course-id={course.id}
-                    className="min-w-[64px] max-w-[64px] md:min-w-[74px] md:max-w-[74px] text-center px-1 md:px-1.5 relative overflow-visible"
-                    {...swipeHandlers}
+                    className="min-w-[64px] max-w-[64px] md:min-w-[74px] md:max-w-[74px] text-center px-1 md:px-1.5 relative overflow-hidden"
                   >
                     {/* Swipe reveal delete button background */}
                     {isSwipedOpen && (
-                      <div className="absolute inset-0 bg-attendance-danger flex items-center justify-center z-10">
+                      <div className="absolute inset-0 bg-attendance-danger flex items-center justify-center z-0">
                         <button
                           onClick={() => {
                             vibrate([10])
@@ -380,7 +379,10 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
                       </div>
                     )}
 
-                    <div className={`py-1 px-0.5 transition-transform duration-200 ${isSwipedOpen ? '-translate-x-full' : 'translate-x-0'}`}>
+                    <div
+                      className={`py-1 px-0.5 transition-transform duration-200 relative z-10 bg-dark-surface ${isSwipedOpen ? '-translate-x-full' : 'translate-x-0'}`}
+                      {...swipeHandlers}
+                    >
                       {/* Badge Style with Status - Modern & Polished */}
 
                       {/* Course name with colored dot - TOP */}
