@@ -327,7 +327,10 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
                 min="1"
                 max="6"
                 value={formData.creditHours > 3 ? formData.creditHours : ''}
-                onChange={(e) => handleCreditHoursChange(Number(e.target.value) || 2)}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 2 : Number(e.target.value)
+                  handleCreditHoursChange(value)
+                }}
                 className="px-2 py-2.5 bg-dark-bg/50 border border-dark-border/30 rounded-xl text-content-primary text-sm text-center focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
                 placeholder="4+"
               />
@@ -520,7 +523,10 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
                   min="1"
                   max="52"
                   value={semesterDuration}
-                  onChange={(e) => setSemesterDuration(Number(e.target.value) || 16)}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? 16 : Number(e.target.value)
+                    setSemesterDuration(value)
+                  }}
                   className="w-full px-4 py-2.5 bg-dark-bg/50 border border-dark-border/30 rounded-xl text-content-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
                   placeholder="Custom weeks"
                 />
@@ -547,7 +553,8 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
               min="0"
               value={formData.allowedAbsences ?? ''}
               onChange={(e) => {
-                setFormData({ ...formData, allowedAbsences: Number(e.target.value) || 0 })
+                const value = e.target.value === '' ? null : Number(e.target.value)
+                setFormData({ ...formData, allowedAbsences: value })
                 setUserModifiedAbsences(true)
               }}
               className="w-full px-4 py-2.5 bg-dark-bg/50 border border-dark-border/30 rounded-xl text-content-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
@@ -567,7 +574,10 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
               type="number"
               min="0"
               value={formData.initialAbsences || ''}
-              onChange={(e) => setFormData({ ...formData, initialAbsences: Number(e.target.value) || 0 })}
+              onChange={(e) => {
+                const value = e.target.value === '' ? 0 : Number(e.target.value)
+                setFormData({ ...formData, initialAbsences: value })
+              }}
               className="w-full px-4 py-2.5 bg-dark-bg/50 border border-dark-border/30 rounded-xl text-content-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
               placeholder="0"
             />
