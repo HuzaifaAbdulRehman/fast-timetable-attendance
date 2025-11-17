@@ -105,26 +105,32 @@ export default function NotificationSettings({ onClose }) {
     }
 
     if (isIOS) {
-      alert('To install on iOS:\n\n1. Tap the Share button (⬆️)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to confirm')
+      alert('📱 To install on iOS/Safari:\n\n1. Tap the Share button (⬆️) at the bottom\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to confirm\n\nThe app icon will appear on your home screen!')
       return
     }
 
+    // For Android/Chrome
     if (deferredPrompt) {
-      deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
+      try {
+        deferredPrompt.prompt()
+        const { outcome } = await deferredPrompt.userChoice
 
-      if (outcome === 'accepted') {
-        console.log('User accepted the install prompt')
-        setCanInstall(false)
-        alert('✅ App installed successfully!')
-      } else {
-        alert('Installation cancelled')
+        if (outcome === 'accepted') {
+          console.log('User accepted the install prompt')
+          setCanInstall(false)
+          alert('✅ App installed successfully! Check your home screen.')
+        } else {
+          console.log('User dismissed the install prompt')
+        }
+
+        setDeferredPrompt(null)
+      } catch (error) {
+        console.error('Install prompt error:', error)
+        alert('📱 To install:\n\n1. Tap the menu (⋮) in the top-right\n2. Select "Install app" or "Add to Home Screen"\n3. Confirm installation\n\nThe app will appear on your home screen!')
       }
-
-      setDeferredPrompt(null)
     } else {
-      // For Android Chrome: Guide to browser menu
-      alert('To install this app:\n\n1. Tap the menu (⋮) in the top-right corner\n2. Select "Install app" or "Add to Home Screen"\n3. Follow the prompts\n\nNote: Some browsers don\'t support installation. Try Chrome or Edge for best results.')
+      // Fallback: Browser doesn't support automatic prompt
+      alert('📱 To install this app on Android:\n\n1. Tap the menu (⋮) in the top-right corner\n2. Select "Install app" or "Add to Home Screen"\n3. Tap "Install" to confirm\n\nIf you don\'t see the option, make sure you\'re using Chrome or Edge browser.')
     }
   }
 
