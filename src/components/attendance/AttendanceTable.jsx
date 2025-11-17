@@ -16,6 +16,7 @@ const vibrate = (pattern = [10]) => {
 
 // Get color classes for a course
 const getCourseColor = (course) => {
+  if (!course || !course.color) return COURSE_COLORS[0]
   const color = COURSE_COLORS.find(c => c.name === course.color) || COURSE_COLORS[0]
   return color
 }
@@ -298,11 +299,23 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
                 <span className="text-xs md:text-sm font-semibold text-content-primary">Date</span>
               </th>
               {courses.map((course, index) => {
-                const stats = calculateAttendanceStats(course, attendance)
-                const absencesUsed = stats.absences
-                const absencesAllowed = course.allowedAbsences
-                const percentage = absencesAllowed > 0 ? (absencesUsed / absencesAllowed) * 100 : 0
-                const courseColor = getCourseColor(course)
+                // Safely calculate stats with error handling
+                let stats, absencesUsed, absencesAllowed, percentage, courseColor
+                try {
+                  stats = calculateAttendanceStats(course, attendance)
+                  absencesUsed = stats.absences
+                  absencesAllowed = course.allowedAbsences || 0
+                  percentage = absencesAllowed > 0 ? (absencesUsed / absencesAllowed) * 100 : 0
+                  courseColor = getCourseColor(course)
+                } catch (error) {
+                  console.error('Error rendering course:', error, course)
+                  // Set default values to prevent crash
+                  stats = { absences: 0, percentage: 100 }
+                  absencesUsed = 0
+                  absencesAllowed = 0
+                  percentage = 0
+                  courseColor = COURSE_COLORS[0]
+                }
 
                 // Determine status color
                 const statusColor = percentage >= 85
@@ -360,13 +373,13 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
                       <div className="flex items-center justify-center gap-1 min-w-0 mb-0.5">
                         <div
                           className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: courseColor.hex }}
+                          style={{ backgroundColor: course.colorHex || courseColor?.hex || '#6366f1' }}
                         />
                         <div
                           className="text-[11px] md:text-sm font-bold truncate text-content-primary max-w-[48px] md:max-w-[58px]"
-                          title={course.name}
+                          title={course.name || 'Course'}
                         >
-                          {course.shortName || course.name}
+                          {course.shortName || course.name || 'N/A'}
                         </div>
                       </div>
 

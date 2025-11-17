@@ -166,19 +166,24 @@ export function getSessionCountOnDate(course, date) {
  * @returns {number}
  */
 export function calculateTotalClasses(course) {
-  if (!course.startDate || !course.endDate) return 0
+  if (!course || !course.startDate || !course.endDate || !course.weekdays) return 0
 
-  const dates = getDatesForWeekdays(
-    course.startDate,
-    course.endDate,
-    course.weekdays
-  )
+  try {
+    const dates = getDatesForWeekdays(
+      course.startDate,
+      course.endDate,
+      course.weekdays
+    )
 
-  // Count total sessions across all dates
-  // Each date might have multiple sessions (back-to-back classes)
-  return dates.reduce((total, date) => {
-    return total + getSessionCountOnDate(course, date)
-  }, 0)
+    // Count total sessions across all dates
+    // Each date might have multiple sessions (back-to-back classes)
+    return dates.reduce((total, date) => {
+      return total + getSessionCountOnDate(course, date)
+    }, 0)
+  } catch (error) {
+    console.error('Error calculating total classes:', error, course)
+    return 0
+  }
 }
 
 /**
