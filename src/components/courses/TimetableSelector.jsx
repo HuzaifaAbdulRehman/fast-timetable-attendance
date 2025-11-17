@@ -41,6 +41,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
   const [error, setError] = useState(null)
   const [showManualForm, setShowManualForm] = useState(false)
   const [isMobileDevice] = useState(isMobile())
+  const [hasSearched, setHasSearched] = useState(false) // Track if search has been performed
 
   // Date configuration state (Step 2)
   const parseDate = (isoDate) => {
@@ -263,14 +264,18 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
   const handleSearch = () => {
     if (!section || !section.trim() || !timetable || !department) {
       setFilteredCourses([])
+      setHasSearched(false)
       return
     }
 
+    // Mark that search has been performed
+    setHasSearched(true)
+
     // Combine department and section (e.g., BCS + 5F = BCS-5F)
     const fullSection = `${department}-${section.toUpperCase().trim()}`
-    console.log('🔍 Searching for section:', fullSection)
+    console.log('Searching for section:', fullSection)
     console.log('Available sections:', timetable ? Object.keys(timetable) : [])
-    console.log('📖 Timetable data:', timetable)
+    console.log('Timetable data:', timetable)
 
     const courses = (timetable && timetable[fullSection]) || []
     console.log('Found courses:', courses)
@@ -396,7 +401,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
 
     // Add courses using context - use batch add function for multiple courses
     console.log('Adding courses to context:', appCourses)
-    console.log(`📊 Total courses to add: ${appCourses.length}`)
+    console.log(`Total courses to add: ${appCourses.length}`)
     
     try {
       // Use batch add function if multiple courses, single add if one course
@@ -601,7 +606,12 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                   <input
                     type="text"
                     value={section}
-                    onChange={(e) => setSection(e.target.value.toUpperCase())}
+                    onChange={(e) => {
+                      setSection(e.target.value.toUpperCase())
+                      // Reset search state when user types
+                      setHasSearched(false)
+                      setFilteredCourses([])
+                    }}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     placeholder="e.g., 5F"
                     className="w-full pl-10 pr-4 py-3 bg-dark-bg border border-dark-border rounded-xl text-content-primary placeholder-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all uppercase"
@@ -863,7 +873,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
             </div>
           )}
 
-          {!loading && !error && filteredCourses.length === 0 && section && (
+          {!loading && !error && filteredCourses.length === 0 && section && hasSearched && (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-dark-surface-raised rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-8 h-8 text-content-tertiary" />

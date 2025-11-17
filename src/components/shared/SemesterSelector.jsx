@@ -1,17 +1,15 @@
 import { useState } from 'react'
 import { useApp } from '../../context/AppContext'
-import { Plus, FolderOpen, Archive, ArchiveRestore, MoreVertical } from 'lucide-react'
+import { Plus, FolderOpen, MoreVertical } from 'lucide-react'
 
 export default function SemesterSelector({ compact = false }) {
-  const { semesters, activeSemesterId, switchSemester, createSemester, archiveSemester, unarchiveSemester } = useApp()
+  const { semesters, activeSemesterId, switchSemester, createSemester } = useApp()
   const [showNewSemester, setShowNewSemester] = useState(false)
   const [newSemesterName, setNewSemesterName] = useState('')
   const [showMenu, setShowMenu] = useState(false)
-  const [showArchived, setShowArchived] = useState(false)
 
-  // Filter active and archived semesters
+  // Filter active semesters
   const activeSemesters = semesters.filter(s => !s.isArchived)
-  const archivedSemesters = semesters.filter(s => s.isArchived)
 
   const handleCreateSemester = () => {
     if (newSemesterName.trim()) {
@@ -86,31 +84,6 @@ export default function SemesterSelector({ compact = false }) {
           <Plus className="w-3.5 h-3.5" />
         </button>
 
-        {/* Archive current semester button */}
-        {activeSemester && !activeSemester.isArchived && activeSemesters.length > 1 && (
-          <button
-            onClick={() => {
-              if (confirm(`Archive "${activeSemester.name}"? You can unarchive it later.`)) {
-                archiveSemester(activeSemesterId)
-              }
-            }}
-            className="p-1.5 text-content-tertiary hover:text-attendance-warning transition-colors rounded-lg hover:bg-dark-surface-raised flex-shrink-0"
-            title="Archive semester"
-          >
-            <Archive className="w-3.5 h-3.5" />
-          </button>
-        )}
-
-        {/* Show archived semesters toggle */}
-        {archivedSemesters.length > 0 && (
-          <button
-            onClick={() => setShowArchived(!showArchived)}
-            className={`p-1.5 transition-colors rounded-lg hover:bg-dark-surface-raised flex-shrink-0 ${showArchived ? 'text-accent' : 'text-content-tertiary'}`}
-            title="Show archived semesters"
-          >
-            <ArchiveRestore className="w-3.5 h-3.5" />
-          </button>
-        )}
       </div>
     )
   }
@@ -139,61 +112,8 @@ export default function SemesterSelector({ compact = false }) {
           <Plus className="w-4 h-4" />
         </button>
 
-        {/* Archive current semester button */}
-        {activeSemester && !activeSemester.isArchived && activeSemesters.length > 1 && (
-          <button
-            onClick={() => {
-              if (confirm(`Archive "${activeSemester.name}"? You can unarchive it later.`)) {
-                archiveSemester(activeSemesterId)
-              }
-            }}
-            className="p-2 text-content-tertiary hover:text-attendance-warning transition-colors rounded-lg hover:bg-dark-surface-raised"
-            title="Archive semester"
-          >
-            <Archive className="w-4 h-4" />
-          </button>
-        )}
-
-        {/* Show archived semesters toggle */}
-        {archivedSemesters.length > 0 && (
-          <button
-            onClick={() => setShowArchived(!showArchived)}
-            className={`p-2 transition-colors rounded-lg hover:bg-dark-surface-raised ${showArchived ? 'text-accent' : 'text-content-tertiary'}`}
-            title="Show archived semesters"
-          >
-            <ArchiveRestore className="w-4 h-4" />
-          </button>
-        )}
       </div>
 
-      {/* Archived Semesters List */}
-      {showArchived && archivedSemesters.length > 0 && (
-        <div className="bg-dark-surface-raised border border-dark-border rounded-lg p-3">
-          <div className="text-xs uppercase tracking-wider text-content-tertiary font-semibold mb-2">
-            Archived Semesters ({archivedSemesters.length})
-          </div>
-          <div className="space-y-2">
-            {archivedSemesters.map((semester) => (
-              <div
-                key={semester.id}
-                className="flex items-center justify-between p-2 bg-dark-bg rounded-lg"
-              >
-                <span className="text-xs text-content-secondary">{semester.name}</span>
-                <button
-                  onClick={() => {
-                    unarchiveSemester(semester.id)
-                    switchSemester(semester.id)
-                  }}
-                  className="p-1.5 text-content-tertiary hover:text-accent transition-colors rounded hover:bg-dark-surface-raised"
-                  title="Unarchive semester"
-                >
-                  <ArchiveRestore className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

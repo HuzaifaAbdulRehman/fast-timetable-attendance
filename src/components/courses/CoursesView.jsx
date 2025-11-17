@@ -1,19 +1,23 @@
 import { useState } from 'react'
 import { useApp } from '../../context/AppContext'
-import { BookOpen, Calendar, AlertCircle, CheckCircle2, Plus, Trash2, Edit } from 'lucide-react'
+import { BookOpen, Calendar, AlertCircle, CheckCircle2, Plus, Trash2, Edit, FolderOpen, X } from 'lucide-react'
 import TimetableSelector from './TimetableSelector'
 import CourseForm from './CourseForm'
 import ConfirmModal from '../shared/ConfirmModal'
 import SemesterSelector from '../shared/SemesterSelector'
+import { createPortal } from 'react-dom'
 
 export default function CoursesView() {
-  const { courses, deleteCourse, deleteAllCourses, updateCourse, addCourse } = useApp()
+  const { courses, deleteCourse, deleteAllCourses, updateCourse, addCourse, semesters, activeSemesterId, switchSemester, createSemester, deleteSemester } = useApp()
   const [showTimetableSelector, setShowTimetableSelector] = useState(false)
   const [showCourseForm, setShowCourseForm] = useState(false)
   const [editingCourse, setEditingCourse] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
+  const [showDeleteAllOptions, setShowDeleteAllOptions] = useState(false)
   const [courseToDelete, setCourseToDelete] = useState(null)
+  const [newSemesterName, setNewSemesterName] = useState('')
+  const [showNewSemesterInput, setShowNewSemesterInput] = useState(false)
 
   const handleEditCourse = (course) => {
     setEditingCourse(course)
@@ -33,16 +37,51 @@ export default function CoursesView() {
   }
 
   const handleDeleteAll = () => {
-    setShowDeleteAllConfirm(true)
+    setShowDeleteAllOptions(true)
   }
 
   const confirmDeleteAll = () => {
     deleteAllCourses()
+    // Delete the current semester if it exists and has no courses
+    if (activeSemesterId && courses.length > 0) {
+      // Check if there are other semesters to switch to
+      const otherSemesters = semesters.filter(s => s.id !== activeSemesterId && !s.isArchived)
+      if (otherSemesters.length > 0) {
+        // Switch to another semester before deleting
+        switchSemester(otherSemesters[0].id)
+      }
+      // Delete the semester
+      deleteSemester(activeSemesterId)
+    }
+    setShowDeleteAllOptions(false)
   }
+
+  const handleSwitchSemester = (semesterId) => {
+    switchSemester(semesterId)
+    setShowDeleteAllOptions(false)
+  }
+
+  const handleCreateNewSemester = () => {
+    if (newSemesterName.trim()) {
+      createSemester({ name: newSemesterName.trim() })
+      setNewSemesterName('')
+      setShowNewSemesterInput(false)
+      setShowDeleteAllOptions(false)
+    }
+  }
+
+  // Filter semesters - show all non-archived semesters
+  const activeSemesters = semesters.filter(s => !s.isArchived)
+  const currentSemester = semesters.find(s => s.id === activeSemesterId)
 
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="max-w-4xl mx-auto p-4 md:p-6">
+        {/* Semester Selector - Always visible */}
+        <div className="mb-4">
+          <SemesterSelector compact={true} />
+        </div>
+
         {courses.length === 0 ? (
           // Welcome Screen - No Courses Yet
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
@@ -121,11 +160,6 @@ export default function CoursesView() {
         ) : (
           // Course List - Courses Already Added
           <div>
-            {/* Semester Selector */}
-            <div className="mb-4">
-              <SemesterSelector compact={true} />
-            </div>
-
             {/* Header with Actions */}
             <div className="mb-6 flex items-start justify-between">
               <div>
@@ -305,6 +339,150 @@ export default function CoursesView() {
           cancelText="Cancel"
           variant="danger"
         />
+      )}
+
+      {/* Delete All Options Modal */}
+      {showDeleteAllOptions && createPortal(
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowDeleteAllOptions(false)}
+        >
+          <div
+            className="bg-dark-surface/98 backdrop-blur-xl border border-dark-border/50 shadow-glass-lg rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="sticky top-0 bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 p-5 z-10 rounded-t-2xl">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-bold text-content-primary">
+                  Manage Semesters
+                </h2>
+                <button
+                  onClick={() => setShowDeleteAllOptions(false)}
+                  className="p-2 hover:bg-dark-surface-raised rounded-lg transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5 text-content-secondary" />
+                </button>
+              </div>
+              <p className="text-sm text-content-secondary">
+                Switch to another semester or create a new one. Current: <span className="font-medium text-content-primary">{currentSemester?.name || 'Unknown'}</span>
+              </p>
+            </div>
+
+            {/* Content */}
+            <div className="p-5 space-y-4">
+              {/* Active Semesters */}
+              {activeSemesters.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-content-primary mb-3 flex items-center gap-2">
+                    <FolderOpen className="w-4 h-4" />
+                    Active Semesters
+                  </h3>
+                  <div className="space-y-2">
+                    {activeSemesters.map((semester) => (
+                      <button
+                        key={semester.id}
+                        onClick={() => handleSwitchSemester(semester.id)}
+                        disabled={semester.id === activeSemesterId}
+                        className={`w-full p-3 rounded-xl border transition-all text-left ${
+                          semester.id === activeSemesterId
+                            ? 'bg-accent/10 border-accent/30 text-accent cursor-not-allowed'
+                            : 'bg-dark-surface-raised border-dark-border hover:border-accent/30 hover:bg-dark-bg text-content-primary cursor-pointer'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{semester.name}</span>
+                          {semester.id === activeSemesterId && (
+                            <span className="text-xs text-accent">Current</span>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Create New Semester */}
+              <div>
+                <h3 className="text-sm font-semibold text-content-primary mb-3 flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  New Semester
+                </h3>
+                {showNewSemesterInput ? (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={newSemesterName}
+                      onChange={(e) => setNewSemesterName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleCreateNewSemester()
+                        } else if (e.key === 'Escape') {
+                          setShowNewSemesterInput(false)
+                          setNewSemesterName('')
+                        }
+                      }}
+                      placeholder="Enter semester name..."
+                      className="w-full px-4 py-3 bg-dark-bg border border-dark-border rounded-xl text-content-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
+                      autoFocus
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleCreateNewSemester}
+                        disabled={!newSemesterName.trim()}
+                        className="flex-1 px-4 py-2 bg-accent hover:bg-accent-hover text-dark-bg font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Create
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowNewSemesterInput(false)
+                          setNewSemesterName('')
+                        }}
+                        className="px-4 py-2 bg-dark-bg border border-dark-border text-content-primary rounded-xl hover:bg-dark-surface-raised transition-all"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowNewSemesterInput(true)}
+                    className="w-full p-3 rounded-xl border border-dashed border-dark-border bg-dark-surface-raised hover:border-accent/30 hover:bg-dark-bg text-content-primary transition-all flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Create New Semester</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-dark-border my-4"></div>
+
+              {/* Delete All Option */}
+              {courses.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-content-danger mb-3 flex items-center gap-2">
+                    <Trash2 className="w-4 h-4" />
+                    Delete All Courses
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setShowDeleteAllOptions(false)
+                      setShowDeleteAllConfirm(true)
+                    }}
+                    className="w-full p-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all text-left"
+                  >
+                    <div className="font-medium mb-1">Delete all {courses.length} courses</div>
+                    <div className="text-xs text-red-400/80">This will remove all courses and attendance for this semester</div>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* Delete All Courses Confirmation Modal */}
