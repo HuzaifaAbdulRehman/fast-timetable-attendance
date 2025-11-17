@@ -91,17 +91,15 @@ function parseCellEntry(cellText, room, day, slotNumber) {
  */
 export function parseDayTimetable(csvText, day) {
   const entries = []
-  const lines = csvText.split('\n')
 
-  // Skip first 4 lines (header, slots, time, CLASSROOMS)
+  // Parse entire CSV respecting quoted fields
+  const rows = parseCSV(csvText)
+
+  // Skip first 4 rows (header, slots, time, CLASSROOMS)
   let currentRoom = ''
 
-  for (let i = 4; i < lines.length; i++) {
-    const line = lines[i].trim()
-    if (!line) continue
-
-    // Split by comma, but handle quoted fields with newlines
-    const columns = parseCSVLine(line)
+  for (let i = 4; i < rows.length; i++) {
+    const columns = rows[i]
 
     if (columns.length === 0) continue
 
@@ -127,28 +125,54 @@ export function parseDayTimetable(csvText, day) {
 }
 
 /**
- * Parse CSV line handling quoted fields with newlines
+ * Parse CSV properly handling quoted fields with newlines
  */
-function parseCSVLine(line) {
-  const result = []
-  let current = ''
+function parseCSV(csvText) {
+  const rows = []
+  const chars = csvText.split('')
+  let currentRow = []
+  let currentCell = ''
   let inQuotes = false
 
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i]
+  for (let i = 0; i < chars.length; i++) {
+    const char = chars[i]
+    const nextChar = chars[i + 1]
 
     if (char === '"') {
-      inQuotes = !inQuotes
+      // Handle escaped quotes ("")
+      if (inQuotes && nextChar === '"') {
+        currentCell += '"'
+        i++ // Skip next quote
+      } else {
+        inQuotes = !inQuotes
+      }
     } else if (char === ',' && !inQuotes) {
-      result.push(current)
-      current = ''
+      currentRow.push(currentCell)
+      currentCell = ''
+    } else if (char === '\n' && !inQuotes) {
+      currentRow.push(currentCell)
+      if (currentRow.some(cell => cell.trim() !== '')) {
+        rows.push(currentRow)
+      }
+      currentRow = []
+      currentCell = ''
+    } else if (char === '\r') {
+      // Skip carriage return
+      continue
     } else {
-      current += char
+      currentCell += char
     }
   }
 
-  result.push(current) // Add last field
-  return result
+  // Add last cell and row
+  if (currentCell || currentRow.length > 0) {
+    currentRow.push(currentCell)
+    if (currentRow.some(cell => cell.trim() !== '')) {
+      rows.push(currentRow)
+    }
+  }
+
+  return rows
 }
 
 /**

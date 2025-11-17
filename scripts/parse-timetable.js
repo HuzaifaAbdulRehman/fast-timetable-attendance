@@ -1,11 +1,15 @@
 // Node.js script to parse all timetable CSVs and generate JSON
 // Run by GitHub Actions on CSV upload
 
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 // Import parser functions
-const { parseTimetable } = require('../src/utils/timetableParser.js')
+import { parseTimetable } from '../src/utils/timetableParser.js'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const TIMETABLE_DIR = path.join(__dirname, '../public/timetable')
 const OUTPUT_FILE = path.join(TIMETABLE_DIR, 'timetable.json')

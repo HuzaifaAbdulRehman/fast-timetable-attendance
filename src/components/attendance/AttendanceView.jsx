@@ -18,7 +18,7 @@ export default function AttendanceView() {
   const [showTimetableSelector, setShowTimetableSelector] = useState(false)
   const [editingCourse, setEditingCourse] = useState(null)
   const [toast, setToast] = useState(null) // { message, type, action }
-  const [showAllControls, setShowAllControls] = useState(false) // Track if ALL controls are visible
+  const [showAllControls, setShowAllControls] = useState(true) // Track if ALL controls are visible - default to true
 
   // Haptic feedback
   const vibrate = (pattern) => {
@@ -157,14 +157,30 @@ export default function AttendanceView() {
             </div>
           </div>
 
-          {/* CTA */}
-          <button
-            onClick={() => setShowCourseForm(true)}
-            className="w-full bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-semibold px-6 py-4 rounded-xl transition-all duration-200 shadow-accent hover:shadow-accent-lg hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            Add Your First Course
-          </button>
+          {/* CTA Buttons */}
+          <div className="space-y-3">
+            <button
+              onClick={() => {
+                vibrate([10])
+                setShowTimetableSelector(true)
+              }}
+              className="w-full bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-semibold px-6 py-4 rounded-xl transition-all duration-200 shadow-accent hover:shadow-accent-lg hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+            >
+              <BookOpen className="w-5 h-5" />
+              Import from Timetable
+            </button>
+
+            <button
+              onClick={() => {
+                vibrate([10])
+                setShowCourseForm(true)
+              }}
+              className="w-full bg-dark-surface-raised border border-dark-border hover:border-accent/50 text-content-primary font-medium px-6 py-4 rounded-xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Add Manually
+            </button>
+          </div>
         </div>
 
         {/* Course Form Modal */}
@@ -172,7 +188,32 @@ export default function AttendanceView() {
           <CourseForm
             existingCourse={editingCourse}
             onClose={handleCloseForm}
-            onSave={handleCloseForm}
+            onSave={handleSaveCourse}
+          />
+        )}
+
+        {/* Timetable Selector Modal */}
+        {showTimetableSelector && (
+          <TimetableSelector
+            onCoursesSelected={(courses) => {
+              courses.forEach(course => addCourse(course))
+              setShowTimetableSelector(false)
+              setToast({
+                message: `Added ${courses.length} course${courses.length > 1 ? 's' : ''} from timetable`,
+                type: 'success'
+              })
+            }}
+            onClose={() => setShowTimetableSelector(false)}
+          />
+        )}
+
+        {/* Toast Notifications */}
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            action={toast.action}
+            onClose={() => setToast(null)}
           />
         )}
       </div>

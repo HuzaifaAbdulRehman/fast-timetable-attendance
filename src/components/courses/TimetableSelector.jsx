@@ -12,6 +12,15 @@ const vibrate = (pattern = [10]) => {
 // Mobile detection
 const isMobile = () => window.innerWidth < 768
 
+// Convert 24-hour time to 12-hour format
+const formatTimeTo12Hour = (time24) => {
+  const [hours, minutes] = time24.split(':')
+  const hour = parseInt(hours)
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  const hour12 = hour % 12 || 12
+  return `${hour12}:${minutes} ${ampm}`
+}
+
 export default function TimetableSelector({ onCoursesSelected, onClose }) {
   const [section, setSection] = useState('')
   const [timetable, setTimetable] = useState(null)
@@ -48,16 +57,16 @@ export default function TimetableSelector({ onCoursesSelected, onClose }) {
         }
       }
 
-      // Try to fetch from API (production on Vercel)
-      const response = await fetch('/api/timetable?mock=true')
+      // Try to fetch from JSON file (works in dev and production)
+      const response = await fetch('/timetable/timetable.json')
       const data = await response.json()
 
-      if (data.success) {
+      if (data.data) {
         setTimetable(data.data)
         // Cache in localStorage
         localStorage.setItem('timetable', JSON.stringify(data.data))
       } else {
-        throw new Error(data.error || 'Failed to load timetable')
+        throw new Error('Invalid timetable format')
       }
     } catch (err) {
       console.error('Error fetching timetable:', err)
@@ -213,19 +222,17 @@ export default function TimetableSelector({ onCoursesSelected, onClose }) {
     const courses = timetable[sectionUpper] || []
     console.log('✅ Found courses:', courses)
 
-    // Group courses by course code to avoid duplicates
+    // Group courses by course code and collect all sessions
     const uniqueCourses = {}
     courses.forEach(course => {
       if (!uniqueCourses[course.courseCode]) {
         uniqueCourses[course.courseCode] = {
           ...course,
-          sessions: course.sessions || [course]
+          sessions: [course] // Always start with array
         }
       } else {
-        // Only add to sessions if not already using sessions array
-        if (!course.sessions) {
-          uniqueCourses[course.courseCode].sessions.push(course)
-        }
+        // Add this session to the existing course
+        uniqueCourses[course.courseCode].sessions.push(course)
       }
     })
 
@@ -448,14 +455,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose }) {
                       </div>
 
                       {/* Details Grid */}
-                      <div className="grid grid-cols-2 gap-2 mt-3">
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-content-tertiary flex-shrink-0" />
-                          <span className="text-xs text-content-secondary truncate">
-                            {course.room}
-                          </span>
-                        </div>
-
+                      <div className="space-y-2 mt-3">
                         <div className="flex items-center gap-1.5">
                           <User className="w-3.5 h-3.5 text-content-tertiary flex-shrink-0" />
                           <span className="text-xs text-content-secondary truncate">
@@ -463,19 +463,43 @@ export default function TimetableSelector({ onCoursesSelected, onClose }) {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-content-tertiary flex-shrink-0" />
-                          <span className="text-xs text-content-secondary">
-                            {course.timeSlot}
-                          </span>
-                        </div>
+                        {/* Show schedule for each day */}
+                        {(() => {
+                          // Group sessions by day
+                          const sessionsByDay = {}
+                          course.sessions?.forEach(session => {
+                            if (!sessionsByDay[session.day]) {
+                              sessionsByDay[session.day] = []
+                            }
+                            sessionsByDay[session.day].push(session)
+                          })
 
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-content-tertiary flex-shrink-0" />
-                          <span className="text-xs text-content-secondary">
-                            {course.sessions?.map(s => s.day.slice(0, 3)).join(', ')}
-                          </span>
-                        </div>
+                          return Object.entries(sessionsByDay).map(([day, sessions]) => {
+                            // Sort sessions by slot number for this day
+                            const sortedSessions = sessions.sort((a, b) => a.slotNumber - b.slotNumber)
+
+                            // Get time range (start of first slot to end of last slot)
+                            const startTime = sortedSessions[0].timeSlot.split('-')[0]
+                            const endTime = sortedSessions[sortedSessions.length - 1].timeSlot.split('-')[1]
+                            const timeRange = `${formatTimeTo12Hour(startTime)} - ${formatTimeTo12Hour(endTime)}`
+
+                            // Get room (use first session's room)
+                            const room = sortedSessions[0].room
+
+                            return (
+                              <div key={day} className="flex items-start gap-1.5 text-xs">
+                                <Calendar className="w-3.5 h-3.5 text-content-tertiary flex-shrink-0 mt-0.5" />
+                                <div className="flex-1">
+                                  <span className="text-content-primary font-medium">{day.slice(0, 3)}</span>
+                                  <span className="text-content-tertiary mx-1">•</span>
+                                  <span className="text-content-secondary">{timeRange}</span>
+                                  <span className="text-content-tertiary mx-1">•</span>
+                                  <span className="text-content-secondary">{room}</span>
+                                </div>
+                              </div>
+                            )
+                          })
+                        })()}
                       </div>
                     </div>
                   </div>
