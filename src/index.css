@@ -167,6 +167,16 @@ body {
   overflow-x: hidden;
 }
 
+/* Hide scrollbar but allow scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   color: var(--color-content-primary);
