@@ -10,7 +10,6 @@ export default function CoursesView() {
   const [showTimetableSelector, setShowTimetableSelector] = useState(false)
   const [showCourseForm, setShowCourseForm] = useState(false)
   const [editingCourse, setEditingCourse] = useState(null)
-  const [deletingCourseId, setDeletingCourseId] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
   const [courseToDelete, setCourseToDelete] = useState(null)
@@ -277,6 +276,43 @@ export default function CoursesView() {
             setShowCourseForm(false)
             setEditingCourse(null)
           }}
+        />
+      )}
+
+      {/* Delete Course Confirmation Modal */}
+      {showDeleteConfirm && (
+        <ConfirmModal
+          isOpen={showDeleteConfirm}
+          onClose={() => {
+            setShowDeleteConfirm(false)
+            setCourseToDelete(null)
+          }}
+          onConfirm={confirmDeleteCourse}
+          title="Delete Course"
+          message={
+            courseToDelete
+              ? `Are you sure you want to delete "${courseToDelete.name}"? This will also remove all attendance records for this course. This action cannot be undone.`
+              : 'Are you sure you want to delete this course?'
+          }
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="danger"
+        />
+      )}
+
+      {/* Delete All Courses Confirmation Modal */}
+      {showDeleteAllConfirm && (
+        <ConfirmModal
+          isOpen={showDeleteAllConfirm}
+          onClose={() => setShowDeleteAllConfirm(false)}
+          onConfirm={confirmDeleteAll}
+          title="Delete All Courses"
+          message={`Are you sure you want to delete all ${courses.length} courses? This will also remove all attendance records. This action cannot be undone.`}
+          confirmText="Delete All"
+          cancelText="Cancel"
+          variant="danger"
+          requiresTyping={true}
+          confirmationText="DELETE ALL"
         />
       )}
     </div>
