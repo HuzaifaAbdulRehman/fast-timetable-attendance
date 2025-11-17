@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useApp } from '../../context/AppContext'
 import { generateWeeks, formatDateShort, courseHasClassOnDate } from '../../utils/dateHelpers'
 import { getDayStatus, getSessionStatus, calculateAttendanceStats } from '../../utils/attendanceCalculator'
@@ -29,6 +29,27 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
   const [swipedCourse, setSwipedCourse] = useState(null) // Track swiped course for delete reveal
   const [openMenuCourse, setOpenMenuCourse] = useState(null) // Track which course menu is open
   const [reorderMode, setReorderMode] = useState(false) // Track reorder mode
+
+  // Close swipe when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      // Close swiped course if clicking anywhere outside the table
+      if (swipedCourse) {
+        const isClickOnSwipedCourse = e.target.closest(`[data-course-id="${swipedCourse}"]`)
+        if (!isClickOnSwipedCourse) {
+          setSwipedCourse(null)
+        }
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('touchstart', handleClickOutside)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
+    }
+  }, [swipedCourse])
 
   // Get latest course end date
   const getLatestEndDate = () => {
@@ -317,6 +338,7 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
                 return (
                   <th
                     key={course.id}
+                    data-course-id={course.id}
                     className="min-w-[64px] max-w-[64px] md:min-w-[74px] md:max-w-[74px] text-center px-1 md:px-1.5 relative overflow-visible"
                     {...swipeHandlers}
                   >
