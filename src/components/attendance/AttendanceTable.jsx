@@ -241,86 +241,77 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
       </button>
 
       <div className="overflow-auto max-h-[calc(100vh-13rem)] md:max-h-[calc(100vh-14rem)] scroll-smooth pb-4">
+        {showActions && (
+          <div className="sticky top-0 z-20 bg-dark-surface border-b border-dark-border px-2 md:px-4 py-2 flex flex-wrap items-center gap-2 justify-between">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <button
+                onClick={toggleBulkSelectMode}
+                className={`
+                  flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] font-medium transition-all duration-200 flex-shrink-0
+                  ${bulkSelectMode
+                    ? 'bg-accent text-dark-bg shadow-accent'
+                    : 'bg-dark-bg border border-dark-border text-content-secondary hover:bg-dark-surface-raised hover:text-content-primary hover:border-accent/30'
+                  }
+                `}
+              >
+                {bulkSelectMode ? (
+                  <>
+                    <CheckSquare className="w-3.5 h-3.5" />
+                    <span className="whitespace-nowrap">Bulk Select</span>
+                  </>
+                ) : (
+                  <>
+                    <Square className="w-3.5 h-3.5" />
+                    <span className="whitespace-nowrap">Select</span>
+                  </>
+                )}
+              </button>
+
+              {!bulkSelectMode && courses.length > 1 && (
+                <button
+                  onClick={() => {
+                    vibrate([10])
+                    if (!reorderMode) {
+                      setBulkSelectMode(false)
+                      setSelectedDates([])
+                    }
+                    setReorderMode(!reorderMode)
+                  }}
+                  className={`
+                    flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] font-medium transition-all duration-200 flex-shrink-0
+                    ${reorderMode
+                      ? 'bg-accent text-dark-bg shadow-accent'
+                      : 'bg-dark-bg border border-dark-border text-content-secondary hover:bg-dark-surface-raised hover:text-content-primary hover:border-accent/30'
+                    }
+                  `}
+                  title="Reorder courses"
+                >
+                  <ArrowLeftRight className="w-3.5 h-3.5" />
+                  <span className="whitespace-nowrap">Reorder</span>
+                </button>
+              )}
+
+              {bulkSelectMode && selectedDates.length > 0 && (
+                <span className="text-xs text-content-tertiary font-medium flex-shrink-0 tabular-nums">
+                  {selectedDates.length} selected
+                </span>
+              )}
+
+              {reorderMode && (
+                <span className="text-xs text-accent font-medium flex-shrink-0">
+                  Use arrows to reorder
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {!bulkSelectMode && !reorderMode && <QuickMarkToday inline />}
+            </div>
+          </div>
+        )}
+
         <table className="attendance-table w-full min-w-full">
-          <thead className="sticky top-0 z-[5] bg-dark-surface">
-            {/* Row 1: Action Buttons - Collapsible */}
-            {showActions && (
-            <tr>
-              <th colSpan={courses.length + 1} className="py-1.5 border-b border-dark-border bg-dark-surface">
-                <div className="flex items-center justify-between gap-1.5 px-2 md:px-4">
-                  <div className="flex items-center gap-1 flex-1 min-w-0">
-                    <button
-                      onClick={toggleBulkSelectMode}
-                      className={`
-                        flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] font-medium transition-all duration-200 flex-shrink-0
-                        ${bulkSelectMode
-                          ? 'bg-accent text-dark-bg shadow-accent'
-                          : 'bg-dark-bg border border-dark-border text-content-secondary hover:bg-dark-surface-raised hover:text-content-primary hover:border-accent/30'
-                        }
-                      `}
-                    >
-                      {bulkSelectMode ? (
-                        <>
-                          <CheckSquare className="w-3.5 h-3.5" />
-                          <span className="whitespace-nowrap">Bulk Select</span>
-                        </>
-                      ) : (
-                        <>
-                          <Square className="w-3.5 h-3.5" />
-                          <span className="whitespace-nowrap">Select</span>
-                        </>
-                      )}
-                    </button>
-
-                    {/* Reorder Mode Toggle */}
-                    {!bulkSelectMode && courses.length > 1 && (
-                      <button
-                        onClick={() => {
-                          vibrate([10])
-                          if (!reorderMode) {
-                            setBulkSelectMode(false)
-                            setSelectedDates([])
-                          }
-                          setReorderMode(!reorderMode)
-                        }}
-                        className={`
-                          flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] font-medium transition-all duration-200 flex-shrink-0
-                          ${reorderMode
-                            ? 'bg-accent text-dark-bg shadow-accent'
-                            : 'bg-dark-bg border border-dark-border text-content-secondary hover:bg-dark-surface-raised hover:text-content-primary hover:border-accent/30'
-                          }
-                        `}
-                        title="Reorder courses"
-                      >
-                        <ArrowLeftRight className="w-3.5 h-3.5" />
-                        <span className="whitespace-nowrap">Reorder</span>
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Right side content */}
-                  <div className="flex items-center gap-2">
-                    {bulkSelectMode && selectedDates.length > 0 && (
-                      <span className="text-xs text-content-tertiary font-medium flex-shrink-0 tabular-nums">
-                        {selectedDates.length} selected
-                      </span>
-                    )}
-
-                    {reorderMode && (
-                      <span className="text-xs text-accent font-medium flex-shrink-0">
-                        Use arrows to reorder
-                      </span>
-                    )}
-
-                    {/* Quick Mark Today Button - on the right */}
-                    {!bulkSelectMode && !reorderMode && <QuickMarkToday inline />}
-                  </div>
-                </div>
-              </th>
-            </tr>
-            )}
-
-            {/* Row 2: Date and Course Headers */}
+          <thead className={`sticky ${showActions ? 'top-[56px]' : 'top-0'} z-[5] bg-dark-surface`}>
             <tr className="border-b border-dark-border">
               <th className="text-left min-w-[60px] md:min-w-[80px] px-3 md:px-4 py-1">
                 <span className="text-xs md:text-sm font-semibold text-content-primary">Date</span>

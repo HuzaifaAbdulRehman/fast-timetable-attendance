@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useApp } from '../../context/AppContext'
 import { X, Calendar, BookOpen, Hash } from 'lucide-react'
 import { getTodayISO } from '../../utils/dateHelpers'
@@ -20,6 +21,31 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
   const { addCourse, updateCourse } = useApp()
   const modalRef = useRef(null)
   const [isMobileDevice] = useState(isMobile())
+  const portalTargetRef = useRef(typeof document !== 'undefined' ? document.body : null)
+
+  useEffect(() => {
+    const portalTarget = portalTargetRef.current
+    if (!portalTarget) return
+
+    const { style, classList } = portalTarget
+    const previousOverflow = style.overflow
+    const previousPaddingRight = style.paddingRight
+
+    const scrollbarWidth = typeof window !== 'undefined'
+      ? window.innerWidth - document.documentElement.clientWidth
+      : 0
+    if (scrollbarWidth > 0) {
+      style.paddingRight = `${scrollbarWidth}px`
+    }
+    style.overflow = 'hidden'
+    classList.add('modal-open')
+
+    return () => {
+      style.overflow = previousOverflow
+      style.paddingRight = previousPaddingRight
+      classList.remove('modal-open')
+    }
+  }, [])
 
   // Parse existing date or use today
   const parseDate = (isoDate) => {
@@ -118,8 +144,9 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
     if (formData.weekdays.length !== formData.creditHours) {
       newErrors.weekdays = `Select ${formData.creditHours} session day(s)`
     }
+    if (!startDateISO) newErrors.startDate = 'Start date is required'
     if (!endDateISO) newErrors.endDate = 'End date is required'
-    if (endDateISO && endDateISO <= startDateISO) {
+    if (endDateISO && startDateISO && endDateISO <= startDateISO) {
       newErrors.endDate = 'End date must be after start date'
     }
 
@@ -144,7 +171,13 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
     }
 
     vibrate([10, 50, 10]) // Success pattern
-    onSave()
+
+    if (typeof onSave === 'function') {
+      onSave()
+    }
+    if (typeof onClose === 'function' && onClose !== onSave) {
+      onClose()
+    }
   }
 
   // Generate year/month/day options
@@ -166,27 +199,32 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
   ]
   const days = Array.from({ length: 31 }, (_, i) => i + 1)
 
-  return (
-    <div
-      className={`
-        fixed inset-0 bg-black/60 backdrop-blur-sm z-50
-        ${isMobileDevice
-          ? 'flex items-end'
-          : 'flex items-center justify-center p-4 overflow-y-auto'
-        }
-      `}
-      onClick={onClose}
-    >
+  const portalTarget = portalTargetRef.current
+  if (!portalTarget) return null
+
+  return createPortal(
+    (
       <div
         className={`
-          bg-dark-surface/95 backdrop-blur-xl border border-dark-border/50 shadow-glass-lg w-full
+          fixed inset-0 bg-black/60 backdrop-blur-sm z-50
           ${isMobileDevice
-            ? 'rounded-t-3xl max-h-[92vh] animate-slide-up'
-            : 'relative rounded-2xl max-w-lg my-8'
+            ? 'flex items-end'
+            : 'flex items-center justify-center p-4 overflow-y-auto'
           }
         `}
-        onClick={(e) => e.stopPropagation()}
+        onClick={onClose}
       >
+        <div
+          className={`
+            bg-dark-surface/95 backdrop-blur-xl border border-dark-border/50 shadow-glass-lg w-full
+            ${isMobileDevice
+              ? 'rounded-t-3xl max-h-[92vh] animate-slide-up'
+              : 'relative rounded-2xl max-w-lg my-8'
+            }
+          `}
+          onClick={(e) => e.stopPropagation()}
+          ref={modalRef}
+        >
         {/* Mobile Drag Handle */}
         {isMobileDevice && (
           <div className="flex justify-center pt-3 pb-1">
@@ -369,6 +407,9 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
                 ))}
               </select>
             </div>
+            {errors.startDate && (
+              <p className="text-xs text-attendance-danger mt-1.5">{errors.startDate}</p>
+            )}
           </div>
 
           {/* End Date */}
@@ -535,8 +576,14 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
             </p>
           </div>
 
-          {/* Actions - Sticky */}
-          <div className="sticky bottom-0 bg-gradient-to-t from-dark-surface via-dark-surface to-transparent pt-4 pb-1 -mx-5 px-5">
+        {/* Actions */}
+        <div
+          className={`${
+            isMobileDevice
+              ? 'sticky bottom-0 bg-gradient-to-t from-dark-surface via-dark-surface to-transparent pt-4 pb-1 -mx-5 px-5'
+              : 'border-t border-dark-border/50 mt-6 pt-4'
+          }`}
+        >
             <div className="flex gap-3">
               <button
                 type="submit"
@@ -554,7 +601,9 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
             </div>
           </div>
         </form>
+        </div>
       </div>
-    </div>
+    ),
+    portalTarget
   )
 }

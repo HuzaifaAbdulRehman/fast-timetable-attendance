@@ -10,6 +10,7 @@ import {
   cleanupNotificationScheduler,
   DEFAULT_NOTIFICATION_SETTINGS
 } from '../utils/notificationManager'
+import { generateId } from '../utils/id'
 
 const AppContext = createContext()
 
@@ -30,7 +31,7 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (semesters.length === 0) {
       const defaultSemester = {
-        id: crypto.randomUUID(),
+        id: generateId('semester'),
         name: 'Current Semester',
         createdAt: Date.now(),
         isActive: true
@@ -45,6 +46,27 @@ export function AppProvider({ children }) {
   // Filter data by active semester
   const courses = allCourses.filter(c => c.semesterId === activeSemesterId)
   const attendance = allAttendance.filter(a => a.semesterId === activeSemesterId)
+
+  const ensureActiveSemester = useCallback(() => {
+    if (activeSemesterId) return activeSemesterId
+
+    if (semesters.length > 0) {
+      const fallbackId = semesters[0].id
+      setActiveSemesterId(fallbackId)
+      return fallbackId
+    }
+
+    const fallbackSemester = {
+      id: generateId('semester'),
+      name: 'Current Semester',
+      createdAt: Date.now(),
+      isActive: true
+    }
+
+    setSemesters(prev => [...prev, fallbackSemester])
+    setActiveSemesterId(fallbackSemester.id)
+    return fallbackSemester.id
+  }, [activeSemesterId, semesters, setSemesters, setActiveSemesterId])
 
   const setCourses = useCallback((updater) => {
     setAllCourses(prev => {
@@ -133,26 +155,44 @@ export function AppProvider({ children }) {
       assignedColor = COURSE_COLORS[courses.length % COURSE_COLORS.length]
     }
 
+    const normalizedStartDate = courseData.startDate || courseData.endDate || getTodayISO()
+    const normalizedEndDate = courseData.endDate || normalizedStartDate
+
+    let totalClassesEstimate = courseData.creditHours * 16
+    try {
+      totalClassesEstimate = calculateTotalClasses({
+        ...courseData,
+        startDate: normalizedStartDate,
+        endDate: normalizedEndDate
+      })
+    } catch (error) {
+      console.error('Failed to calculate total classes, falling back to heuristic value.', error)
+    }
+
+    const computedAllowedAbsences = courseData.allowedAbsences ??
+      Math.floor(totalClassesEstimate * DEFAULT_ALLOWED_ABSENCE_PERCENTAGE)
+
+    const semesterIdForCourse = ensureActiveSemester()
+
     const newCourse = {
-      id: crypto.randomUUID(),
+      id: generateId('course'),
       name: courseData.name,
       shortName: courseData.shortName,
       creditHours: courseData.creditHours || 2,
       weekdays: courseData.weekdays,
-      startDate: courseData.startDate,
-      endDate: courseData.endDate,
+      startDate: normalizedStartDate,
+      endDate: normalizedEndDate,
       initialAbsences: courseData.initialAbsences || 0,
-      allowedAbsences: courseData.allowedAbsences ||
-        Math.floor(calculateTotalClasses(courseData) * DEFAULT_ALLOWED_ABSENCE_PERCENTAGE),
+      allowedAbsences: computedAllowedAbsences,
       color: courseData.color || assignedColor.name,
       colorHex: assignedColor.hex,
-      semesterId: activeSemesterId,
+      semesterId: semesterIdForCourse,
       createdAt: Date.now(),
     }
 
     setCourses(prev => [...prev, newCourse])
     return newCourse
-  }, [setCourses, courses, activeSemesterId])
+  }, [setCourses, courses, ensureActiveSemester])
 
   const updateCourse = useCallback((courseId, updates) => {
     setCourses(prev =>
@@ -228,7 +268,7 @@ export function AppProvider({ children }) {
           return [
             ...prev,
             {
-              id: crypto.randomUUID(),
+              id: generateId('attendance'),
               courseId,
               date,
               status: newStatus,
@@ -278,7 +318,7 @@ export function AppProvider({ children }) {
         const sessionCount = getSessionCountOnDate(course, date)
         for (let i = 0; i < sessionCount; i++) {
           newRecords.push({
-            id: crypto.randomUUID(),
+            id: generateId('attendance'),
             courseId: course.id,
             date,
             status: SESSION_STATUS.ABSENT,
@@ -341,7 +381,7 @@ export function AppProvider({ children }) {
         const sessionCount = getSessionCountOnDate(course, date)
         for (let i = 0; i < sessionCount; i++) {
           newRecords.push({
-            id: crypto.randomUUID(),
+            id: generateId('attendance'),
             courseId: course.id,
             date,
             status: SESSION_STATUS.ABSENT,
@@ -373,7 +413,7 @@ export function AppProvider({ children }) {
 
   const createSemester = useCallback((semesterData) => {
     const newSemester = {
-      id: crypto.randomUUID(),
+      id: generateId('semester'),
       name: semesterData.name || `Semester ${semesters.length + 1}`,
       createdAt: Date.now(),
       isActive: false,

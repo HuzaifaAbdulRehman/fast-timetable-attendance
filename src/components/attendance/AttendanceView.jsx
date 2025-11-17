@@ -185,23 +185,14 @@ export default function AttendanceView() {
           vibrate([10])
           setShowAllControls(!showAllControls)
         }}
-        className="mb-2 flex items-center justify-center py-1.5 bg-dark-surface border border-dark-border rounded-lg cursor-pointer hover:bg-dark-surface-raised transition-all"
+        className="mb-2 flex items-center justify-center py-1 bg-dark-surface border border-dark-border/50 rounded-lg cursor-pointer hover:bg-dark-surface-raised hover:border-accent/30 transition-all group"
+        title={showAllControls ? "Hide controls" : "Show controls"}
       >
-        <div className="flex items-center gap-2 text-content-secondary hover:text-content-primary">
-          {showAllControls ? (
-            <>
-              <ChevronDown className="w-4 h-4" />
-              <span className="text-xs font-medium">Hide Controls</span>
-              <ChevronDown className="w-4 h-4" />
-            </>
-          ) : (
-            <>
-              <ChevronUp className="w-4 h-4" />
-              <span className="text-xs font-medium">Show Controls</span>
-              <ChevronUp className="w-4 h-4" />
-            </>
-          )}
-        </div>
+        {showAllControls ? (
+          <ChevronUp className="w-4 h-4 text-accent group-hover:text-accent-hover transition-colors" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-accent group-hover:text-accent-hover transition-colors" />
+        )}
       </div>
 
       {/* Unified Controls Row - Semester + Weeks + Add Course */}
