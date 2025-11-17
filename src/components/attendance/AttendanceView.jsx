@@ -121,7 +121,7 @@ export default function AttendanceView() {
             Welcome to Absence Tracker
           </h2>
           <p className="text-content-secondary leading-relaxed">
-            Never worry about attendance again. Track your absences strategically and stay above the 80% threshold.
+            Take the days you need. Plan strategically, stay above 80%, and maximize your flexibility.
           </p>
 
           {/* Features list */}
@@ -179,6 +179,15 @@ export default function AttendanceView() {
 
   const renderContent = () => (
     <div className="relative">
+      {/* App Tagline - Always visible */}
+      {courses.length > 0 && (
+        <div className="mb-3 text-center">
+          <p className="text-xs md:text-sm text-content-tertiary/80 font-medium">
+            Stay home when you need. Plan smart. Still hit 80%.
+          </p>
+        </div>
+      )}
+
       {/* Unified Toggle Bar for ALL controls */}
       <div
         onClick={() => {
