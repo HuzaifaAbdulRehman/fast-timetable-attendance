@@ -16,7 +16,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 sticky top-0 z-30 shadow-lg w-full" style={{ minWidth: '100%', width: '100%' }}>
+      <header className="bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 sticky top-0 z-30 w-full" style={{ minWidth: '100%', width: '100%' }}>
         <div className="w-full px-3 sm:px-4 md:px-8 py-3.5 sm:py-4 md:py-5" style={{ minWidth: '100%', width: '100%' }}>
           <div className="flex items-center w-full" style={{ minWidth: '100%', width: '100%' }}>
             <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">

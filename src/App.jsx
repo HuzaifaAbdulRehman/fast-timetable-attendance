@@ -7,6 +7,7 @@ import CoursesView from './components/courses/CoursesView'
 import ExploreClassesView from './components/explore/ExploreClassesView'
 import TimetableView from './components/timetable/TimetableView'
 import AttendanceView from './components/attendance/AttendanceView'
+import GPAView from './components/gpa/GPAView'
 import InstallPrompt from './components/shared/InstallPrompt'
 import NotificationPrompt from './components/shared/NotificationPrompt'
 import ErrorBoundary from './components/shared/ErrorBoundary'
@@ -52,6 +53,9 @@ function AppContent() {
         </div>
         <div className={activeTab === 'attendance' ? 'flex flex-col flex-1 overflow-hidden' : 'hidden'}>
           <AttendanceView />
+        </div>
+        <div className={activeTab === 'gpa' ? 'flex flex-col flex-1 overflow-hidden' : 'hidden'}>
+          <GPAView />
         </div>
       </main>
 

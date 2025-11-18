@@ -1,12 +1,13 @@
-import { Table, GraduationCap, Calendar, Compass } from 'lucide-react'
+import { Table, GraduationCap, Calendar, Compass, Award } from 'lucide-react'
 import { vibrate } from '../../utils/uiHelpers'
 
 export default function TabNavigation({ activeTab, onTabChange }) {
   const tabs = [
-    { id: 'explore', label: 'Explore', shortLabel: 'Explore', icon: Compass },
-    { id: 'courses', label: 'My Courses', shortLabel: 'Courses', icon: GraduationCap },
-    { id: 'timetable', label: 'My Timetable', shortLabel: 'Schedule', icon: Calendar },
-    { id: 'attendance', label: 'Attendance', shortLabel: 'Track', icon: Table },
+    { id: 'explore', label: 'Explore', shortLabel: 'Explore', ultraShort: 'Exp', icon: Compass },
+    { id: 'courses', label: 'My Courses', shortLabel: 'Courses', ultraShort: 'Crs', icon: GraduationCap },
+    { id: 'timetable', label: 'My Timetable', shortLabel: 'Schedule', ultraShort: 'Sch', icon: Calendar },
+    { id: 'attendance', label: 'Attendance', shortLabel: 'Track', ultraShort: 'Att', icon: Table },
+    { id: 'gpa', label: 'GPA', shortLabel: 'GPA', ultraShort: 'GPA', icon: Award },
   ]
 
   return (
@@ -25,19 +26,20 @@ export default function TabNavigation({ activeTab, onTabChange }) {
                   vibrate([10])
                 }}
                 className={`
-                  flex-1 flex flex-col items-center justify-center gap-0.5 sm:gap-1 py-2 sm:py-3 px-1 sm:px-2 md:px-4 min-w-0
+                  flex-1 flex flex-col items-center justify-center gap-0.5 xs:gap-1 sm:gap-1.5 py-1.5 xs:py-2 sm:py-3 px-0.5 xs:px-1 sm:px-2 md:px-4 min-w-0
                   transition-all duration-200 relative
                   ${isActive
                     ? 'text-accent'
                     : 'text-content-secondary hover:text-content-primary'
                   }
                 `}
-                style={{ minWidth: '70px', flexShrink: 0, maxWidth: 'none' }}
+                style={{ minWidth: '56px', flexShrink: 0, maxWidth: 'none' }}
               >
-                <Icon className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-transform flex-shrink-0 ${isActive ? 'scale-110' : ''}`} />
-                <span className={`text-[9px] sm:text-xs md:text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis w-full text-center ${isActive ? 'font-semibold' : 'font-normal'}`}>
-                  <span className="hidden min-[320px]:inline">{tab.label}</span>
-                  <span className="min-[320px]:hidden">{tab.shortLabel}</span>
+                <Icon className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-transform flex-shrink-0 ${isActive ? 'scale-110' : ''}`} />
+                <span className={`text-[8px] xs:text-[9px] sm:text-xs md:text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis w-full text-center leading-tight ${isActive ? 'font-bold' : 'font-normal'}`}>
+                  <span className="hidden min-[420px]:inline">{tab.label}</span>
+                  <span className="hidden min-[350px]:inline min-[420px]:hidden">{tab.shortLabel}</span>
+                  <span className="inline min-[350px]:hidden">{tab.ultraShort}</span>
                 </span>
                 {isActive && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-t-full" />
