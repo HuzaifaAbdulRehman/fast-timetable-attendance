@@ -68,7 +68,7 @@ export default function SemesterSelector({ compact = false }) {
         <select
           value={activeSemesterId || ''}
           onChange={(e) => switchSemester(e.target.value)}
-          className="bg-dark-surface-raised border border-dark-border rounded-lg px-2 py-1.5 text-content-primary text-xs focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all flex-shrink-0 min-w-[120px]"
+          className="bg-dark-surface-raised border border-dark-border rounded-lg px-2 sm:px-2.5 py-1 sm:py-1.5 text-content-primary text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all flex-shrink-0 min-w-[120px]"
         >
           {activeSemesters.map((semester) => (
             <option key={semester.id} value={semester.id}>
@@ -78,10 +78,10 @@ export default function SemesterSelector({ compact = false }) {
         </select>
         <button
           onClick={() => setShowNewSemester(true)}
-          className="p-1.5 text-content-tertiary hover:text-accent transition-colors rounded-lg hover:bg-dark-surface-raised flex-shrink-0"
+          className="p-1 sm:p-1.5 text-content-tertiary hover:text-accent transition-colors rounded-lg hover:bg-dark-surface-raised flex-shrink-0"
           title="Create new semester"
         >
-          <Plus className="w-3.5 h-3.5" />
+          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
 
       </div>

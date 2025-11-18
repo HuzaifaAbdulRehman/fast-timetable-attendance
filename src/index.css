@@ -18,27 +18,29 @@
   --color-secondary-hover: #7C3AED; /* Purple 600 */
   --color-secondary-light: #EDE9FE; /* Purple 100 */
 
-  /* Dark theme backgrounds - Softer & more comfortable */
+  /* Dark theme backgrounds - Enhanced for mobile visibility */
   --color-dark-bg: #0f1115;
   --color-dark-bg-secondary: #1a1d24;
   --color-dark-bg-tertiary: #232832;
 
   /* Dark theme surfaces */
   --color-dark-surface: #1a1d24;
-  --color-dark-surface-raised: #232832;
+  --color-dark-card: #1e2229; /* Dedicated card background - slightly lighter for better separation */
+  --color-dark-surface-raised: #252a34;
   --color-dark-surface-overlay: #2d3341;
   --color-dark-surface-hover: #363c4f;
 
-  /* Dark theme borders - Subtle & refined */
-  --color-dark-border: #2d3341;
-  --color-dark-border-muted: #363c4f;
-  --color-dark-border-strong: #4a5060;
+  /* Dark theme borders - Enhanced visibility for mobile */
+  --color-dark-border: #353b47; /* Increased brightness for better component separation */
+  --color-dark-border-muted: #2d3341; /* Subtle borders for inner elements */
+  --color-dark-border-strong: #4a5060; /* Strong borders for emphasis */
+  --color-dark-border-accent: #4a516340; /* Subtle accent-tinted borders */
 
-  /* Content/Text colors - Enhanced readability */
-  --color-content-primary: #f5f5f7;
-  --color-content-secondary: #b4b8c5;
-  --color-content-tertiary: #8b90a0;
-  --color-content-disabled: #5a5f6e;
+  /* Content/Text colors - Optimized for mobile readability */
+  --color-content-primary: #f8f9fa; /* Slightly brighter for outdoor visibility */
+  --color-content-secondary: #b8bcc9; /* Enhanced contrast for secondary text */
+  --color-content-tertiary: #9095a5; /* Improved visibility for tertiary text */
+  --color-content-disabled: #5f6471; /* Clearer disabled state */
 
   /* Light mode backgrounds - Clean & professional */
   --color-light-bg: #ffffff;
@@ -62,11 +64,14 @@
   --color-light-content-tertiary: #6c757d;
   --color-light-content-disabled: #adb5bd;
 
-  /* Box shadows */
-  --shadow-glass: 0 0 0 1px rgb(255 255 255 / 0.05), 0 1px 3px 0 rgb(0 0 0 / 0.1);
-  --shadow-glass-lg: 0 0 0 1px rgb(255 255 255 / 0.05), 0 10px 25px -5px rgb(0 0 0 / 0.2);
-  --shadow-accent: 0 0 0 1px rgb(59 130 246 / 0.15), 0 0 20px -10px rgb(59 130 246 / 0.25); /* Blue shadow */
-  --shadow-secondary: 0 0 0 1px rgb(99 102 241 / 0.15), 0 0 20px -10px rgb(99 102 241 / 0.25); /* Indigo shadow */
+  /* Box shadows - Enhanced for mobile depth perception */
+  --shadow-glass: 0 0 0 1px rgb(255 255 255 / 0.06), 0 2px 4px 0 rgb(0 0 0 / 0.15);
+  --shadow-glass-lg: 0 0 0 1px rgb(255 255 255 / 0.08), 0 12px 28px -6px rgb(0 0 0 / 0.25);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.12), 0 0 0 1px rgb(255 255 255 / 0.04); /* Card elevation */
+  --shadow-card-hover: 0 4px 8px 0 rgb(0 0 0 / 0.18), 0 0 0 1px rgb(255 255 255 / 0.06); /* Hover state */
+  --shadow-accent: 0 0 0 1px rgb(99 102 241 / 0.2), 0 4px 16px -4px rgb(99 102 241 / 0.3); /* Accent shadow */
+  --shadow-accent-lg: 0 0 0 1px rgb(99 102 241 / 0.25), 0 8px 24px -6px rgb(99 102 241 / 0.4); /* Strong accent */
+  --shadow-secondary: 0 0 0 1px rgb(139 92 246 / 0.2), 0 4px 16px -4px rgb(139 92 246 / 0.3); /* Purple shadow */
 }
 
 @keyframes fadeIn {
@@ -134,6 +139,8 @@
   /* Override shadows for light mode */
   --shadow-glass: 0 0 0 1px rgb(0 0 0 / 0.05), 0 1px 3px 0 rgb(0 0 0 / 0.1);
   --shadow-glass-lg: 0 0 0 1px rgb(0 0 0 / 0.05), 0 10px 25px -5px rgb(0 0 0 / 0.2);
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.08), 0 0 0 1px rgb(0 0 0 / 0.05);
+  --shadow-card-hover: 0 4px 6px 0 rgb(0 0 0 / 0.12), 0 0 0 1px rgb(0 0 0 / 0.08);
 }
 
 /* Base styles */

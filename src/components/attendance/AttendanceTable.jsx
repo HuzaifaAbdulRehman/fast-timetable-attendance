@@ -12,7 +12,6 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
   const { courses, attendance, toggleDay, toggleSession, deleteCourse, markDaysAbsent, reorderCourse } = useApp()
   const [deleteConfirm, setDeleteConfirm] = useState(null) // { course }
   const [longPressTimer, setLongPressTimer] = useState(null)
-  const [swipedCourse, setSwipedCourse] = useState(null) // Track swiped course for delete reveal
 
   // Use external state if provided, otherwise use internal state
   const [internalBulkSelectMode, setInternalBulkSelectMode] = useState(false)
@@ -26,26 +25,6 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
   const reorderMode = externalReorderMode !== undefined ? externalReorderMode : internalReorderMode
   const setReorderMode = externalReorderMode !== undefined ? (() => {}) : setInternalReorderMode
 
-  // Close swipe when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      // Close swiped course if clicking anywhere outside the table
-      if (swipedCourse) {
-        const isClickOnSwipedCourse = e.target.closest(`[data-course-id="${swipedCourse}"]`)
-        if (!isClickOnSwipedCourse) {
-          setSwipedCourse(null)
-        }
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('touchstart', handleClickOutside)
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('touchstart', handleClickOutside)
-    }
-  }, [swipedCourse])
 
   // Get latest course end date - memoized
   const latestEndDate = useMemo(() => {
@@ -236,10 +215,6 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
                   totalCourses={courses.length}
                   attendance={attendance}
                   reorderMode={reorderMode}
-                  swipedCourse={swipedCourse}
-                  setSwipedCourse={setSwipedCourse}
-                  setDeleteConfirm={setDeleteConfirm}
-                  onEditCourse={onEditCourse}
                   reorderCourse={reorderCourse}
                 />
               ))}

@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { useSwipeable } from 'react-swipeable'
-import { Edit2, Trash2, ArrowLeft, ArrowRight, Info } from 'lucide-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { calculateAttendanceStats } from '../../utils/attendanceCalculator'
 import { COURSE_COLORS } from '../../utils/constants'
 
@@ -24,10 +23,6 @@ export default function CourseHeader({
   totalCourses,
   attendance,
   reorderMode,
-  swipedCourse,
-  setSwipedCourse,
-  setDeleteConfirm,
-  onEditCourse,
   reorderCourse
 }) {
   const [showTooltip, setShowTooltip] = useState(false)
@@ -50,46 +45,13 @@ export default function CourseHeader({
     courseColor = COURSE_COLORS[0]
   }
 
-  // Swipe handlers - NOW SAFE because it's in a component, not a loop
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => {
-      vibrate([10])
-      setSwipedCourse(course.id)
-    },
-    onSwipedRight: () => {
-      setSwipedCourse(null)
-    },
-    trackMouse: false,
-    preventScrollOnSwipe: true,
-  })
-
-  const isSwipedOpen = swipedCourse === course.id
-
   return (
     <th
       key={course.id}
-      data-course-id={course.id}
-      className="min-w-[56px] max-w-[56px] sm:min-w-[64px] sm:max-w-[64px] md:min-w-[74px] md:max-w-[74px] text-center px-0.5 sm:px-1 md:px-1.5 relative overflow-hidden"
+      className="min-w-[56px] max-w-[56px] sm:min-w-[64px] sm:max-w-[64px] md:min-w-[74px] md:max-w-[74px] text-center px-0.5 sm:px-1 md:px-1.5 relative"
     >
-      {/* Swipe reveal delete button background */}
-      {isSwipedOpen && (
-        <div className="absolute inset-0 bg-attendance-danger flex items-center justify-center z-0">
-          <button
-            onClick={() => {
-              vibrate([10])
-              setDeleteConfirm(course)
-              setSwipedCourse(null)
-            }}
-            className="text-white font-medium text-[10px] sm:text-xs uppercase tracking-wider"
-          >
-            Delete
-          </button>
-        </div>
-      )}
-
       <div
-        className={`py-0.5 sm:py-1 px-0.5 transition-transform duration-200 relative z-10 bg-dark-surface ${isSwipedOpen ? '-translate-x-[calc(100%+6px)]' : 'translate-x-0'}`}
-        {...swipeHandlers}
+        className="py-0.5 sm:py-1 px-0.5 relative z-10 bg-dark-surface"
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
@@ -150,73 +112,39 @@ export default function CourseHeader({
           {absencesUsed}/{absencesAllowed}
         </div>
 
-        {/* Action buttons - BOTTOM - Hidden on mobile (<640px), shown on larger screens */}
-        <div className="hidden sm:flex items-center justify-center gap-0.5 sm:gap-1">
-          {reorderMode ? (
-            <>
-              {/* Reorder arrows */}
-              <button
-                onClick={() => {
-                  vibrate([10])
-                  reorderCourse(course.id, 'left')
-                }}
-                disabled={index === 0}
-                className={`p-1 md:p-1.5 rounded transition-colors border border-dark-border/30 ${
-                  index === 0
-                    ? 'opacity-30 cursor-not-allowed'
-                    : 'hover:bg-dark-surface-raised hover:border-accent/40'
-                }`}
-                title="Move left"
-              >
-                <ArrowLeft className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-accent" />
-              </button>
-              <button
-                onClick={() => {
-                  vibrate([10])
-                  reorderCourse(course.id, 'right')
-                }}
-                disabled={index === totalCourses - 1}
-                className={`p-1 md:p-1.5 rounded transition-colors border border-dark-border/30 ${
-                  index === totalCourses - 1
-                    ? 'opacity-30 cursor-not-allowed'
-                    : 'hover:bg-dark-surface-raised hover:border-accent/40'
-                }`}
-                title="Move right"
-              >
-                <ArrowRight className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-accent" />
-              </button>
-            </>
-          ) : (
-            <>
-              {/* Edit/Delete buttons */}
-              <button
-                onClick={() => {
-                  vibrate([10])
-                  onEditCourse(course)
-                }}
-                className="p-1 md:p-1.5 hover:bg-dark-surface-raised rounded transition-colors border border-dark-border/30 hover:border-accent/40"
-                title="Edit course"
-              >
-                <Edit2 className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-accent" />
-              </button>
-              <button
-                onClick={() => {
-                  vibrate([10])
-                  setDeleteConfirm(course)
-                }}
-                className="p-1 md:p-1.5 hover:bg-dark-surface-raised rounded transition-colors border border-dark-border/30 hover:border-attendance-danger/40"
-                title="Delete course"
-              >
-                <Trash2 className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-attendance-danger" />
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Mobile tap hint - Only show on mobile when not in reorder mode */}
-        {!reorderMode && (
-          <div className="sm:hidden text-[7px] text-content-tertiary/60 text-center mt-0.5">
-            Swipe
+        {/* Reorder buttons - Only show when in reorder mode */}
+        {reorderMode && (
+          <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+            <button
+              onClick={() => {
+                vibrate([10])
+                reorderCourse(course.id, 'left')
+              }}
+              disabled={index === 0}
+              className={`p-1 md:p-1.5 rounded transition-colors border border-dark-border/30 ${
+                index === 0
+                  ? 'opacity-30 cursor-not-allowed'
+                  : 'hover:bg-dark-surface-raised hover:border-accent/40'
+              }`}
+              title="Move left"
+            >
+              <ArrowLeft className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-accent" />
+            </button>
+            <button
+              onClick={() => {
+                vibrate([10])
+                reorderCourse(course.id, 'right')
+              }}
+              disabled={index === totalCourses - 1}
+              className={`p-1 md:p-1.5 rounded transition-colors border border-dark-border/30 ${
+                index === totalCourses - 1
+                  ? 'opacity-30 cursor-not-allowed'
+                  : 'hover:bg-dark-surface-raised hover:border-accent/40'
+              }`}
+              title="Move right"
+            >
+              <ArrowRight className="w-2.5 h-2.5 md:w-3 md:h-3 text-content-tertiary hover:text-accent" />
+            </button>
           </div>
         )}
       </div>

@@ -244,12 +244,12 @@ export default function AttendanceView() {
             <select
               value={weeksToShow}
               onChange={(e) => setWeeksToShow(Number(e.target.value))}
-              className="bg-dark-surface-raised border border-dark-border rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 text-content-primary text-[9px] sm:text-[10px] focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all flex-shrink-0"
+              className="bg-dark-surface-raised border border-dark-border rounded-lg px-2 sm:px-2.5 py-1 sm:py-1.5 text-content-primary text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all flex-shrink-0 min-w-[70px]"
             >
-              <option value={4}>4w</option>
-              <option value={8}>8w</option>
-              <option value={12}>12w</option>
-              <option value={16}>16w</option>
+              <option value={4}>4 weeks</option>
+              <option value={8}>8 weeks</option>
+              <option value={12}>12 weeks</option>
+              <option value={16}>16 weeks</option>
               <option value={semesterWeeks}>All ({semesterWeeks}w)</option>
             </select>
           </div>

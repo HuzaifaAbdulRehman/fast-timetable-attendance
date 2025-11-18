@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Calendar, Check, XIcon } from 'lucide-react'
+import { Calendar, Check, XIcon, Circle } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { getTodayISO, courseHasClassOnDate, formatDateLong } from '../../utils/dateHelpers'
 import { SESSION_STATUS } from '../../utils/constants'
@@ -123,6 +123,7 @@ export default function QuickMarkToday({ inline = false }) {
               const status = getCourseStatus(course.id)
               const isPresent = status === 'present' || !status
               const isAbsent = status === SESSION_STATUS.ABSENT
+              const isCancelled = status === SESSION_STATUS.CANCELLED
 
               return (
                 <div
@@ -150,38 +151,52 @@ export default function QuickMarkToday({ inline = false }) {
                       className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
                         isPresent
                           ? 'bg-attendance-safe/10 text-attendance-safe'
+                          : isCancelled
+                          ? 'bg-attendance-warning/10 text-attendance-warning'
                           : 'bg-attendance-danger/10 text-attendance-danger'
                       }`}
                     >
-                      {isPresent ? 'Present' : 'Absent'}
+                      {isPresent ? 'Present' : isCancelled ? 'Cancelled' : 'Absent'}
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="grid grid-cols-2 gap-2">
+                  {/* Action Buttons - 3 options in responsive grid */}
+                  <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                     <button
                       onClick={() => handleMark(course.id, 'present')}
                       disabled={isPresent}
-                      className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all ${
+                      className={`flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg font-medium transition-all text-xs sm:text-sm ${
                         isPresent
                           ? 'bg-attendance-safe/20 text-attendance-safe border-2 border-attendance-safe'
                           : 'bg-dark-surface-raised border border-dark-border text-content-primary hover:bg-attendance-safe/10 hover:border-attendance-safe/30'
                       }`}
                     >
-                      <Check className="w-4 h-4" />
-                      Present
+                      <Check className="w-4 h-4 flex-shrink-0" />
+                      <span className="text-[10px] sm:text-xs">Present</span>
                     </button>
                     <button
                       onClick={() => handleMark(course.id, SESSION_STATUS.ABSENT)}
                       disabled={isAbsent}
-                      className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all ${
+                      className={`flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg font-medium transition-all text-xs sm:text-sm ${
                         isAbsent
                           ? 'bg-attendance-danger/20 text-attendance-danger border-2 border-attendance-danger'
                           : 'bg-dark-surface-raised border border-dark-border text-content-primary hover:bg-attendance-danger/10 hover:border-attendance-danger/30'
                       }`}
                     >
-                      <XIcon className="w-4 h-4" />
-                      Absent
+                      <XIcon className="w-4 h-4 flex-shrink-0" />
+                      <span className="text-[10px] sm:text-xs">Absent</span>
+                    </button>
+                    <button
+                      onClick={() => handleMark(course.id, SESSION_STATUS.CANCELLED)}
+                      disabled={isCancelled}
+                      className={`flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg font-medium transition-all text-xs sm:text-sm ${
+                        isCancelled
+                          ? 'bg-attendance-warning/20 text-attendance-warning border-2 border-attendance-warning'
+                          : 'bg-dark-surface-raised border border-dark-border text-content-primary hover:bg-attendance-warning/10 hover:border-attendance-warning/30'
+                      }`}
+                    >
+                      <Circle className="w-4 h-4 flex-shrink-0" />
+                      <span className="text-[10px] sm:text-xs">Cancelled</span>
                     </button>
                   </div>
                 </div>
