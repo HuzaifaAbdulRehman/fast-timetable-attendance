@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { X, Check, User, Clock, MapPin, Calendar } from 'lucide-react'
+import { Check, User, Clock, MapPin, Calendar } from 'lucide-react'
+import BaseModal from './BaseModal'
 
 /**
  * Section Selector Dialog - Shows all available sections for a course
  * Allows student to select and switch to a different section
+ * Now using standardized BaseModal wrapper
  */
 export default function SectionSelectorDialog({
   isOpen,
@@ -16,11 +18,10 @@ export default function SectionSelectorDialog({
 }) {
   const [selectedSection, setSelectedSection] = useState(null)
 
-  if (!isOpen) return null
-
   const handleConfirm = () => {
     if (!selectedSection) return
     onConfirm(selectedSection)
+    onClose()
   }
 
   // Format time from 24-hour to 12-hour
@@ -40,70 +41,84 @@ export default function SectionSelectorDialog({
     return `${format(start)} - ${format(end)}`
   }
 
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] animate-fade-in"
+  // Custom title with subtitle
+  const titleContent = (
+    <div>
+      <h3 className="text-base sm:text-lg font-semibold text-content-primary">
+        Change Section for {courseCode}
+      </h3>
+      <p className="text-xs sm:text-sm text-content-secondary truncate mt-0.5">
+        {courseName}
+      </p>
+    </div>
+  )
+
+  // Footer with action buttons
+  const footer = (
+    <div className="flex items-center justify-end gap-2">
+      <button
         onClick={onClose}
-      />
+        className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-content-secondary hover:text-content-primary bg-dark-surface hover:bg-dark-surface-raised rounded-lg transition-all border border-dark-border"
+      >
+        Cancel
+      </button>
+      <button
+        onClick={handleConfirm}
+        disabled={!selectedSection}
+        className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg transition-all hover:scale-[1.02] active:scale-95 ${
+          selectedSection
+            ? 'bg-accent hover:bg-accent-hover text-dark-bg'
+            : 'bg-dark-surface text-content-tertiary cursor-not-allowed opacity-50'
+        }`}
+      >
+        Change Section
+      </button>
+    </div>
+  )
 
-      {/* Dialog */}
-      <div className="fixed inset-0 z-[101] flex items-center justify-center p-2 sm:p-4">
-        <div
-          className="bg-dark-card border border-dark-border rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col animate-slide-up"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-start justify-between p-3 sm:p-4 md:p-5 border-b border-dark-border flex-shrink-0">
-            <div className="flex-1 min-w-0 pr-2 sm:pr-4">
-              <h3 className="text-base sm:text-lg font-semibold text-content-primary mb-1">
-                Change Section for {courseCode}
-              </h3>
-              <p className="text-xs sm:text-sm text-content-secondary truncate">
-                {courseName}
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-1 hover:bg-dark-surface-raised rounded-lg transition-colors flex-shrink-0"
-            >
-              <X className="w-4 h-4 sm:w-5 sm:h-5 text-content-secondary" />
-            </button>
-          </div>
+  return (
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={titleContent}
+      size="lg"
+      variant="default"
+      footer={footer}
+      closeOnBackdrop={true}
+      closeOnEscape={true}
+      showCloseButton={false}
+    >
 
-          {/* Content - Scrollable Section List */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-5">
-            {availableSections.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-content-secondary">No other sections available for this course</p>
-              </div>
-            ) : (
-              <div className="space-y-2 sm:space-y-3">
-                <p className="text-xs sm:text-sm text-content-secondary mb-2 sm:mb-3">
-                  Select a section to switch to (currently in <span className="font-semibold text-accent">{currentSection}</span>):
-                </p>
+      {availableSections.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-content-secondary">No other sections available for this course</p>
+        </div>
+      ) : (
+        <div className="space-y-2 sm:space-y-3">
+          <p className="text-xs sm:text-sm text-content-secondary mb-2 sm:mb-3">
+            Select a section to switch to (currently in <span className="font-semibold text-accent">{currentSection}</span>):
+          </p>
 
-                {availableSections.map((sectionCourse, index) => {
-                  const isCurrentSection = sectionCourse.section === currentSection
-                  const isSelected = selectedSection?.section === sectionCourse.section
+          {availableSections.map((sectionCourse, index) => {
+            const isCurrentSection = sectionCourse.section === currentSection
+            const isSelected = selectedSection?.section === sectionCourse.section
 
-                  return (
-                    <div
-                      key={index}
-                      onClick={() => {
-                        if (isCurrentSection) return
-                        // Toggle: if already selected, deselect it; otherwise select it
-                        setSelectedSection(isSelected ? null : sectionCourse)
-                      }}
-                      className={`relative border-2 rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 transition-all ${
-                        isCurrentSection
-                          ? 'border-green-500/40 bg-green-500/10 cursor-not-allowed opacity-60'
-                          : isSelected
-                          ? 'border-accent bg-accent/10 cursor-pointer'
-                          : 'border-dark-border bg-dark-surface hover:border-accent/50 cursor-pointer'
-                      }`}
-                    >
+            return (
+              <div
+                key={index}
+                onClick={() => {
+                  if (isCurrentSection) return
+                  // Toggle: if already selected, deselect it; otherwise select it
+                  setSelectedSection(isSelected ? null : sectionCourse)
+                }}
+                className={`relative border-2 rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 transition-all ${
+                  isCurrentSection
+                    ? 'border-green-500/40 bg-green-500/10 cursor-not-allowed opacity-60'
+                    : isSelected
+                    ? 'border-accent bg-accent/10 cursor-pointer'
+                    : 'border-dark-border bg-dark-surface hover:border-accent/50 cursor-pointer'
+                }`}
+              >
                       {/* Selection Indicator - Responsive */}
                       <div className="absolute top-2 sm:top-2.5 md:top-3 right-2 sm:right-2.5 md:right-3">
                         {isCurrentSection ? (
@@ -250,35 +265,11 @@ export default function SectionSelectorDialog({
                           </span>
                         )}
                       </div>
-                    </div>
-                  )
-                })}
               </div>
-            )}
-          </div>
-
-          {/* Actions - Mobile optimized */}
-          <div className="flex items-center justify-end gap-2 p-3 sm:p-4 md:p-5 border-t border-dark-border flex-shrink-0">
-            <button
-              onClick={onClose}
-              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-content-secondary hover:text-content-primary bg-dark-surface hover:bg-dark-surface-raised rounded-lg transition-all border border-dark-border"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleConfirm}
-              disabled={!selectedSection}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg transition-all ${
-                selectedSection
-                  ? 'bg-accent hover:bg-accent-hover text-dark-bg'
-                  : 'bg-dark-surface text-content-tertiary cursor-not-allowed'
-              }`}
-            >
-              Change Section
-            </button>
-          </div>
+            )
+          })}
         </div>
-      </div>
-    </>
+      )}
+    </BaseModal>
   )
 }

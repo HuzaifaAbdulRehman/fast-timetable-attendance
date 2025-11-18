@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
-import { createPortal } from 'react-dom'
+import { useState, useEffect } from 'react'
 import { useApp } from '../../context/AppContext'
-import { X, Calendar, BookOpen, Hash } from 'lucide-react'
+import { Calendar, BookOpen, Hash } from 'lucide-react'
 import { getTodayISO } from '../../utils/dateHelpers'
 import { WEEKDAY_FULL_NAMES } from '../../utils/constants'
 import Toast from '../shared/Toast'
+import BaseModal from '../shared/BaseModal'
 
 // Haptic feedback utility
 const vibrate = (pattern = [10]) => {
@@ -13,41 +13,9 @@ const vibrate = (pattern = [10]) => {
   }
 }
 
-// Detect mobile device
-const isMobile = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768
-}
-
 export default function CourseForm({ onClose, onSave, existingCourse = null }) {
   const { addCourse, updateCourse } = useApp()
-  const modalRef = useRef(null)
-  const [isMobileDevice] = useState(isMobile())
-  const portalTargetRef = useRef(typeof document !== 'undefined' ? document.body : null)
   const [toast, setToast] = useState(null)
-
-  useEffect(() => {
-    const portalTarget = portalTargetRef.current
-    if (!portalTarget) return
-
-    const { style, classList } = portalTarget
-    const previousOverflow = style.overflow
-    const previousPaddingRight = style.paddingRight
-
-    const scrollbarWidth = typeof window !== 'undefined'
-      ? window.innerWidth - document.documentElement.clientWidth
-      : 0
-    if (scrollbarWidth > 0) {
-      style.paddingRight = `${scrollbarWidth}px`
-    }
-    style.overflow = 'hidden'
-    classList.add('modal-open')
-
-    return () => {
-      style.overflow = previousOverflow
-      style.paddingRight = previousPaddingRight
-      classList.remove('modal-open')
-    }
-  }, [])
 
   // Parse existing date or use today
   const parseDate = (isoDate) => {
@@ -245,66 +213,61 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
   ]
   const days = Array.from({ length: 31 }, (_, i) => i + 1)
 
-  const portalTarget = portalTargetRef.current
-  if (!portalTarget) return null
+  // Header icon
+  const headerIcon = (
+    <div className="p-2 bg-gradient-to-br from-accent/20 to-accent/10 rounded-xl border border-accent/20">
+      <BookOpen className="w-5 h-5 text-accent" />
+    </div>
+  )
 
-  return createPortal(
-    (
-      <div
-        className={`
-          fixed inset-0 bg-black/60 backdrop-blur-sm z-50
-          ${isMobileDevice
-            ? 'flex items-end'
-            : 'flex items-center justify-center p-4 overflow-y-auto'
-          }
-        `}
-        onClick={onClose}
+  // Custom title with subtitle
+  const titleContent = (
+    <div>
+      <h2 className="text-lg font-semibold text-content-primary">
+        {existingCourse ? 'Edit Course' : 'Add New Course'}
+      </h2>
+      <p className="text-xs text-content-tertiary">
+        Track your attendance
+      </p>
+    </div>
+  )
+
+  // Footer with action buttons
+  const footer = (
+    <div className="flex gap-3">
+      <button
+        type="submit"
+        form="course-form"
+        className="flex-1 bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-medium px-5 py-3 rounded-xl transition-all duration-200 shadow-accent hover:shadow-accent-lg hover:scale-[1.02] active:scale-95"
       >
-        <div
-          className={`
-            bg-dark-surface/95 backdrop-blur-xl border border-dark-border/50 shadow-glass-lg w-full
-            ${isMobileDevice
-              ? 'rounded-t-3xl max-h-[92vh] animate-slide-up'
-              : 'relative rounded-2xl max-w-lg my-8'
-            }
-          `}
-          onClick={(e) => e.stopPropagation()}
-          ref={modalRef}
-        >
-        {/* Mobile Drag Handle */}
-        {isMobileDevice && (
-          <div className="flex justify-center pt-3 pb-1">
-            <div className="w-10 h-1 bg-content-disabled/30 rounded-full"></div>
-          </div>
-        )}
+        {existingCourse ? 'Update Course' : 'Add Course'}
+      </button>
+      <button
+        type="button"
+        onClick={onClose}
+        className="px-5 py-3 bg-dark-bg/50 hover:bg-dark-surface-raised text-content-primary border border-dark-border/30 rounded-xl transition-all hover:scale-[1.02] active:scale-95"
+      >
+        Cancel
+      </button>
+    </div>
+  )
 
-        {/* Header - Sticky */}
-        <div className={`sticky top-0 bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 p-3 sm:p-4 md:p-5 z-10 ${isMobileDevice ? 'rounded-t-3xl' : 'rounded-t-2xl'}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-accent/20 to-accent/10 rounded-xl border border-accent/20">
-                <BookOpen className="w-5 h-5 text-accent" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-content-primary">
-                  {existingCourse ? 'Edit Course' : 'Add New Course'}
-                </h2>
-                <p className="text-xs text-content-tertiary">
-                  Track your attendance
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-dark-surface-raised rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-content-secondary" />
-            </button>
-          </div>
-        </div>
-
+  return (
+    <>
+      <BaseModal
+        isOpen={true}
+        onClose={onClose}
+        title={titleContent}
+        size="md"
+        variant="default"
+        headerIcon={headerIcon}
+        footer={footer}
+        closeOnBackdrop={true}
+        closeOnEscape={true}
+        showCloseButton={false}
+      >
         {/* Form - Scrollable */}
-        <form id="course-form" onSubmit={handleSubmit} className={`p-3 sm:p-4 md:p-5 space-y-4 sm:space-y-5 overflow-y-auto ${isMobileDevice ? 'max-h-[calc(100vh-16rem)]' : 'max-h-[calc(100vh-16rem)]'} pb-4`}>
+        <form id="course-form" onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           {/* Course Name */}
           <div>
             <label className="block text-sm font-medium text-content-primary mb-2">
@@ -636,38 +599,16 @@ export default function CourseForm({ onClose, onSave, existingCourse = null }) {
             </p>
           </div>
         </form>
+      </BaseModal>
 
-        {/* Actions - Fixed at bottom */}
-        <div className={`sticky bottom-0 bg-dark-surface/98 backdrop-blur-lg border-t border-dark-border/50 p-5 ${isMobileDevice ? 'rounded-b-3xl' : 'rounded-b-2xl'} shadow-2xl z-10`}>
-          <div className="flex gap-3">
-            <button
-              type="submit"
-              form="course-form"
-              className="flex-1 bg-gradient-to-br from-accent to-accent-hover text-dark-bg font-medium px-5 py-3 rounded-xl transition-all duration-200 shadow-accent hover:shadow-accent-lg hover:scale-[1.02] active:scale-95"
-            >
-              {existingCourse ? 'Update Course' : 'Add Course'}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-3 bg-dark-bg/50 hover:bg-dark-surface-raised text-content-primary border border-dark-border/30 rounded-xl transition-all hover:scale-[1.02] active:scale-95"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-        </div>
-
-        {/* Toast Notification */}
-        {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
-          />
-        )}
-      </div>
-    ),
-    portalTarget
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+    </>
   )
 }

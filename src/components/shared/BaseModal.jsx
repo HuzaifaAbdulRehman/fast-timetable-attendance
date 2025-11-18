@@ -43,21 +43,31 @@ export default function BaseModal({
     const { style, classList } = portalTarget
     const previousOverflow = style.overflow
     const previousPaddingRight = style.paddingRight
+    const previousPosition = style.position
+    const previousTop = style.top
+    const previousWidth = style.width
 
     // Calculate scrollbar width
     const scrollbarWidth = typeof window !== 'undefined'
       ? window.innerWidth - document.documentElement.clientWidth
       : 0
 
+    // Lock body scroll completely
     if (scrollbarWidth > 0) {
       style.paddingRight = `${scrollbarWidth}px`
     }
     style.overflow = 'hidden'
+    style.position = 'fixed'
+    style.top = '0'
+    style.width = '100%'
     classList.add('modal-open')
 
     return () => {
       style.overflow = previousOverflow
       style.paddingRight = previousPaddingRight
+      style.position = previousPosition
+      style.top = previousTop
+      style.width = previousWidth
       classList.remove('modal-open')
     }
   }, [isOpen, portalTarget])
@@ -153,7 +163,7 @@ export default function BaseModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end md:items-center md:justify-center md:p-4 animate-fade-in"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-0 md:p-4 animate-fade-in overflow-hidden"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
@@ -163,7 +173,7 @@ export default function BaseModal({
         ref={modalRef}
         className={`
           ${sizeClasses[size]}
-          w-full
+          w-full md:mx-auto
           bg-dark-surface/95 backdrop-blur-xl
           border ${variantClasses[variant]}
           shadow-glass-lg

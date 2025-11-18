@@ -27,13 +27,16 @@ export default function AttendanceView() {
   const [reorderMode, setReorderMode] = useState(false)
 
   // Track if we've already shown toast for current undo history
-  const lastUndoHistoryRef = useRef(null)
+  const lastUndoHistoryRef = useRef(undoHistory)
+  const hasShownToastRef = useRef(false)
 
   // Show undo toast only when a NEW action is performed (not on tab navigation)
   useEffect(() => {
     // Only show toast if undoHistory is new and different from last shown
-    if (undoHistory && undoHistory !== lastUndoHistoryRef.current) {
+    // AND we haven't already shown a toast for this undo history
+    if (undoHistory && undoHistory !== lastUndoHistoryRef.current && !hasShownToastRef.current) {
       lastUndoHistoryRef.current = undoHistory
+      hasShownToastRef.current = true
       setToast({
         message: undoHistory.description,
         type: 'info',
@@ -43,12 +46,14 @@ export default function AttendanceView() {
             undo()
             setToast(null)
             lastUndoHistoryRef.current = null
+            hasShownToastRef.current = false
           }
         }
       })
     } else if (!undoHistory && lastUndoHistoryRef.current) {
       // Clear reference when undo history is cleared
       lastUndoHistoryRef.current = null
+      hasShownToastRef.current = false
     }
   }, [undoHistory, undo])
 
@@ -310,7 +315,7 @@ export default function AttendanceView() {
         selectedDates={selectedDates}
         setSelectedDates={setSelectedDates}
         reorderMode={reorderMode}
-        onScroll={(scrollTop) => {
+onScroll={(scrollTop) => {
           // Show header when at top or scrolling up, hide when scrolling down past threshold
           if (scrollTop < 10) {
             setScrollVisible(true)

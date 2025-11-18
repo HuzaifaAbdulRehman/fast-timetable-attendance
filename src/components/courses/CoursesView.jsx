@@ -403,15 +403,18 @@ export default function CoursesView() {
   )
 
   return (
-    <PullToRefresh
-      onRefresh={handleRefresh}
-      pullingContent=""
-      refreshingContent={<div className="text-center py-4 text-accent text-sm">Refreshing...</div>}
-      isPullable={true}
-      resistance={2}
-    >
-      <div className="flex-1 overflow-y-auto">
-        {renderContent()}
+    <>
+      <PullToRefresh
+        onRefresh={handleRefresh}
+        pullingContent=""
+        refreshingContent={<div className="text-center py-4 text-accent text-sm">Refreshing...</div>}
+        isPullable={true}
+        resistance={2}
+      >
+        <div className="flex-1 overflow-y-auto">
+          {renderContent()}
+        </div>
+      </PullToRefresh>
 
       {/* Timetable Selector Modal */}
       {showTimetableSelector && (
@@ -619,7 +622,6 @@ export default function CoursesView() {
           confirmationText="DELETE ALL"
         />
       )}
-      </div>
-    </PullToRefresh>
+    </>
   )
 }
