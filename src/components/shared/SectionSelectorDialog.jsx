@@ -113,18 +113,18 @@ export default function SectionSelectorDialog({
                 }}
                 className={`relative border-2 rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 transition-all ${
                   isCurrentSection
-                    ? 'border-green-500/40 bg-green-500/10 cursor-not-allowed opacity-60'
+                    ? 'border-green-600/50 dark:border-green-500/40 bg-green-500/12 dark:bg-green-500/10 cursor-not-allowed opacity-70'
                     : isSelected
-                    ? 'border-accent bg-accent/10 cursor-pointer'
-                    : 'border-dark-border bg-dark-surface hover:border-accent/50 cursor-pointer'
+                    ? 'border-accent/70 dark:border-accent bg-accent/12 dark:bg-accent/10 cursor-pointer'
+                    : 'border-dark-border bg-dark-surface hover:border-accent/60 dark:hover:border-accent/50 cursor-pointer'
                 }`}
               >
                       {/* Selection Indicator - Responsive */}
                       <div className="absolute top-2 sm:top-2.5 md:top-3 right-2 sm:right-2.5 md:right-3">
                         {isCurrentSection ? (
-                          <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-500/20 border border-green-500/40 rounded-md sm:rounded-lg flex items-center gap-0.5 sm:gap-1">
-                            <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-green-400" />
-                            <span className="text-[10px] sm:text-xs text-green-400 font-medium">Current</span>
+                          <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-500/15 dark:bg-green-500/20 border-2 border-green-600/50 dark:border-green-500/40 rounded-md sm:rounded-lg flex items-center gap-0.5 sm:gap-1">
+                            <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-green-600 dark:text-green-400" />
+                            <span className="text-[10px] sm:text-xs text-green-700 dark:text-green-400 font-semibold">Current</span>
                           </div>
                         ) : (
                           <div
@@ -134,7 +134,7 @@ export default function SectionSelectorDialog({
                                 : 'border-dark-border bg-dark-bg'
                             }`}
                           >
-                            {isSelected && <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-dark-bg" />}
+                            {isSelected && <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white dark:text-dark-bg" />}
                           </div>
                         )}
                       </div>

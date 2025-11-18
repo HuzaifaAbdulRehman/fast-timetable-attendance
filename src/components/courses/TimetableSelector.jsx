@@ -1178,10 +1178,10 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                     }}
                     className={`relative bg-dark-surface-raised border-2 rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 transition-all ${
                       isAlreadyAdded
-                        ? 'border-yellow-500/30 bg-yellow-500/5 cursor-not-allowed opacity-75'
+                        ? 'border-yellow-600/40 dark:border-yellow-500/30 bg-yellow-500/8 dark:bg-yellow-500/5 cursor-not-allowed opacity-80'
                         : isSelected
-                        ? 'border-accent/50 bg-accent/5 cursor-pointer'
-                        : 'border-dark-border hover:border-accent/30 cursor-pointer'
+                        ? 'border-accent/60 dark:border-accent/50 bg-accent/8 dark:bg-accent/5 cursor-pointer'
+                        : 'border-dark-border hover:border-accent/40 dark:hover:border-accent/30 cursor-pointer'
                     }`}
                   >
                     {/* Status Indicator - Top Right */}
@@ -1191,14 +1191,14 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                         isSameSection ? (
                           // Same section - show enhanced indicator with section info and full schedule tooltip
                           <div
-                            className="bg-green-500/20 border border-green-500/40 rounded-lg shadow-sm overflow-hidden cursor-help"
+                            className="bg-green-500/15 dark:bg-green-500/20 border-2 border-green-600/50 dark:border-green-500/40 rounded-lg shadow-sm overflow-hidden cursor-help"
                             title={generateScheduleTooltip(existingCourseMatch)}
                           >
                             <div className="px-1.5 sm:px-2 py-1 flex items-center gap-1">
-                              <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-400 flex-shrink-0" />
+                              <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-600 dark:text-green-400 flex-shrink-0" />
                               <div className="flex flex-col min-w-0">
-                                <span className="text-[10px] sm:text-xs text-green-400 font-medium">Added</span>
-                                <span className="text-[8px] sm:text-[9px] text-green-300/80 truncate">
+                                <span className="text-[10px] sm:text-xs text-green-700 dark:text-green-400 font-semibold">Added</span>
+                                <span className="text-[8px] sm:text-[9px] text-green-600 dark:text-green-300/80 font-medium truncate">
                                   {existingSection} {existingCourseMatch?.instructor && `• ${existingCourseMatch.instructor.split(' ')[0]}`}
                                 </span>
                               </div>
@@ -1207,10 +1207,10 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                         ) : (
                           // Different section - compact yellow badge with full schedule tooltip, responsive padding
                           <div
-                            className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-yellow-500/20 border border-yellow-500/40 rounded-md sm:rounded-lg shadow-sm cursor-help"
+                            className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-yellow-500/15 dark:bg-yellow-500/20 border-2 border-yellow-600/50 dark:border-yellow-500/40 rounded-md sm:rounded-lg shadow-sm cursor-help"
                             title={generateScheduleTooltip(existingCourseMatch)}
                           >
-                            <span className="text-[9px] sm:text-[10px] md:text-xs text-yellow-400 font-semibold uppercase tracking-wide whitespace-nowrap">Unavailable</span>
+                            <span className="text-[9px] sm:text-[10px] md:text-xs text-yellow-700 dark:text-yellow-400 font-bold uppercase tracking-wide whitespace-nowrap">Unavailable</span>
                           </div>
                         )
                       ) : isSelected ? (

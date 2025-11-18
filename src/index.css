@@ -121,6 +121,7 @@
 
   /* Override surfaces */
   --color-dark-surface: var(--color-light-surface);
+  --color-dark-card: var(--color-light-surface-raised);
   --color-dark-surface-raised: var(--color-light-surface-raised);
   --color-dark-surface-overlay: var(--color-light-surface-overlay);
   --color-dark-surface-hover: var(--color-light-surface-hover);
@@ -129,6 +130,7 @@
   --color-dark-border: var(--color-light-border);
   --color-dark-border-muted: var(--color-light-border-muted);
   --color-dark-border-strong: var(--color-light-border-strong);
+  --color-dark-border-accent: #6366f140; /* Light mode accent border */
 
   /* Override text/content colors */
   --color-content-primary: var(--color-light-content-primary);

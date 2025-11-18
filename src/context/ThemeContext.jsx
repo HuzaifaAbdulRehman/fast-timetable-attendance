@@ -9,11 +9,11 @@ export function ThemeProvider({ children }) {
     if (savedTheme) return savedTheme
 
     // Check system preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-      return 'light'
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark'
     }
 
-    return 'dark' // Default to dark
+    return 'light' // Default to light mode
   }
 
   const [theme, setTheme] = useState(getInitialTheme)
