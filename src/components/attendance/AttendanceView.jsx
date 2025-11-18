@@ -260,14 +260,14 @@ export default function AttendanceView() {
               <button
                 onClick={toggleBulkSelectMode}
                 className={`
-                  flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] sm:text-[10px] font-medium transition-all duration-200 flex-shrink-0
+                  flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex-shrink-0
                   ${bulkSelectMode
-                    ? 'bg-accent text-dark-bg'
-                    : 'bg-dark-bg border border-dark-border text-content-secondary hover:bg-dark-surface-raised hover:text-content-primary hover:border-accent/30'
+                    ? 'bg-accent text-white shadow-sm'
+                    : 'bg-dark-surface-raised border border-dark-border text-content-primary hover:bg-dark-surface-hover hover:border-accent/40'
                   }
                 `}
               >
-                {bulkSelectMode ? <CheckSquare className="w-3 h-3" /> : <Square className="w-3 h-3" />}
+                {bulkSelectMode ? <CheckSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Square className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                 <span className="whitespace-nowrap">Select</span>
               </button>
 
@@ -282,26 +282,26 @@ export default function AttendanceView() {
                     setReorderMode(!reorderMode)
                   }}
                   className={`
-                    flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] sm:text-[10px] font-medium transition-all duration-200 flex-shrink-0
+                    flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex-shrink-0
                     ${reorderMode
-                      ? 'bg-accent text-dark-bg'
-                      : 'bg-dark-bg border border-dark-border text-content-secondary hover:bg-dark-surface-raised hover:text-content-primary hover:border-accent/30'
+                      ? 'bg-accent text-white shadow-sm'
+                      : 'bg-dark-surface-raised border border-dark-border text-content-primary hover:bg-dark-surface-hover hover:border-accent/40'
                     }
                   `}
                 >
-                  <ArrowLeftRight className="w-3 h-3" />
+                  <ArrowLeftRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span className="whitespace-nowrap">Reorder</span>
                 </button>
               )}
 
               {bulkSelectMode && selectedDates.length > 0 && (
-                <span className="text-[9px] sm:text-[10px] text-content-tertiary font-medium flex-shrink-0 tabular-nums">
+                <span className="text-xs sm:text-sm text-content-secondary font-medium flex-shrink-0 tabular-nums">
                   {selectedDates.length} selected
                 </span>
               )}
 
               {reorderMode && (
-                <span className="text-[9px] sm:text-[10px] text-accent font-medium flex-shrink-0">
+                <span className="text-xs sm:text-sm text-accent font-medium flex-shrink-0">
                   Use arrows
                 </span>
               )}
