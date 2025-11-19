@@ -4,8 +4,8 @@ import { vibrate } from '../../utils/uiHelpers'
 export default function TabNavigation({ activeTab, onTabChange }) {
   const tabs = [
     { id: 'explore', label: 'Explore', shortLabel: 'Explore', ultraShort: 'Exp', icon: Compass },
-    { id: 'courses', label: 'My Courses', shortLabel: 'Courses', ultraShort: 'Crs', icon: GraduationCap },
-    { id: 'timetable', label: 'My Timetable', shortLabel: 'Schedule', ultraShort: 'Sch', icon: Calendar },
+    { id: 'courses', label: 'Courses', shortLabel: 'Courses', ultraShort: 'Crs', icon: GraduationCap },
+    { id: 'timetable', label: 'Timetable', shortLabel: 'Schedule', ultraShort: 'Sch', icon: Calendar },
     { id: 'attendance', label: 'Attendance', shortLabel: 'Track', ultraShort: 'Att', icon: Table },
     { id: 'gpa', label: 'GPA', shortLabel: 'GPA', ultraShort: 'GPA', icon: Award },
   ]
@@ -27,7 +27,7 @@ export default function TabNavigation({ activeTab, onTabChange }) {
                 }}
                 className={`
                   flex-1 flex flex-col items-center justify-center gap-0.5 xs:gap-1 sm:gap-1.5 py-1.5 xs:py-2 sm:py-3 px-0.5 xs:px-1 sm:px-2 md:px-4 min-w-0
-                  transition-all duration-200 relative
+                  transition-all duration-200 relative active:scale-95
                   ${isActive
                     ? 'text-accent'
                     : 'text-content-secondary hover:text-content-primary'
