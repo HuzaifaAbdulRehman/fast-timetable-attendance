@@ -1,12 +1,13 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { useApp } from '../../context/AppContext'
-import { Calendar, Clock, MapPin, User, BookOpen } from 'lucide-react'
+import { Calendar, Clock, MapPin, User, BookOpen, ChevronDown, ChevronUp } from 'lucide-react'
 import SemesterSelector from '../shared/SemesterSelector'
 import CacheReminderBanner from '../shared/CacheReminderBanner'
 import Toast from '../shared/Toast'
 import PullToRefresh from 'react-simple-pull-to-refresh'
 import { clearTimetableCache } from '../../utils/cacheManager'
 import { formatTimeTo12Hour } from '../../utils/dateHelpers'
+import { vibrate } from '../../utils/uiHelpers'
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 
@@ -24,6 +25,8 @@ export default function TimetableView() {
   const [toast, setToast] = useState(null)
   const [showCacheReminder, setShowCacheReminder] = useState(false)
   const [expandedFields, setExpandedFields] = useState(new Set()) // Track expanded instructor/room fields
+  const [collapsedDays, setCollapsedDays] = useState(new Set()) // Track collapsed days
+  const dayRefs = useRef({}) // Refs for scrolling to days
 
   // Create a stable dependency for useMemo by tracking course IDs and sections
   // This ensures re-sorting happens when courses change (add/remove/section change)
@@ -194,6 +197,82 @@ export default function TimetableView() {
     })
   }
 
+  // Toggle day collapse state
+  const toggleDayCollapse = (day) => {
+    vibrate([10])
+    setCollapsedDays(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(day)) {
+        newSet.delete(day)
+      } else {
+        newSet.add(day)
+      }
+      return newSet
+    })
+  }
+
+  // Collapse all days
+  const collapseAll = () => {
+    vibrate([10])
+    setCollapsedDays(new Set(DAYS))
+  }
+
+  // Expand all days
+  const expandAll = () => {
+    vibrate([10])
+    setCollapsedDays(new Set())
+  }
+
+  // Smart toggle: If all expanded, collapse all. Otherwise, expand all.
+  const smartToggle = () => {
+    vibrate([10])
+    if (collapsedDays.size === 0) {
+      // All are expanded, so collapse all
+      setCollapsedDays(new Set(DAYS))
+    } else {
+      // Some are collapsed, so expand all
+      setCollapsedDays(new Set())
+    }
+  }
+
+  // Scroll to a specific day
+  const scrollToDay = (day) => {
+    vibrate([10])
+    const dayElement = dayRefs.current[day]
+    if (dayElement) {
+      // Expand the day if it's collapsed
+      if (collapsedDays.has(day)) {
+        setCollapsedDays(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(day)
+          return newSet
+        })
+      }
+
+      // Smooth scroll to the day with offset for sticky header
+      setTimeout(() => {
+        const headerOffset = 180 // Approximate height of header + tab nav + quick nav bar
+        const elementPosition = dayElement.getBoundingClientRect().top
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        })
+      }, 100) // Small delay to ensure day is expanded first
+    }
+  }
+
+  // Get today's day name
+  const getTodayDayName = () => {
+    const today = new Date()
+    const dayIndex = today.getDay() // 0 = Sunday, 1 = Monday, etc.
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    return dayNames[dayIndex]
+  }
+
+  const todayDayName = getTodayDayName()
+
   // Pull to refresh handler
   const handleRefresh = async () => {
     setRefreshing(true)
@@ -271,9 +350,9 @@ export default function TimetableView() {
   }
 
   const renderContent = () => (
-    <div className="max-w-4xl mx-auto p-4 md:p-6 space-y-4">
+    <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16 py-4 md:py-6 space-y-3 sm:space-y-4">
       {/* Semester Selector */}
-      <div className="mb-4">
+      <div className="mb-3 sm:mb-4">
         <SemesterSelector compact={true} />
       </div>
 
@@ -289,54 +368,150 @@ export default function TimetableView() {
       )}
 
         {/* Header */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-content-primary mb-2">
-            Your Weekly Schedule
-          </h2>
-          <p className="text-content-secondary text-sm">
-            Complete timetable with rooms, timings, and instructors
-          </p>
+        <div className="mb-4 sm:mb-6">
+          <div className="flex-1 min-w-0 mb-3 sm:mb-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-content-primary mb-1 sm:mb-2">
+              Your Weekly Schedule
+            </h2>
+            <p className="text-content-secondary text-xs sm:text-sm">
+              Complete timetable with rooms, timings, and instructors
+            </p>
+          </div>
+
+          {/* Quick Day Navigation Bar */}
+          <div className="bg-dark-card border border-dark-border rounded-xl sm:rounded-2xl p-2.5 sm:p-3 md:p-4">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              {/* Day Pills */}
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-1">
+                {DAYS.map(day => {
+                  const classCount = scheduleByDay[day]?.length || 0
+                  const isToday = day === todayDayName
+                  const isCollapsed = collapsedDays.has(day)
+
+                  return (
+                    <button
+                      key={day}
+                      onClick={() => scrollToDay(day)}
+                      className={`
+                        flex flex-col items-center justify-center gap-0.5 sm:gap-1 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl
+                        transition-all duration-200 active:scale-95 flex-shrink-0 min-w-0
+                        ${isToday
+                          ? 'bg-accent text-white border-2 border-accent shadow-lg shadow-accent/30'
+                          : classCount > 0
+                            ? 'bg-dark-surface-raised hover:bg-dark-surface-hover border border-dark-border text-content-primary hover:border-accent/50'
+                            : 'bg-dark-bg border border-dark-border/50 text-content-tertiary hover:bg-dark-surface-raised'
+                        }
+                      `}
+                      aria-label={`Jump to ${day}'s schedule (${classCount} ${classCount === 1 ? 'class' : 'classes'})`}
+                    >
+                      {/* Day Name */}
+                      <span className={`text-[10px] sm:text-xs md:text-sm font-bold leading-tight whitespace-nowrap ${
+                        isToday ? 'text-white' : 'text-current'
+                      }`}>
+                        <span className="hidden sm:inline">{DAYS_SHORT[day]}</span>
+                        <span className="sm:hidden">{DAYS_SHORT[day].charAt(0)}</span>
+                      </span>
+
+                      {/* Class Count Badge */}
+                      <span className={`text-[9px] sm:text-[10px] font-medium leading-tight ${
+                        isToday
+                          ? 'text-white/90'
+                          : classCount > 0
+                            ? 'text-accent'
+                            : 'text-content-tertiary/70'
+                      }`}>
+                        {classCount > 9 ? '9+' : classCount}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Smart Toggle Button */}
+              <button
+                onClick={smartToggle}
+                className={`
+                  flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl
+                  transition-all duration-200 active:scale-95 flex-shrink-0 font-medium text-xs sm:text-sm
+                  ${collapsedDays.size === 0
+                    ? 'bg-dark-surface-raised hover:bg-dark-surface-hover border border-dark-border text-content-secondary hover:text-content-primary'
+                    : 'bg-accent hover:bg-accent-hover text-white shadow-sm'
+                  }
+                `}
+                aria-label={collapsedDays.size === 0 ? 'Collapse all days' : 'Expand all days'}
+              >
+                {collapsedDays.size === 0 ? (
+                  <>
+                    <ChevronUp className="w-4 h-4 flex-shrink-0" />
+                    <span className="hidden md:inline whitespace-nowrap">All</span>
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-4 h-4 flex-shrink-0" />
+                    <span className="hidden md:inline whitespace-nowrap">All</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Days Schedule */}
+        <div className="space-y-3 sm:space-y-4">
         {DAYS.map(day => {
           const dayClasses = scheduleByDay[day]
           const hasClasses = dayClasses && dayClasses.length > 0
+          const isCollapsed = collapsedDays.has(day)
 
           return (
             <div
               key={day}
-              className="bg-dark-card rounded-2xl border border-dark-border overflow-hidden"
+              ref={(el) => (dayRefs.current[day] = el)}
+              className="bg-dark-card rounded-xl sm:rounded-2xl border border-dark-border overflow-hidden transition-all"
               role="region"
               aria-label={`${day} schedule with ${hasClasses ? dayClasses.length : 0} ${dayClasses?.length === 1 ? 'class' : 'classes'}`}
+              aria-expanded={!isCollapsed}
             >
-              {/* Day Header */}
-              <div className="bg-gradient-to-r from-accent/10 to-accent/5 px-4 py-3 border-b border-dark-border">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-accent" />
+              {/* Day Header - Clickable */}
+              <button
+                onClick={() => toggleDayCollapse(day)}
+                className="w-full bg-gradient-to-r from-accent/10 to-accent/5 hover:from-accent/15 hover:to-accent/10 px-3 sm:px-4 py-3 sm:py-4 border-b border-dark-border transition-all text-left active:scale-[0.99]"
+                aria-label={isCollapsed ? `Expand ${day} schedule` : `Collapse ${day} schedule`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-accent/20 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-content-primary">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base sm:text-lg md:text-xl font-semibold text-content-primary">
                         {day}
                       </h3>
-                      <p className="text-xs text-content-tertiary">
+                      <p className="text-[10px] sm:text-xs text-content-tertiary">
                         {hasClasses ? `${dayClasses.length} ${dayClasses.length === 1 ? 'class' : 'classes'}` : 'No classes'}
                       </p>
                     </div>
                   </div>
-                  <div className="px-3 py-1 bg-dark-bg rounded-lg">
-                    <span className="text-xs font-bold text-accent">
-                      {DAYS_SHORT[day]}
-                    </span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-dark-bg rounded-lg">
+                      <span className="text-[10px] sm:text-xs font-bold text-accent">
+                        {DAYS_SHORT[day]}
+                      </span>
+                    </div>
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-dark-bg rounded-lg flex items-center justify-center">
+                      {isCollapsed ? (
+                        <ChevronDown className="w-5 h-5 text-content-secondary" />
+                      ) : (
+                        <ChevronUp className="w-5 h-5 text-accent" />
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </button>
 
-              {/* Classes */}
-              {hasClasses ? (
-                <div className="p-3 space-y-2">
+              {/* Classes - Collapsible */}
+              {!isCollapsed && hasClasses ? (
+                <div className="p-2.5 sm:p-3 md:p-4 space-y-2 sm:space-y-2.5 md:space-y-3 animate-fade-in">
                   {dayClasses.map((classInfo, index) => (
                     <div
                       key={index}
@@ -387,24 +562,18 @@ export default function TimetableView() {
 
                       {/* Class Details - Vertical stack on all screens */}
                       <div className="space-y-2 sm:space-y-2.5">
-                        {/* Instructor - Prioritized with expand-on-tap */}
+                        {/* Instructor - Always wraps on all screens */}
                         {classInfo.instructor && (
                           <div className="flex items-start gap-1.5 sm:gap-2 text-sm">
                             <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
                               <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400" />
                             </div>
-                            <button
-                              onClick={() => toggleExpand(`instructor-${day}-${index}`)}
-                              className="min-w-0 flex-1 text-left"
-                              aria-label={expandedFields.has(`instructor-${day}-${index}`) ? "Collapse instructor name" : "Expand instructor name"}
-                            >
+                            <div className="min-w-0 flex-1">
                               <p className="text-[10px] sm:text-xs text-content-tertiary mb-0.5">Instructor</p>
-                              <p className={`text-xs sm:text-sm font-medium text-content-primary leading-snug ${
-                                expandedFields.has(`instructor-${day}-${index}`) ? 'break-words' : 'truncate'
-                              }`}>
+                              <p className="text-xs sm:text-sm font-medium text-content-primary leading-snug break-words">
                                 {classInfo.instructor}
                               </p>
-                            </button>
+                            </div>
                           </div>
                         )}
 
@@ -431,19 +600,13 @@ export default function TimetableView() {
                               <div className="w-7 h-7 sm:w-8 sm:h-8 bg-purple-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
                                 <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400" />
                               </div>
-                              <button
-                                onClick={() => toggleExpand(`location-${day}-${index}`)}
-                                className="min-w-0 flex-1 text-left"
-                                aria-label={expandedFields.has(`location-${day}-${index}`) ? "Collapse location" : "Expand location"}
-                              >
+                              <div className="min-w-0 flex-1">
                                 <p className="text-[10px] sm:text-xs text-content-tertiary mb-0.5">Location</p>
-                                <p className={`text-xs sm:text-sm font-medium text-content-primary leading-snug ${
-                                  expandedFields.has(`location-${day}-${index}`) ? 'break-words' : 'truncate'
-                                }`}>
+                                <p className="text-xs sm:text-sm font-medium text-content-primary leading-snug break-words">
                                   {classInfo.room}
                                   {classInfo.building && `, ${classInfo.building}`}
                                 </p>
-                              </button>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -451,22 +614,23 @@ export default function TimetableView() {
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className="p-8 text-center">
-                  <div className="w-12 h-12 bg-dark-bg rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Calendar className="w-6 h-6 text-content-tertiary" />
+              ) : !isCollapsed && !hasClasses ? (
+                <div className="p-6 sm:p-8 text-center animate-fade-in">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-dark-bg rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Calendar className="w-6 h-6 sm:w-7 sm:h-7 text-content-tertiary" />
                   </div>
-                  <p className="text-sm text-content-tertiary">
+                  <p className="text-sm sm:text-base text-content-tertiary font-medium">
                     No classes scheduled
                   </p>
-                  <p className="text-xs text-content-tertiary/60 mt-1">
+                  <p className="text-xs sm:text-sm text-content-tertiary/60 mt-1">
                     Enjoy your day off!
                   </p>
                 </div>
-              )}
+              ) : null}
             </div>
           )
         })}
+        </div>
 
         {/* Footer Message */}
         <div className="mt-6 p-4 bg-accent/5 border border-accent/20 rounded-xl">

@@ -26,17 +26,19 @@ export default function TabNavigation({ activeTab, onTabChange }) {
                   vibrate([10])
                 }}
                 className={`
-                  flex-1 flex flex-col items-center justify-center gap-0.5 xs:gap-1 sm:gap-1.5 py-1.5 xs:py-2 sm:py-3 px-0.5 xs:px-1 sm:px-2 md:px-4 min-w-0
+                  flex-1 flex flex-col items-center justify-center gap-1 xs:gap-1 sm:gap-1.5 py-2.5 xs:py-2.5 sm:py-3 md:py-3.5 px-1 xs:px-1.5 sm:px-2 md:px-4 min-w-0
                   transition-all duration-200 relative active:scale-95
                   ${isActive
                     ? 'text-accent'
                     : 'text-content-secondary hover:text-content-primary'
                   }
                 `}
-                style={{ minWidth: '56px', flexShrink: 0, maxWidth: 'none' }}
+                style={{ minWidth: '60px', flexShrink: 0, maxWidth: 'none' }}
+                aria-label={tab.label}
+                aria-current={isActive ? 'page' : undefined}
               >
-                <Icon className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-transform flex-shrink-0 ${isActive ? 'scale-110' : ''}`} />
-                <span className={`text-[8px] xs:text-[9px] sm:text-xs md:text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis w-full text-center leading-tight ${isActive ? 'font-bold' : 'font-normal'}`}>
+                <Icon className={`w-[18px] h-[18px] xs:w-5 xs:h-5 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-transform flex-shrink-0 ${isActive ? 'scale-110' : ''}`} />
+                <span className={`text-[10px] xs:text-[10px] sm:text-xs md:text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis w-full text-center leading-tight ${isActive ? 'font-bold' : 'font-normal'}`}>
                   <span className="hidden min-[420px]:inline">{tab.label}</span>
                   <span className="hidden min-[350px]:inline min-[420px]:hidden">{tab.shortLabel}</span>
                   <span className="inline min-[350px]:hidden">{tab.ultraShort}</span>
