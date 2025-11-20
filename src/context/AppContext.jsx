@@ -240,7 +240,11 @@ export function AppProvider({ children }) {
       }
     }
 
-    const normalizedStartDate = courseData.startDate || courseData.endDate || getTodayISO()
+    // enrollmentStartDate: precise day-level tracking for attendance calculation
+    // If not provided, default to today (when student enrolled)
+    const enrollmentStartDate = courseData.enrollmentStartDate || courseData.startDate || getTodayISO()
+
+    const normalizedStartDate = courseData.startDate || enrollmentStartDate
     const normalizedEndDate = courseData.endDate || normalizedStartDate
 
     let totalClassesEstimate = courseData.creditHours * 16
@@ -288,13 +292,14 @@ export function AppProvider({ children }) {
         weekdays: courseData.weekdays,
         startDate: normalizedStartDate,
         endDate: normalizedEndDate,
+        enrollmentStartDate, // Precise day student enrolled (for attendance tracking)
         initialAbsences: courseData.initialAbsences || 0,
         allowedAbsences: computedAllowedAbsences,
         color: courseData.color || assignedColor.name,
         colorHex: assignedColor.hex,
         semesterId: semesterIdForCourse,
         createdAt: Date.now(),
-        
+
         // Preserve timetable metadata for TimetableView
         schedule: courseData.schedule || [],
         instructor: courseData.instructor,
@@ -386,7 +391,10 @@ export function AppProvider({ children }) {
           assignedColor = COURSE_COLORS[currentIndex % COURSE_COLORS.length]
         }
 
-        const normalizedStartDate = courseData.startDate || courseData.endDate || getTodayISO()
+        // enrollmentStartDate: precise day-level tracking for attendance calculation
+        const enrollmentStartDate = courseData.enrollmentStartDate || courseData.startDate || getTodayISO()
+
+        const normalizedStartDate = courseData.startDate || enrollmentStartDate
         const normalizedEndDate = courseData.endDate || normalizedStartDate
 
         let totalClassesEstimate = courseData.creditHours * 16
@@ -411,13 +419,14 @@ export function AppProvider({ children }) {
           weekdays: courseData.weekdays,
           startDate: normalizedStartDate,
           endDate: normalizedEndDate,
+          enrollmentStartDate, // Precise day student enrolled (for attendance tracking)
           initialAbsences: courseData.initialAbsences || 0,
           allowedAbsences: computedAllowedAbsences,
           color: courseData.color || assignedColor.name,
           colorHex: assignedColor.hex,
           semesterId: semesterIdForCourse,
           createdAt: Date.now(),
-          
+
           // Preserve timetable metadata for TimetableView
           schedule: courseData.schedule || [],
           instructor: courseData.instructor,
@@ -530,6 +539,7 @@ export function AppProvider({ children }) {
       creditHours: newCourseData.creditHours || oldCourse.creditHours,
       startDate: oldCourse.startDate,
       endDate: oldCourse.endDate,
+      enrollmentStartDate: oldCourse.enrollmentStartDate, // CRITICAL: Preserve original enrollment date
       initialAbsences: oldCourse.initialAbsences,
       allowedAbsences: oldCourse.allowedAbsences,
       createdAt: oldCourse.createdAt,

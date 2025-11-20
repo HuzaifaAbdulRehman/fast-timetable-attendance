@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../../context/AppContext'
-import { BookOpen, Calendar, AlertCircle, CheckCircle2, Plus, Trash2, Edit, FolderOpen, X, Compass } from 'lucide-react'
+import { BookOpen, Calendar, AlertCircle, CheckCircle2, Plus, Trash2, Edit, FolderOpen, X, Compass, RefreshCcw } from 'lucide-react'
 import TimetableSelector from './TimetableSelector'
 import CourseForm from './CourseForm'
 import ConfirmModal from '../shared/ConfirmModal'
+import SectionSelectorDialog from '../shared/SectionSelectorDialog'
 import SemesterSelector from '../shared/SemesterSelector'
 import CacheReminderBanner from '../shared/CacheReminderBanner'
 import Toast from '../shared/Toast'
 import { createPortal } from 'react-dom'
 import PullToRefresh from 'react-simple-pull-to-refresh'
-import { clearTimetableCache } from '../../utils/cacheManager'
+import { clearTimetableCache, getTimetableFromCache } from '../../utils/cacheManager'
+import { vibrate } from '../../utils/uiHelpers'
 
 export default function CoursesView({ onNavigate }) {
-  const { courses, deleteCourse, deleteAllCourses, updateCourse, addCourse, semesters, activeSemesterId, switchSemester, createSemester, deleteSemester } = useApp()
+  const { courses, deleteCourse, deleteAllCourses, updateCourse, addCourse, semesters, activeSemesterId, switchSemester, createSemester, deleteSemester, changeCourseSection } = useApp()
   const [showTimetableSelector, setShowTimetableSelector] = useState(false)
   const [showCourseForm, setShowCourseForm] = useState(false)
   const [editingCourse, setEditingCourse] = useState(null)
@@ -26,6 +28,7 @@ export default function CoursesView({ onNavigate }) {
   const [toast, setToast] = useState(null)
   const [showCacheReminder, setShowCacheReminder] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(true)
+  const [sectionSelectorData, setSectionSelectorData] = useState(null)
 
   const handleEditCourse = (course) => {
     setEditingCourse(course)
@@ -35,6 +38,103 @@ export default function CoursesView({ onNavigate }) {
   const handleDeleteCourse = (course) => {
     setCourseToDelete(course)
     setShowDeleteConfirm(true)
+  }
+
+  const handleChangeSectionClick = async (course) => {
+    vibrate(15)
+
+    // Fetch timetable to get available sections
+    const cachedTimetable = getTimetableFromCache()
+
+    if (!cachedTimetable || !Array.isArray(cachedTimetable)) {
+      setToast({
+        message: 'Please refresh your timetable data first',
+        type: 'info',
+        duration: 3000
+      })
+      return
+    }
+
+    // Find all sections for this course (different from current section)
+    const availableSections = cachedTimetable.filter(c =>
+      c.courseCode === course.courseCode &&
+      c.section !== course.section &&
+      c.courseCode && c.section // Ensure valid data
+    )
+
+    if (availableSections.length === 0) {
+      setToast({
+        message: `No other sections available for ${course.courseCode}`,
+        type: 'info',
+        duration: 3000
+      })
+      return
+    }
+
+    setSectionSelectorData({
+      course,
+      availableSections,
+      currentSection: course.section
+    })
+  }
+
+  const handleConfirmSectionChange = (selectedSectionCourse) => {
+    if (!sectionSelectorData) return
+
+    const { course } = sectionSelectorData
+
+    // Build new course data from selected section
+    const newCourseData = {
+      name: selectedSectionCourse.courseName,
+      courseCode: selectedSectionCourse.courseCode,
+      section: selectedSectionCourse.section,
+      instructor: selectedSectionCourse.instructor,
+      creditHours: selectedSectionCourse.creditHours,
+      schedule: selectedSectionCourse.sessions?.map(session => ({
+        day: session.day,
+        startTime: session.timeSlot?.split('-')[0]?.trim() || '',
+        endTime: session.timeSlot?.split('-')[1]?.trim() || '',
+        room: session.room || ''
+      })) || [],
+      color: course.color, // Preserve original color
+      weekdays: selectedSectionCourse.sessions?.map(s => s.day) || []
+    }
+
+    const result = changeCourseSection(course.id, newCourseData)
+
+    if (result.success) {
+      setToast({
+        message: `Changed ${course.courseCode} from ${result.oldCourse.section} to ${result.course.section}`,
+        type: 'success',
+        duration: 5000,
+        action: {
+          label: 'Undo',
+          onClick: () => {
+            const oldCourseData = {
+              ...result.oldCourse,
+              weekdays: result.oldCourse.weekdays || [],
+              schedule: result.oldCourse.schedule || []
+            }
+            changeCourseSection(result.course.id, oldCourseData)
+            setToast({
+              message: `Restored ${course.courseCode} to ${result.oldCourse.section}`,
+              type: 'info',
+              duration: 3000
+            })
+          }
+        }
+      })
+      vibrate([10, 50, 10])
+    } else {
+      setToast({
+        message: result.error || 'Failed to change section',
+        type: 'error',
+        duration: 3000
+      })
+      vibrate([15, 30, 15, 30, 15])
+    }
+
+    setSectionSelectorData(null)
   }
 
   const confirmDeleteCourse = () => {
@@ -154,7 +254,7 @@ export default function CoursesView({ onNavigate }) {
   const currentSemester = semesters.find(s => s.id === activeSemesterId)
 
   const renderContent = () => (
-    <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16 py-4 md:py-6">
+    <div className="w-full px-4 sm:px-6 py-4">
       {/* Semester Selector - Always visible */}
       <div className="mb-4">
         <SemesterSelector compact={true} />
@@ -315,11 +415,12 @@ export default function CoursesView({ onNavigate }) {
             )}
 
             {/* Course Cards */}
-            <div className="space-y-3 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-6">
               {courses.map((course) => (
                 <div
                   key={course.id}
-                  className="bg-dark-card rounded-xl p-3 sm:p-4 border border-dark-border hover:border-accent/30 active:scale-[0.98] active:border-accent/50 transition-all group"
+                  className="bg-dark-surface rounded-xl p-4 border-l-[3px] border-r border-t border-b border-r-dark-border/40 border-t-dark-border/40 border-b-dark-border/40 hover:border-l-accent hover:border-r-accent/40 hover:border-t-accent/40 hover:border-b-accent/40 hover:shadow-glass-sm transition-all duration-300 group"
+                  style={{ borderLeftColor: course.color?.hex || '#3B82F6' }}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -332,10 +433,18 @@ export default function CoursesView({ onNavigate }) {
                         </p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <button
+                        onClick={() => handleChangeSectionClick(course)}
+                        className="p-2.5 bg-dark-bg hover:bg-blue-500/10 active:bg-blue-500/20 text-content-secondary hover:text-blue-400 active:scale-95 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        title="Change section"
+                        aria-label="Change section"
+                      >
+                        <RefreshCcw className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={() => handleEditCourse(course)}
-                        className="p-2 bg-dark-bg hover:bg-accent/10 active:bg-accent/20 text-content-secondary hover:text-accent active:scale-95 rounded-lg transition-all"
+                        className="p-2.5 bg-dark-bg hover:bg-accent/10 active:bg-accent/20 text-content-secondary hover:text-accent active:scale-95 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
                         title="Edit course"
                         aria-label="Edit course"
                       >
@@ -343,16 +452,12 @@ export default function CoursesView({ onNavigate }) {
                       </button>
                       <button
                         onClick={() => handleDeleteCourse(course)}
-                        className="p-2 bg-dark-bg hover:bg-red-500/10 active:bg-red-500/20 text-content-secondary hover:text-red-400 active:scale-95 rounded-lg transition-all"
+                        className="p-2.5 bg-dark-bg hover:bg-red-500/10 active:bg-red-500/20 text-content-secondary hover:text-red-400 active:scale-95 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
                         title="Delete course"
                         aria-label="Delete course"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
-                      <div
-                        className="w-3 h-3 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: course.color?.hex || '#3B82F6' }}
-                      />
                     </div>
                   </div>
 
@@ -361,8 +466,8 @@ export default function CoursesView({ onNavigate }) {
                     {/* Instructor - Full width on mobile */}
                     {course.instructor && (
                       <div className="sm:col-span-2">
-                        <p className="text-content-tertiary text-[10px] sm:text-xs">Instructor</p>
-                        <p className="text-content-primary font-medium text-xs sm:text-sm truncate">{course.instructor}</p>
+                        <p className="text-content-tertiary text-xs">Instructor</p>
+                        <p className="text-content-primary font-medium text-sm truncate">{course.instructor}</p>
                       </div>
                     )}
 
@@ -371,24 +476,24 @@ export default function CoursesView({ onNavigate }) {
                       {/* Section */}
                       {course.section && (
                         <div className="flex-shrink-0">
-                          <p className="text-content-tertiary text-[10px] sm:text-xs">Section</p>
-                          <p className="text-content-primary font-medium text-xs sm:text-sm">{course.section}</p>
+                          <p className="text-content-tertiary text-xs">Section</p>
+                          <p className="text-content-primary font-medium text-sm">{course.section}</p>
                         </div>
                       )}
 
                       {/* Credit Hours - Aligned to right */}
                       {course.creditHours && (
                         <div className="flex-shrink-0 text-right">
-                          <p className="text-content-tertiary text-[10px] sm:text-xs">Credit Hours</p>
-                          <p className="text-content-primary font-medium text-xs sm:text-sm">{course.creditHours} CH</p>
+                          <p className="text-content-tertiary text-xs">Credit Hours</p>
+                          <p className="text-content-primary font-medium text-sm">{course.creditHours} CH</p>
                         </div>
                       )}
 
                       {/* Days - Aligned to right if section not present */}
                       {!course.section && course.schedule && course.schedule.length > 0 && (
                         <div className="flex-1 min-w-0 text-right">
-                          <p className="text-content-tertiary text-[10px] sm:text-xs">Days</p>
-                          <p className="text-content-primary font-medium text-xs sm:text-sm truncate">
+                          <p className="text-content-tertiary text-xs">Days</p>
+                          <p className="text-content-primary font-medium text-sm truncate">
                             {course.schedule.map(s => s.day.slice(0, 3)).join(', ')}
                           </p>
                         </div>
@@ -398,12 +503,12 @@ export default function CoursesView({ onNavigate }) {
                     {/* Days - Full row if section is present */}
                     {course.section && course.schedule && course.schedule.length > 0 && (
                       <div className="sm:col-span-2">
-                        <p className="text-content-tertiary text-[10px] sm:text-xs">Class Days</p>
+                        <p className="text-content-tertiary text-xs">Class Days</p>
                         <div className="flex flex-wrap gap-1 sm:gap-1.5 mt-1">
                           {course.schedule.map((session, idx) => (
                             <span
                               key={idx}
-                              className="px-1.5 sm:px-2 py-0.5 bg-accent/10 text-accent text-[9px] sm:text-[10px] font-medium rounded border border-accent/20"
+                              className="px-2 py-0.5 bg-accent/10 text-accent text-[10px] sm:text-xs font-medium rounded border border-accent/20"
                             >
                               {session.day}
                             </span>
@@ -663,6 +768,19 @@ export default function CoursesView({ onNavigate }) {
           variant="danger"
           requiresTyping={true}
           confirmationText="DELETE ALL"
+        />
+      )}
+
+      {/* Section Selector Dialog */}
+      {sectionSelectorData && (
+        <SectionSelectorDialog
+          isOpen={true}
+          onClose={() => setSectionSelectorData(null)}
+          onConfirm={handleConfirmSectionChange}
+          courseCode={sectionSelectorData.course.courseCode}
+          courseName={sectionSelectorData.course.name}
+          currentSection={sectionSelectorData.currentSection}
+          availableSections={sectionSelectorData.availableSections}
         />
       )}
     </>

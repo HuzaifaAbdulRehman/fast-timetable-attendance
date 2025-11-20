@@ -1,5 +1,6 @@
 import { useState, memo, useMemo } from 'react'
-import { Plus, Check, Clock, MapPin, User, BookOpen, AlertTriangle, ChevronDown, ChevronUp, CheckCheck, CheckSquare, Square } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { Plus, Check, Clock, MapPin, User, BookOpen, AlertTriangle, ChevronDown, ChevronUp, CheckCheck, CheckSquare, Square, X, Lock } from 'lucide-react'
 import { vibrate } from '../../utils/uiHelpers'
 import { getHighlightedText } from '../../hooks/useClassSearch'
 import { formatTimeTo12Hour } from '../../utils/dateHelpers'
@@ -71,9 +72,14 @@ const ClassCard = memo(function ClassCard({
 
   const handleAdd = (e) => {
     e.stopPropagation()
-    // In multi-select mode, allow selecting (will be filtered out during bulk add)
-    // In normal mode, prevent adding if already added or currently adding
-    if (!multiSelectMode && (isAdded || isAdding)) return
+
+    // Prevent interaction with already enrolled courses in ALL modes
+    if (isAdded || isAdding) {
+      // Haptic feedback to indicate can't select
+      vibrate([15, 30, 15])
+      return
+    }
+
     vibrate(15)
     onAdd(classData)
   }
@@ -109,22 +115,22 @@ const ClassCard = memo(function ClassCard({
         className={`
           relative group
           bg-dark-surface rounded-xl overflow-hidden
-          border-l-4 border-r border-t border-b
+          border-l-[3px] border-r border-t border-b
+          min-h-[180px]
           transition-all duration-300 ease-out
           ${isAdded
-            ? 'border-r-attendance-safe/30 border-t-attendance-safe/30 border-b-attendance-safe/30 bg-attendance-safe/5'
+            ? 'border-r-attendance-safe/30 border-t-attendance-safe/30 border-b-attendance-safe/30 bg-attendance-safe/5 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
             : hasConflict
             ? 'border-r-attendance-warning/30 border-t-attendance-warning/30 border-b-attendance-warning/30'
-            : 'border-r-dark-border border-t-dark-border border-b-dark-border hover:border-r-accent/30 hover:border-t-accent/30 hover:border-b-accent/30'
+            : 'border-r-dark-border border-t-dark-border border-b-dark-border hover:border-r-accent/40 hover:border-t-accent/40 hover:border-b-accent/40'
           }
           ${!isAdded && !hasConflict && 'hover:shadow-lg hover:shadow-accent/10'}
-          hover:-translate-y-0.5
-          active:translate-y-0
+          sm:hover:-translate-y-0.5 active:translate-y-0
         `}
-        style={{ borderLeftColor: isAdded ? '#10B981' : dayColor }}
+        style={{ borderLeftColor: dayColor }}
       >
       {/* Compact View - Always Visible */}
-      <div className="p-3 sm:p-4">
+      <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           {/* Course Info */}
           <div
@@ -140,13 +146,30 @@ const ClassCard = memo(function ClassCard({
             }}
           >
             {/* Course Code + Section - Primary */}
-            <div className="flex items-baseline gap-2 mb-1">
-              <h3 className="text-base sm:text-lg font-bold text-content-primary group-hover:text-accent transition-colors">
+            <div className="flex items-baseline gap-2 mb-1 flex-wrap">
+              <h3 className="text-lg font-bold text-content-primary group-hover:text-accent transition-colors">
                 <HighlightedText text={classData.courseCode || 'N/A'} searchTerm={searchTerm} />
               </h3>
-              <span className="text-xs sm:text-sm font-semibold text-accent px-2 py-0.5 rounded-full bg-accent/10">
+              <span className="text-sm font-semibold text-accent px-2 py-0.5 rounded-full bg-accent/10">
                 <HighlightedText text={classData.section || 'N/A'} searchTerm={searchTerm} />
               </span>
+              {/* Enrollment status indicators - text-based */}
+              {isAdded && (
+                <span
+                  className={`text-[10px] sm:text-xs font-medium px-2 py-0.5 rounded cursor-help transition-all ${
+                    isExactMatch
+                      ? 'text-green-700 dark:text-green-400 bg-green-500/10 hover:bg-green-500/20'
+                      : 'text-amber-700 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20'
+                  }`}
+                  title={
+                    isExactMatch
+                      ? `Already enrolled in ${classData.courseCode} Section ${enrolledCourse?.section || classData.section}${enrolledCourse?.instructor ? `\nInstructor: ${enrolledCourse.instructor}` : ''}`
+                      : `Cannot enroll - Already enrolled in Section ${enrolledCourse?.section}${enrolledCourse?.instructor ? `\nInstructor: ${enrolledCourse.instructor}` : ''}\n\nTo change sections, go to Courses tab and click the Change Section button.`
+                  }
+                >
+                  {isExactMatch ? 'Added' : `Enrolled in ${enrolledCourse?.section}`}
+                </span>
+              )}
             </div>
 
             {/* Course Name - Secondary with expand-on-tap */}
@@ -259,10 +282,10 @@ const ClassCard = memo(function ClassCard({
           {/* Add/Select Button - Fixed right side */}
           <button
             onClick={handleAdd}
-            disabled={(!multiSelectMode && (isAdded || isAdding))}
+            disabled={isAdded || isAdding}
             className={`
               relative flex-shrink-0
-              w-14 h-14 sm:w-14 sm:h-14 md:w-16 md:h-16
+              w-14 h-14
               flex items-center justify-center
               rounded-xl
               font-semibold text-sm
@@ -276,7 +299,7 @@ const ClassCard = memo(function ClassCard({
                   ? 'bg-dark-surface border-2 border-orange-400/30 text-orange-400/50 cursor-not-allowed opacity-50'
                   : isSelected
                   ? 'bg-accent text-dark-bg border-2 border-accent shadow-lg shadow-accent/30'
-                  : 'bg-dark-surface border-2 border-dark-border hover:border-accent/50 hover:scale-110 active:scale-95')
+                  : 'bg-dark-surface border-2 border-dark-border hover:border-accent/50 hover:scale-105 active:scale-95')
                 : (isExactMatch
                   ? 'bg-attendance-safe/30 text-attendance-safe cursor-default border-2 border-attendance-safe/50 shadow-lg shadow-attendance-safe/20'
                   : isAdded
@@ -284,8 +307,8 @@ const ClassCard = memo(function ClassCard({
                   : isAdding
                   ? 'bg-accent/30 text-accent cursor-wait'
                   : hasConflict
-                  ? 'bg-attendance-warning/20 text-attendance-warning hover:bg-attendance-warning/30 hover:scale-110 active:scale-95'
-                  : 'bg-accent/20 text-accent hover:bg-accent hover:text-dark-bg hover:scale-110 hover:shadow-lg hover:shadow-accent/30 active:scale-95')
+                  ? 'bg-attendance-warning/20 text-attendance-warning hover:bg-attendance-warning/30 hover:scale-105 active:scale-95'
+                  : 'bg-accent/20 text-accent hover:bg-accent hover:text-dark-bg hover:scale-105 hover:shadow-lg hover:shadow-accent/30 active:scale-95')
               }
               disabled:cursor-not-allowed disabled:hover:scale-100
             `}
@@ -316,24 +339,24 @@ const ClassCard = memo(function ClassCard({
               {multiSelectMode ? (
                 isAdded ? (
                   isExactMatch ? (
-                    <Check className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
+                    <Check className="w-6 h-6" strokeWidth={2.5} />
                   ) : (
-                    <CheckCheck className="w-5 h-5 sm:w-5.5 sm:h-5.5" strokeWidth={2} />
+                    <CheckCheck className="w-6 h-6" strokeWidth={2} />
                   )
                 ) : isSelected ? (
-                  <CheckSquare className="w-5 h-5 sm:w-5.5 sm:h-5.5" strokeWidth={2} />
+                  <CheckSquare className="w-6 h-6" strokeWidth={2} />
                 ) : (
-                  <Square className="w-5 h-5 sm:w-5.5 sm:h-5.5" strokeWidth={1.5} />
+                  <Square className="w-6 h-6" strokeWidth={1.5} />
                 )
               ) : (
                 isExactMatch ? (
-                  <Check className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
+                  <Check className="w-6 h-6" strokeWidth={2.5} />
                 ) : isAdded ? (
-                  <CheckCheck className="w-5 h-5 sm:w-5.5 sm:h-5.5" strokeWidth={2} />
+                  <CheckCheck className="w-6 h-6" strokeWidth={2} />
                 ) : isAdding ? (
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <Plus className="w-5 h-5 sm:w-5.5 sm:h-5.5" strokeWidth={2} />
+                  <Plus className="w-6 h-6" strokeWidth={2} />
                 )
               )}
             </div>
@@ -341,15 +364,16 @@ const ClassCard = memo(function ClassCard({
         </div>
       </div>
 
-      {/* Expanded View - Inline Accordion */}
+
+      {/* Inline Expansion - Mobile Only (< 640px) */}
       {isExpanded && (
-        <div className="border-t border-dark-border/50 bg-dark-bg/40 animate-slideDown overflow-hidden">
-          <div className="px-3 sm:px-4 py-3 sm:py-4 space-y-3">
-            {/* Session Schedule */}
+        <div className="sm:hidden border-t border-dark-border/50 bg-dark-bg/40 animate-slideDown overflow-hidden">
+          <div className="px-3 py-3 space-y-3">
+            {/* Schedule */}
             {days.length > 0 ? (
               <div className="space-y-2">
                 {days.map(day => (
-                  <div key={day} className="space-y-1.5">
+                  <div key={day}>
                     {sessionsByDay[day].map((session, idx) => {
                       let formattedTime = 'TBA'
                       if (session.timeSlot) {
@@ -360,26 +384,21 @@ const ClassCard = memo(function ClassCard({
                       return (
                         <div
                           key={idx}
-                          className="flex items-start gap-2 sm:gap-3 text-sm bg-dark-surface/50 rounded-lg p-2.5 sm:p-3 border border-dark-border/30"
+                          className="flex items-start gap-2 bg-dark-surface/50 rounded-lg p-2.5 border border-dark-border/30"
                         >
                           <div
-                            className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full mt-1 flex-shrink-0"
+                            className="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0"
                             style={{ backgroundColor: DAY_COLORS[day] }}
-                            aria-hidden="true"
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2 mb-1">
-                              <span className="font-semibold text-content-primary text-xs sm:text-sm">
-                                {day}
-                              </span>
-                              <span className="text-xs text-content-tertiary font-mono">
-                                {formattedTime}
-                              </span>
+                              <span className="font-semibold text-content-primary text-sm">{day}</span>
+                              <span className="text-xs text-content-tertiary font-mono">{formattedTime}</span>
                             </div>
                             {session.room && (
                               <div className="flex items-center gap-1 text-xs text-content-secondary">
                                 <MapPin className="w-3 h-3 flex-shrink-0" />
-                                <span className="truncate">{session.room}</span>
+                                <span>{session.room}</span>
                               </div>
                             )}
                           </div>
@@ -392,22 +411,18 @@ const ClassCard = memo(function ClassCard({
             ) : (
               <div className="text-center py-4 text-content-tertiary">
                 <Clock className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                <p className="text-xs sm:text-sm">No schedule information</p>
+                <p className="text-xs">No schedule information</p>
               </div>
             )}
 
             {/* Conflict Warning */}
             {hasConflict && conflictMessage && !isAdded && (
-              <div className="p-2.5 sm:p-3 bg-attendance-warning/10 border border-attendance-warning/30 rounded-lg">
+              <div className="p-2.5 bg-attendance-warning/10 border border-attendance-warning/30 rounded-lg">
                 <div className="flex gap-2">
                   <AlertTriangle className="w-4 h-4 text-attendance-warning flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-attendance-warning mb-0.5">
-                      Scheduling Conflict
-                    </p>
-                    <p className="text-xs text-content-secondary leading-relaxed">
-                      {conflictMessage}
-                    </p>
+                    <p className="text-xs font-semibold text-attendance-warning mb-0.5">Scheduling Conflict</p>
+                    <p className="text-xs text-content-secondary leading-relaxed">{conflictMessage}</p>
                   </div>
                 </div>
               </div>
@@ -419,16 +434,12 @@ const ClassCard = memo(function ClassCard({
                 onClick={handleAdd}
                 disabled={isAdding}
                 className={`
-                  w-full flex items-center justify-center gap-2
-                  px-4 py-2.5 sm:py-3 rounded-lg
-                  font-semibold text-sm
-                  transition-all duration-200
+                  w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all
                   ${hasConflict
                     ? 'bg-attendance-warning text-dark-bg hover:bg-attendance-warning/90'
                     : 'bg-gradient-to-r from-accent to-accent-hover text-dark-bg'
                   }
-                  hover:scale-[1.02] active:scale-95
-                  disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+                  hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
                 `}
               >
                 {isAdding ? (
@@ -446,6 +457,179 @@ const ClassCard = memo(function ClassCard({
             )}
           </div>
         </div>
+      )}
+
+      {/* Modal Overlay - Tablet/Desktop Only (≥ 640px) - Rendered via Portal */}
+      {isExpanded && createPortal(
+        <div
+          className="hidden sm:block fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm animate-fadeIn"
+          onClick={handleToggle}
+        >
+          {/* Modal Container */}
+          <div className="absolute inset-0 flex items-center justify-center p-4" onClick={handleToggle}>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-2xl max-h-[85vh] overflow-y-auto bg-dark-surface rounded-2xl shadow-2xl border border-dark-border/50 animate-scale-in relative"
+            >
+              {/* Modal Header */}
+              <div className="sticky top-0 bg-dark-surface border-b border-dark-border/50 px-4 py-4 flex items-start justify-between gap-4 z-10">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-xl font-bold text-content-primary">
+                      {classData.courseCode || 'N/A'}
+                    </h3>
+                    <span className="text-sm font-semibold text-accent px-3 py-1 rounded-full bg-accent/10">
+                      {classData.section || 'N/A'}
+                    </span>
+                  </div>
+                  <p className="text-base text-content-secondary">
+                    {classData.courseName || 'Unnamed Course'}
+                  </p>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleToggle()
+                  }}
+                  className="flex-shrink-0 p-3 hover:bg-dark-surface-raised rounded-lg transition-colors text-content-tertiary hover:text-content-primary cursor-pointer"
+                  aria-label="Close schedule details"
+                  type="button"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="px-4 py-4 space-y-4">
+                {/* Course Meta Info */}
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-content-tertiary pb-4 border-b border-dark-border/30">
+                  {classData.instructor && (
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 flex-shrink-0" />
+                      <span>{classData.instructor}</span>
+                    </div>
+                  )}
+                  {classData.creditHours && (
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 flex-shrink-0" />
+                      <span>{classData.creditHours} Credit Hours</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Session Schedule */}
+                <div>
+                  <h4 className="text-xs font-semibold text-content-tertiary uppercase tracking-wide mb-4">
+                    Weekly Schedule
+                  </h4>
+                  {days.length > 0 ? (
+                    <div className="space-y-2.5">
+                      {days.map(day => (
+                        <div key={day} className="space-y-2.5">
+                          {sessionsByDay[day].map((session, idx) => {
+                            let formattedTime = 'TBA'
+                            if (session.timeSlot) {
+                              const [start, end] = session.timeSlot.split('-')
+                              formattedTime = `${formatTimeTo12Hour(start)} - ${formatTimeTo12Hour(end)}`
+                            }
+
+                            return (
+                              <div
+                                key={idx}
+                                className="group relative flex items-center gap-4 bg-dark-bg/50 hover:bg-dark-bg/70 rounded-xl p-4 border border-dark-border/30 hover:border-dark-border/50 transition-all duration-200"
+                              >
+                                {/* Day Accent Bar */}
+                                <div
+                                  className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl"
+                                  style={{ backgroundColor: DAY_COLORS[day] }}
+                                  aria-hidden="true"
+                                />
+
+                                {/* Content */}
+                                <div className="flex-1 min-w-0 pl-3">
+                                  <div className="flex items-baseline justify-between gap-3 mb-2">
+                                    <span className="text-lg font-bold text-content-primary">{day}</span>
+                                    <span className="text-sm font-semibold text-content-secondary tabular-nums whitespace-nowrap">{formattedTime}</span>
+                                  </div>
+                                  {session.room && (
+                                    <div className="flex items-center gap-2 text-sm text-content-tertiary">
+                                      <MapPin className="w-4 h-4 flex-shrink-0" />
+                                      <span>{session.room}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-content-tertiary">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-dark-bg/50 rounded-full flex items-center justify-center">
+                        <Clock className="w-8 h-8 opacity-40" />
+                      </div>
+                      <p className="text-sm font-medium">No schedule information available</p>
+                      <p className="text-xs mt-1 opacity-60">Add schedule details to see class timings</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Conflict Warning */}
+                {hasConflict && conflictMessage && !isAdded && (
+                  <div className="p-4 bg-attendance-warning/10 border border-attendance-warning/30 rounded-xl">
+                    <div className="flex gap-3">
+                      <AlertTriangle className="w-5 h-5 text-attendance-warning flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-attendance-warning mb-1">
+                          Scheduling Conflict Detected
+                        </p>
+                        <p className="text-sm text-content-secondary leading-relaxed">
+                          {conflictMessage}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer - Action Buttons */}
+              {!isExactMatch && !isAdded && (
+                <div className="sticky bottom-0 bg-dark-surface border-t border-dark-border/50 px-4 py-4">
+                  <button
+                    onClick={handleAdd}
+                    disabled={isAdding}
+                    className={`
+                      w-full flex items-center justify-center gap-2
+                      px-6 py-3 rounded-xl
+                      font-semibold text-base
+                      transition-all duration-200
+                      ${hasConflict
+                        ? 'bg-attendance-warning text-dark-bg hover:bg-attendance-warning/90'
+                        : 'bg-gradient-to-r from-accent to-accent-hover text-dark-bg'
+                      }
+                      hover:scale-[1.02] active:scale-95
+                      disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+                    `}
+                  >
+                    {isAdding ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-5 h-5" />
+                        {hasConflict ? 'Add Anyway' : 'Add to My Courses'}
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
       </div>
     </>

@@ -11,6 +11,7 @@ import { DEFAULT_WEEKS_TO_SHOW } from '../../utils/constants'
 import PullToRefresh from 'react-simple-pull-to-refresh'
 import Confetti, { celebratePerfectAttendance, celebrateMilestone } from '../shared/Confetti'
 import { vibrate } from '../../utils/uiHelpers'
+import { startOfWeek } from 'date-fns'
 
 export default function AttendanceView() {
   const { courses, undoHistory, undo, markDaysAbsent } = useApp()
@@ -144,6 +145,26 @@ export default function AttendanceView() {
   useEffect(() => {
     return () => setToast(null)
   }, [])
+
+  // Calculate attendance start date - earliest enrollment date (not week-aligned)
+  // This prevents showing empty pre-enrollment days at the start
+  const attendanceStartDate = useMemo(() => {
+    if (!courses || courses.length === 0) return getTodayISO()
+
+    // Find earliest enrollment date across all courses
+    const enrollmentDates = courses
+      .map(c => c.enrollmentStartDate || c.startDate)
+      .filter(Boolean)
+      .map(d => new Date(d))
+
+    if (enrollmentDates.length === 0) return getTodayISO()
+
+    const earliestEnrollment = new Date(Math.min(...enrollmentDates))
+
+    // Return the actual enrollment date (not week start)
+    // The week generation logic will handle full weeks automatically
+    return earliestEnrollment.toISOString().split('T')[0]
+  }, [courses])
 
   if (courses.length === 0) {
     return (
@@ -340,7 +361,7 @@ export default function AttendanceView() {
 
       {/* Attendance Table */}
       <AttendanceTable
-        startDate={getTodayISO()}
+        startDate={attendanceStartDate}
         weeksToShow={weeksToShow}
         onEditCourse={handleEditCourse}
         onDeleteCourse={handleDeleteCourse}

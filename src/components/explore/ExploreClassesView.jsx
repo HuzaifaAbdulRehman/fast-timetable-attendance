@@ -627,14 +627,14 @@ export default function ExploreClassesView() {
       {/* Welcome Banner for First-Time Users */}
       {showWelcomeBanner && (
         <div className="bg-gradient-to-r from-accent/10 via-accent/5 to-transparent border-b border-accent/20">
-          <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+          <div className="px-4 sm:px-6 py-3 sm:py-4">
             <div className="flex items-start gap-3">
               <div className="p-2 bg-accent/20 rounded-lg flex-shrink-0">
                 <BookOpen className="w-5 h-5 text-accent" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm sm:text-base font-semibold text-content-primary mb-1">
-                  Welcome to Explore! 👋
+                  Welcome to Explore! Find and add classes to your schedule.
                 </h3>
                 <p className="text-xs sm:text-sm text-content-secondary leading-relaxed">
                   Browse all available classes, search by course, instructor, or
@@ -649,7 +649,7 @@ export default function ExploreClassesView() {
 
       {/* Header with Search */}
       <div className="flex-shrink-0 bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 sticky top-0 z-20">
-        <div className="px-2 sm:px-4 md:px-6 py-3 space-y-3">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 space-y-4">
           {/* Title & Result Count */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -657,11 +657,11 @@ export default function ExploreClassesView() {
                 <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
               </div>
               <div>
-                <h2 className="text-base sm:text-lg font-semibold text-content-primary">
+                <h2 className="text-xl font-semibold text-content-primary">
                   Explore Classes
                 </h2>
                 <p
-                  className="text-xs sm:text-sm text-content-tertiary"
+                  className="text-sm text-content-tertiary"
                   role="status"
                   aria-live="polite"
                 >
@@ -765,7 +765,7 @@ export default function ExploreClassesView() {
                 setSearchInput(e.target.value);
               }}
               onKeyDown={handleSearchKeyDown}
-              className="w-full pl-10 pr-10 py-2 sm:py-2.5 bg-dark-bg border border-dark-border rounded-xl text-content-primary placeholder:text-content-tertiary text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
+              className="w-full pl-10 pr-10 py-2.5 bg-dark-bg border border-dark-border rounded-xl text-content-primary placeholder:text-content-tertiary text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
               aria-label="Search for classes by course, instructor, section, or day"
               aria-describedby="search-help-text"
               aria-live="polite"
@@ -788,7 +788,7 @@ export default function ExploreClassesView() {
           </div>
           <p
             id="search-help-text"
-            className="text-xs sm:text-xs text-content-tertiary mt-1.5"
+            className="text-xs text-content-tertiary"
           >
             Instant search - type course, teacher, section, or day (e.g.,
             "sameer monday", "daa 5f", "algo")
@@ -895,9 +895,9 @@ export default function ExploreClassesView() {
         )}
 
         {!loading && !error && filteredClasses.length > 0 && (
-          <div className="p-2 sm:p-3 md:p-4 lg:p-6">
-            {/* Responsive Grid: 1 col mobile, 2 col tablet, 3 col desktop */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+          <div className="px-4 sm:px-6 py-4">
+            {/* Responsive Grid: 1 col mobile, 2 col tablet, 3 col laptop, 4 col desktop */}
+            <div className="max-w-[1400px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
               {displayedClasses.map((classData) => {
                 const isAdded = addedClassIds.has(classData.courseCode);
                 const isAdding = addingClassId === classData.id;

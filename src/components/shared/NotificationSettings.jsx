@@ -147,13 +147,39 @@ export default function NotificationSettings({ onClose }) {
   }
 
   // Confirm and execute reset
-  const confirmResetData = () => {
+  const confirmResetData = async () => {
     if (deleteConfirmation === 'DELETE') {
-      // Clear all localStorage
-      localStorage.clear()
+      try {
+        // 1. Clear localStorage
+        localStorage.clear()
 
-      // Reload the page to start fresh
-      window.location.reload()
+        // 2. Clear sessionStorage
+        sessionStorage.clear()
+
+        // 3. Clear ServiceWorker caches (PWA)
+        if ('caches' in window) {
+          const cacheNames = await caches.keys()
+          await Promise.all(
+            cacheNames.map(cacheName => caches.delete(cacheName))
+          )
+        }
+
+        // 4. Unregister ServiceWorkers
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations()
+          await Promise.all(
+            registrations.map(registration => registration.unregister())
+          )
+        }
+
+        // 5. Force hard reload to start completely fresh
+        window.location.href = window.location.href + '?reset=true&t=' + Date.now()
+      } catch (error) {
+        console.error('Error during data reset:', error)
+        // Fallback: at minimum clear localStorage and reload
+        localStorage.clear()
+        window.location.reload()
+      }
     }
   }
 

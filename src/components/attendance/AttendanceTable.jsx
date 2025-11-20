@@ -119,6 +119,11 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
   const handleCellClick = (e, courseId, date) => {
     e.stopPropagation() // Prevent day toggle when clicking cell
 
+    // Prevent clicks on pre-enrollment cells
+    if (isBeforeEnrollment(courseId, date)) {
+      return
+    }
+
     const currentStatus = getSessionStatus(courseId, date, attendance)
 
     // Cycle through: present (null) → absent → cancelled (no class) → present
@@ -144,9 +149,22 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
     }
   }
 
+  // Check if date is before enrollment for a specific course
+  const isBeforeEnrollment = (courseId, date) => {
+    const course = courses.find(c => c.id === courseId)
+    if (!course || !course.enrollmentStartDate) return false
+
+    return new Date(date) < new Date(course.enrollmentStartDate)
+  }
+
   // Get cell className based on status - enhanced hover effects with scale
   const getCellClassName = (courseId, date, hasClass) => {
     if (!hasClass) return 'cursor-not-allowed opacity-40'
+
+    // Check if before enrollment - grayed out, non-interactive
+    if (isBeforeEnrollment(courseId, date)) {
+      return 'cursor-not-allowed bg-dark-bg/50 opacity-40 relative'
+    }
 
     const status = getSessionStatus(courseId, date, attendance)
 
@@ -166,6 +184,16 @@ export default function AttendanceTable({ startDate, weeksToShow, onEditCourse, 
         <span role="img" aria-label="No class scheduled">
           <Minus className="w-4 h-4 mx-auto text-content-disabled" />
         </span>
+      )
+    }
+
+    // Check if before enrollment - show grayed state
+    if (isBeforeEnrollment(courseId, date)) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-0.5" role="img" aria-label="Not enrolled yet">
+          <Minus className="w-3 h-3 mx-auto text-content-disabled/50" />
+          <span className="text-[8px] sm:text-[9px] text-content-disabled/70 font-medium whitespace-nowrap">Not enrolled</span>
+        </div>
       )
     }
 

@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Search, X, Check, MapPin, User, Clock, Calendar, BookOpen, Loader, RefreshCw, ArrowRight, ArrowLeft, AlertCircle, Plus, RefreshCcw } from 'lucide-react'
 import { dayToWeekday } from '../../utils/timetableParser'
 import { vibrate, isMobile } from '../../utils/uiHelpers'
 import { useApp } from '../../context/AppContext'
 import { getTodayISO } from '../../utils/dateHelpers'
+import { useDebounce } from '../../hooks/useDebounce'
+import { getHighlightedText } from '../../hooks/useClassSearch'
 import CourseForm from './CourseForm'
 import Toast from '../shared/Toast'
 import ConfirmDialog from '../shared/ConfirmDialog'
@@ -16,6 +18,25 @@ const formatTimeTo12Hour = (time24) => {
   const ampm = hour >= 12 ? 'PM' : 'AM'
   const hour12 = hour % 12 || 12
   return `${hour12}:${minutes} ${ampm}`
+}
+
+// HighlightedText Component - Shows text with highlighted search matches
+const HighlightedText = ({ text, searchTerm }) => {
+  const parts = getHighlightedText(text, searchTerm)
+
+  return (
+    <span>
+      {parts.map((part, index) => (
+        part.highlight ? (
+          <mark key={index} className="bg-accent/30 text-accent font-medium px-0.5 rounded">
+            {part.text}
+          </mark>
+        ) : (
+          <span key={index}>{part.text}</span>
+        )
+      ))}
+    </span>
+  )
 }
 
 // Generate comprehensive tooltip with full schedule information
@@ -139,56 +160,23 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
   const [hasSearched, setHasSearched] = useState(false) // Track if search has been performed
   const [toast, setToast] = useState(null) // Toast notification state
   const [confirmDialog, setConfirmDialog] = useState(null) // Confirmation dialog state
+  const [displayLimit, setDisplayLimit] = useState(50) // Pagination limit
 
-  // Handle section change with confirmation - shows all available sections
-  const handleChangeSectionClick = (course, existingCourse) => {
-    // Find all sections offering this course from the timetable
-    const availableSections = []
+  // Rotating placeholder for search input
+  const [placeholderIndex, setPlaceholderIndex] = useState(0)
+  const placeholders = [
+    'Search by course (DAA, Algo)...',
+    'Search by teacher (Sameer, Nasir)...',
+    'Search by section (5F, BCS-5F)...',
+    'Search by day (Monday, Friday)...',
+  ]
 
-    // Handle both direct timetable object and nested data structure
-    const timetableData = timetable?.data || timetable
-
-    if (timetableData && typeof timetableData === 'object') {
-      Object.entries(timetableData).forEach(([sectionName, sectionCourses]) => {
-        // Skip metadata fields
-        if (!Array.isArray(sectionCourses)) return
-
-        const matchingCourse = sectionCourses.find(c => c.courseCode === course.courseCode)
-        if (matchingCourse) {
-          availableSections.push({
-            ...matchingCourse,
-            section: sectionName,
-            isCurrent: sectionName === existingCourse.section,
-            isViewing: sectionName === course.section
-          })
-        }
-      })
-    }
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Available sections for', course.courseCode, ':', availableSections.length)
-      console.log('Available sections:', availableSections.map(s => s.section))
-    }
-
-    // Sort: current first, then viewing section, then alphabetically
-    availableSections.sort((a, b) => {
-      if (a.isCurrent) return -1
-      if (b.isCurrent) return 1
-      if (a.isViewing) return -1
-      if (b.isViewing) return 1
-      return a.section.localeCompare(b.section)
-    })
-
-    setConfirmDialog({
-      course,
-      existingCourse,
-      availableSections,
-      type: 'info',
-      title: `Change Section for ${course.courseCode}`,
-      message: 'Select a new section from the options below:',
-      showSectionSelector: true
-    })
-  }
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % placeholders.length)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
 
   const handleConfirmSectionChange = (selectedSectionCourse) => {
     const { existingCourse } = confirmDialog
@@ -557,8 +545,30 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
     // Courses from timetable.json are already aggregated with sessions array
     // No need to re-group, just use them directly
     setFilteredCourses(validCourses)
+    setDisplayLimit(50) // Reset pagination on new search
     vibrate([10])
   }
+
+  // Memoized paginated courses for display
+  const displayedCourses = useMemo(() => {
+    return filteredCourses.slice(0, displayLimit)
+  }, [filteredCourses, displayLimit])
+
+  // Debounced search query for optional real-time search
+  const debouncedSearchQuery = useDebounce(searchQuery, 400)
+
+  // Auto-search on debounced query change (optional real-time search)
+  useEffect(() => {
+    if (debouncedSearchQuery && hasSearched) {
+      // Only auto-search if user has performed at least one manual search
+      handleSearch()
+    }
+  }, [debouncedSearchQuery])
+
+  // Reset display limit when search query changes
+  useEffect(() => {
+    setDisplayLimit(50)
+  }, [searchQuery])
 
   const clearCache = () => {
     localStorage.removeItem('timetable')
@@ -571,6 +581,20 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
   }
 
   const toggleCourse = (course) => {
+    // Double-check: Never allow selecting an already enrolled course
+    const isEnrolled = courses.find(existingCourse => {
+      if (course.courseCode && existingCourse.courseCode) {
+        return existingCourse.courseCode === course.courseCode
+      }
+      return existingCourse.name === course.courseName
+    })
+
+    if (isEnrolled) {
+      // Safety check - should never reach here due to onClick guard
+      console.warn('Attempted to select already enrolled course:', course.courseCode)
+      return
+    }
+
     const selectedMatch = selectedCourses.find(c => c.courseCode === course.courseCode)
 
     if (selectedMatch) {
@@ -869,7 +893,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
         className={`bg-dark-surface/98 backdrop-blur-xl border border-dark-border/50 shadow-glass-lg w-full ${
           isMobileDevice
             ? 'rounded-t-3xl max-h-[92vh] animate-slide-up'
-            : 'rounded-2xl max-w-2xl max-h-[90vh] animate-scale-in'
+            : 'rounded-2xl max-w-4xl max-h-[90vh] animate-scale-in'
         } flex flex-col`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -881,7 +905,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
         )}
 
         {/* Header */}
-        <div className="sticky top-0 bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 p-2 sm:p-3 md:p-5 z-10 rounded-t-3xl md:rounded-t-2xl">
+        <div className="sticky top-0 bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 px-4 sm:px-6 py-4 z-10 rounded-t-3xl md:rounded-t-2xl">
           <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 bg-gradient-to-br from-accent/20 to-accent/10 rounded-xl border border-accent/20 flex-shrink-0">
@@ -964,7 +988,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                       setFilteredCourses([])
                     }}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    placeholder="e.g., DAA, Sameer, 5F, Monday..."
+                    placeholder={placeholders[placeholderIndex]}
                     className="w-full pl-8 sm:pl-10 pr-2 sm:pr-4 py-2 sm:py-2.5 md:py-3 bg-dark-bg border border-dark-border rounded-lg sm:rounded-xl text-xs sm:text-sm md:text-base text-content-primary placeholder-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
                     autoFocus
                   />
@@ -996,7 +1020,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-2 sm:p-3 md:p-5">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
           {step === 'configure' ? (
             // Step 2: Date Configuration
             <div className="space-y-5">
@@ -1283,14 +1307,18 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
           )}
 
           {!loading && filteredCourses.length > 0 && (
-            <div className="space-y-1.5 sm:space-y-2 md:space-y-3">
-              <p className="text-xs sm:text-sm text-content-secondary mb-1.5 sm:mb-2 md:mb-3">
+            <>
+              <p className="text-xs sm:text-sm text-content-secondary mb-3">
                 Found {filteredCourses.length} course{filteredCourses.length > 1 ? 's' : ''}
                 {searchQuery && <> matching "<span className="text-accent font-medium">{searchQuery}</span>"</>}
                 {' '}in <span className="text-accent font-medium">{department}</span>
+                {displayedCourses.length < filteredCourses.length && (
+                  <> (showing {displayedCourses.length})</>
+                )}
               </p>
 
-              {filteredCourses.map((course) => {
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {displayedCourses.map((course) => {
                 // Find if this course is selected (in selectedCourses state)
                 const selectedCourseMatch = selectedCourses.find(c => c.courseCode === course.courseCode)
                 const isSelected = !!selectedCourseMatch
@@ -1312,59 +1340,50 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                   <div
                     key={`${course.courseCode}-${course.section}`}
                     onClick={() => {
-                      // Allow clicking if not already added, OR if selected in different section
-                      if (!isAlreadyAdded) {
-                        toggleCourse(course)
-                      } else if (isSelected && !isSelectedInSameSection) {
-                        // Allow switching sections for selected courses
-                        toggleCourse(course)
+                      // Completely prevent interaction with already enrolled courses
+                      if (isAlreadyAdded) {
+                        // Optional: Show toast reminder
+                        setToast({
+                          message: `${course.courseCode} is already enrolled${!isSameSection ? ` in section ${existingSection}` : ''}. Go to Courses tab to change sections.`,
+                          type: 'info',
+                          duration: 3000
+                        })
+                        vibrate([15, 30, 15]) // Short info vibration
+                        return
                       }
+
+                      // Only allow selection of non-enrolled courses
+                      toggleCourse(course)
                     }}
-                    className={`relative bg-dark-surface-raised border-2 rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 transition-all ${
+                    className={`relative bg-dark-surface rounded-xl border-l-[3px] border-r border-t border-b p-4 sm:min-h-[200px] transition-all duration-300 ease-out ${
                       isAlreadyAdded
-                        ? 'border-yellow-600/40 dark:border-yellow-500/30 bg-yellow-500/8 dark:bg-yellow-500/5 cursor-not-allowed opacity-80'
+                        ? 'border-l-yellow-500/60 border-yellow-600/40 dark:border-yellow-500/30 bg-yellow-500/8 dark:bg-yellow-500/5 cursor-not-allowed opacity-80 pointer-events-auto'
                         : isSelected
-                        ? 'border-accent/60 dark:border-accent/50 bg-accent/8 dark:bg-accent/5 cursor-pointer'
-                        : 'border-dark-border hover:border-accent/40 dark:hover:border-accent/30 cursor-pointer'
+                        ? 'border-l-accent border-accent/60 dark:border-accent/50 bg-accent/8 dark:bg-accent/5 cursor-pointer hover:shadow-glass-sm'
+                        : 'border-l-content-tertiary border-dark-border hover:border-l-accent hover:border-accent/40 dark:hover:border-accent/30 cursor-pointer hover:shadow-glass-sm'
                     }`}
                   >
-                    {/* Status Indicator - Top Right */}
+
+                    {/* Status Indicator - Top Right - Clean and minimal */}
                     <div className="absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 z-10 max-w-[calc(100%-6rem)] sm:max-w-[calc(100%-8rem)]">
-                      {isAlreadyAdded ? (
-                        // Course already added to app
-                        isSameSection ? (
-                          // Same section - show enhanced indicator with section info and full schedule tooltip
-                          <div
-                            className="bg-green-500/15 dark:bg-green-500/20 border-2 border-green-600/50 dark:border-green-500/40 rounded-lg shadow-sm overflow-hidden cursor-help"
-                            title={generateScheduleTooltip(existingCourseMatch)}
-                          >
-                            <div className="px-1.5 sm:px-2 py-1 flex items-center gap-1">
-                              <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                              <div className="flex flex-col min-w-0">
-                                <span className="text-[10px] sm:text-xs text-green-700 dark:text-green-400 font-semibold">Added</span>
-                                <span className="text-[8px] sm:text-[9px] text-green-600 dark:text-green-300/80 font-medium truncate">
-                                  {existingSection} {existingCourseMatch?.instructor && `• ${existingCourseMatch.instructor.split(' ')[0]}`}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          // Different section - compact yellow badge with full schedule tooltip, responsive padding
-                          <div
-                            className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-yellow-500/15 dark:bg-yellow-500/20 border-2 border-yellow-600/50 dark:border-yellow-500/40 rounded-md sm:rounded-lg shadow-sm cursor-help"
-                            title={generateScheduleTooltip(existingCourseMatch)}
-                          >
-                            <span className="text-[9px] sm:text-[10px] md:text-xs text-yellow-700 dark:text-yellow-400 font-bold uppercase tracking-wide whitespace-nowrap">Unavailable</span>
-                          </div>
-                        )
-                      ) : isSelected ? (
+                      {isAlreadyAdded && isSameSection ? (
+                        // Only show top badge for same-section matches
+                        <span
+                          className="text-[10px] sm:text-xs font-medium px-2 py-0.5 rounded cursor-help transition-all text-green-700 dark:text-green-400 bg-green-500/10 hover:bg-green-500/20"
+                          title={`Already enrolled in ${course.courseCode} Section ${existingSection}${existingCourseMatch?.instructor ? `\nInstructor: ${existingCourseMatch.instructor}` : ''}\n\n${generateScheduleTooltip(existingCourseMatch)}`}
+                        >
+                          Added
+                        </span>
+                      ) : !isAlreadyAdded && isSelected ? (
                         // Course selected but not yet added
                         isSelectedInSameSection ? (
-                          // Selected in same section - simple checkmark
+                          // Selected in same section - simple checkmark with proper touch target
                           <div
-                            className="w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-md sm:rounded-lg border-2 bg-accent border-accent flex items-center justify-center transition-all"
+                            className="w-11 h-11 flex items-center justify-center"
                           >
-                            <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-dark-bg" />
+                            <div className="w-6 h-6 rounded-lg border-2 bg-accent border-accent flex items-center justify-center transition-all">
+                              <Check className="w-4 h-4 text-dark-bg" />
+                            </div>
                           </div>
                         ) : (
                           // Selected in different section - show enhanced badge with section info
@@ -1375,89 +1394,73 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                             <div className="px-2 py-1 flex items-center gap-1">
                               <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-accent flex-shrink-0" />
                               <div className="flex flex-col min-w-0">
-                                <span className="text-[10px] sm:text-xs text-accent font-medium">Selected</span>
-                                <span className="text-[8px] sm:text-[9px] text-accent/80 truncate">
+                                <span className="text-xs text-accent font-medium">Selected</span>
+                                <span className="text-[10px] text-accent/80 truncate">
                                   {selectedCourseMatch.section} {selectedCourseMatch?.instructor && `• ${selectedCourseMatch.instructor.split(' ')[0]}`}
                                 </span>
                               </div>
                             </div>
                           </div>
                         )
-                      ) : (
-                        // Not selected, not added - empty checkbox
+                      ) : !isAlreadyAdded ? (
+                        // Not selected, not added - empty checkbox with proper touch target
                         <div
-                          className="w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-md sm:rounded-lg border-2 border-dark-border bg-dark-surface flex items-center justify-center transition-all"
+                          className="w-11 h-11 flex items-center justify-center"
                         >
+                          <div className="w-6 h-6 rounded-lg border-2 border-dark-border bg-dark-surface flex items-center justify-center transition-all">
+                          </div>
                         </div>
-                      )}
+                      ) : null}
                     </div>
 
                     {/* Course Info */}
                     <div className={
-                      (isAlreadyAdded && isSameSection) || (isSelected && !isSelectedInSameSection)
-                        ? "pr-32 sm:pr-36 md:pr-40"  // Wide padding for enhanced badges
-                        : "pr-20 sm:pr-24 md:pr-28"  // Standard padding for simple indicators
+                      isSelected && !isSelectedInSameSection
+                        ? "pr-36"  // Wide padding for enhanced selection badge
+                        : (isAlreadyAdded && isSameSection)
+                        ? "pr-20"  // Medium padding for "Added" badge
+                        : "pr-14"  // Standard padding for simple checkboxes (44px touch target + spacing)
                     }>
-                      <div className="flex items-start gap-1.5 sm:gap-2 mb-2">
-                        <span className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-accent/20 text-accent text-[10px] sm:text-xs font-mono font-semibold rounded flex-shrink-0">
-                          {course.courseCode}
+                      <div className="flex items-baseline gap-1.5 sm:gap-2 mb-2 flex-wrap">
+                        <span className="px-2 py-1 bg-accent/20 text-accent text-base sm:text-lg font-mono font-semibold rounded flex-shrink-0">
+                          <HighlightedText text={course.courseCode} searchTerm={searchQuery} />
                         </span>
-                        <h3 className="text-xs sm:text-sm md:text-base font-semibold text-content-primary leading-tight flex-1 min-w-0">
-                          {course.courseName}
+                        <span className="px-2 py-0.5 bg-accent/10 text-accent text-xs sm:text-sm font-semibold rounded-full flex-shrink-0">
+                          <HighlightedText text={course.section} searchTerm={searchQuery} />
+                        </span>
+                        <h3 className="text-sm sm:text-base font-semibold text-content-primary leading-tight flex-1 min-w-0 basis-full sm:basis-auto">
+                          <HighlightedText text={course.courseName} searchTerm={searchQuery} />
                         </h3>
                       </div>
 
-                      {/* Cross-section duplicate warning with Change Section button */}
+                      {/* Simple enrolled badge for cross-section duplicates */}
                       {isAlreadyAdded && !isSameSection && existingSection && (
-                        <div className="mb-2 sm:mb-3 px-2 sm:px-2.5 md:px-3 py-1.5 sm:py-2 md:py-2.5 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                          {/* Header with icon and title - responsive wrapping */}
-                          <div className="flex items-start gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                            <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[10px] sm:text-[11px] md:text-xs text-yellow-400 font-semibold">
-                                Course already enrolled
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Details and button - fully responsive stacked layout for mobile */}
-                          <div className="flex flex-col gap-2">
-                            {/* Details section - better spacing on mobile */}
-                            <div className="ml-4 sm:ml-5 md:ml-6 space-y-0.5">
-                              <p className="text-[9px] sm:text-[10px] md:text-xs text-yellow-300/90 break-words">
-                                <span className="font-medium">Section:</span> <span className="inline-block">{existingSection}</span>
-                              </p>
-                              {existingCourseMatch?.instructor && (
-                                <p className="text-[9px] sm:text-[10px] md:text-xs text-yellow-300/90 break-words">
-                                  <span className="font-medium">Prof:</span> <span className="inline-block">{existingCourseMatch.instructor}</span>
-                                </p>
-                              )}
-                            </div>
-
-                            {/* Change button - full width on all mobile screens */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleChangeSectionClick(course, existingCourseMatch)
-                              }}
-                              className="w-full px-2.5 sm:px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-dark-bg text-[10px] sm:text-xs font-medium rounded-md sm:rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm hover:shadow-md"
-                              title="Change to a different section"
-                            >
-                              <RefreshCcw className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                              <span className="whitespace-nowrap">Change Section</span>
-                            </button>
-                          </div>
+                        <div className="mb-2 inline-flex items-center gap-1.5 px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-md">
+                          <AlertCircle className="w-3 h-3 text-amber-500 flex-shrink-0" />
+                          <span className="text-xs text-amber-600 font-medium">
+                            Already enrolled in {existingSection}
+                          </span>
                         </div>
                       )}
 
                       {/* Details Grid */}
-                      <div className="space-y-1 sm:space-y-1.5 md:space-y-2 mt-1.5 sm:mt-2 md:mt-3">
-                        <div className="flex items-center gap-1 sm:gap-1.5">
-                          <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-content-tertiary flex-shrink-0" />
-                          <span className="text-[10px] sm:text-xs text-content-secondary truncate">
-                            {course.instructor}
+                      <div className="space-y-1.5 mt-2">
+                        <div className="flex items-center gap-1.5">
+                          <User className="w-4 h-4 text-content-tertiary flex-shrink-0" />
+                          <span className="text-xs text-content-secondary truncate">
+                            <HighlightedText text={course.instructor} searchTerm={searchQuery} />
                           </span>
                         </div>
+
+                        {/* Credit Hours */}
+                        {course.creditHours && (
+                          <div className="flex items-center gap-1.5">
+                            <BookOpen className="w-4 h-4 text-content-tertiary flex-shrink-0" />
+                            <span className="text-xs text-content-secondary font-medium">
+                              {course.creditHours} Credit Hour{course.creditHours > 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        )}
 
                         {/* Show schedule for each day */}
                         {(() => {
@@ -1483,8 +1486,8 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                             const room = sortedSessions[0].room
 
                             return (
-                              <div key={day} className="flex items-start gap-1 sm:gap-1.5 text-[10px] sm:text-xs">
-                                <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-content-tertiary flex-shrink-0 mt-0.5" />
+                              <div key={day} className="flex items-start gap-1.5 text-xs">
+                                <Calendar className="w-4 h-4 text-content-tertiary flex-shrink-0 mt-0.5" />
                                 <div className="flex-1">
                                   <span className="text-content-primary font-medium">{day.slice(0, 3)}</span>
                                   <span className="text-content-tertiary mx-0.5 sm:mx-1">•</span>
@@ -1501,14 +1504,31 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                   </div>
                 )
               })}
-            </div>
+              </div>
+
+              {/* Load More Button */}
+              {filteredCourses.length > displayLimit && (
+                <div className="flex justify-center pt-2 sm:pt-3 md:pt-4">
+                  <button
+                    onClick={() => {
+                      setDisplayLimit(prev => prev + 50)
+                      vibrate(10)
+                    }}
+                    className="px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 bg-dark-surface-raised hover:bg-dark-surface-hover border border-dark-border hover:border-accent/30 rounded-lg sm:rounded-xl text-xs sm:text-sm text-content-primary hover:text-accent font-medium transition-all flex items-center gap-2"
+                  >
+                    <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    Load {Math.min(50, filteredCourses.length - displayLimit)} More Course{Math.min(50, filteredCourses.length - displayLimit) > 1 ? 's' : ''}
+                  </button>
+                </div>
+              )}
+            </>
           )}
             </>
           )}
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-dark-surface/98 backdrop-blur-lg border-t border-dark-border/50 p-2 sm:p-3 md:p-5 shadow-2xl rounded-b-3xl md:rounded-b-2xl">
+        <div className="sticky bottom-0 bg-dark-surface/98 backdrop-blur-lg border-t border-dark-border/50 px-4 sm:px-6 py-4 shadow-2xl rounded-b-3xl md:rounded-b-2xl">
           <div className="flex gap-1.5 sm:gap-2 md:gap-3">
             <button
               onClick={onClose}

@@ -515,10 +515,16 @@ export default function TimetableView() {
               {/* Classes - Collapsible */}
               {!isCollapsed && hasClasses ? (
                 <div className="p-2.5 sm:p-3 md:p-4 space-y-2 sm:space-y-2.5 md:space-y-3 animate-fade-in">
-                  {dayClasses.map((classInfo, index) => (
+                  {dayClasses.map((classInfo, index) => {
+                    const instructorFieldId = `${day}-${index}-instructor`
+                    const locationFieldId = `${day}-${index}-location`
+                    const isInstructorExpanded = expandedFields.has(instructorFieldId)
+                    const isLocationExpanded = expandedFields.has(locationFieldId)
+
+                    return (
                     <div
                       key={index}
-                      className="bg-dark-bg rounded-xl p-2.5 sm:p-3 md:p-4 border border-dark-border hover:border-accent/30 transition-all active:scale-[0.98]"
+                      className="bg-dark-bg rounded-xl p-2.5 sm:p-3 md:p-4 border border-dark-border hover:border-accent/30 shadow-sm shadow-black/5 dark:shadow-black/30 transition-all active:scale-[0.98]"
                       role="article"
                       aria-label={`${classInfo.courseName} class at ${classInfo.startTime}`}
                     >
@@ -571,7 +577,7 @@ export default function TimetableView() {
 
                       {/* Class Details - Vertical stack on all screens */}
                       <div className="space-y-2 sm:space-y-2.5">
-                        {/* Instructor - Always wraps on all screens */}
+                        {/* Instructor - Expand-on-tap for long names */}
                         {classInfo.instructor && (
                           <div className="flex items-start gap-1.5 sm:gap-2 text-sm">
                             <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -579,7 +585,23 @@ export default function TimetableView() {
                             </div>
                             <div className="min-w-0 flex-1">
                               <p className="text-[10px] sm:text-xs text-content-tertiary mb-0.5">Instructor</p>
-                              <p className="text-xs sm:text-sm font-medium text-content-primary leading-snug break-words">
+                              <p
+                                className={`text-xs sm:text-sm font-medium text-content-primary leading-snug break-words cursor-pointer hover:text-accent transition-colors ${!isInstructorExpanded && 'line-clamp-2'}`}
+                                onClick={() => {
+                                  vibrate(5)
+                                  toggleExpand(instructorFieldId)
+                                }}
+                                title="Tap to expand"
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault()
+                                    vibrate(5)
+                                    toggleExpand(instructorFieldId)
+                                  }
+                                }}
+                              >
                                 {classInfo.instructor}
                               </p>
                             </div>
@@ -611,7 +633,23 @@ export default function TimetableView() {
                               </div>
                               <div className="min-w-0 flex-1">
                                 <p className="text-[10px] sm:text-xs text-content-tertiary mb-0.5">Location</p>
-                                <p className="text-xs sm:text-sm font-medium text-content-primary leading-snug break-words">
+                                <p
+                                  className={`text-xs sm:text-sm font-medium text-content-primary leading-snug break-words cursor-pointer hover:text-accent transition-colors ${!isLocationExpanded && 'line-clamp-2'}`}
+                                  onClick={() => {
+                                    vibrate(5)
+                                    toggleExpand(locationFieldId)
+                                  }}
+                                  title="Tap to expand"
+                                  role="button"
+                                  tabIndex={0}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault()
+                                      vibrate(5)
+                                      toggleExpand(locationFieldId)
+                                    }
+                                  }}
+                                >
                                   {classInfo.room}
                                   {classInfo.building && `, ${classInfo.building}`}
                                 </p>
@@ -621,7 +659,8 @@ export default function TimetableView() {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )
+                  })}
                 </div>
               ) : !isCollapsed && !hasClasses ? (
                 <div className="p-6 sm:p-8 text-center animate-fade-in">

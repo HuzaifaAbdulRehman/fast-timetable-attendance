@@ -66,6 +66,11 @@ export default function CourseHeader({
               {course.room && (
                 <div className="text-[10px] text-content-secondary">Room: {course.room}</div>
               )}
+              {course.enrollmentStartDate && (
+                <div className="text-[10px] text-blue-400 mt-1 border-t border-dark-border/30 pt-1">
+                  Enrolled from {new Date(course.enrollmentStartDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </div>
+              )}
               <div className="text-[10px] text-content-tertiary mt-1">
                 {stats.percentage.toFixed(1)}% attendance
               </div>

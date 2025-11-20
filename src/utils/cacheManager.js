@@ -70,3 +70,33 @@ export function isTimetableCacheStale() {
     return true
   }
 }
+
+/**
+ * Get timetable from cache
+ * Returns parsed timetable data or null if not available
+ */
+export function getTimetableFromCache() {
+  try {
+    const stored = localStorage.getItem('timetable')
+    if (!stored) return null
+
+    const data = JSON.parse(stored)
+
+    // Validate it's actually timetable data with sections
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      // Extract all sections from all departments
+      const allSections = []
+      for (const dept in data) {
+        if (Array.isArray(data[dept])) {
+          allSections.push(...data[dept])
+        }
+      }
+      return allSections.length > 0 ? allSections : null
+    }
+
+    return null
+  } catch (error) {
+    console.error('Error reading timetable from cache:', error)
+    return null
+  }
+}

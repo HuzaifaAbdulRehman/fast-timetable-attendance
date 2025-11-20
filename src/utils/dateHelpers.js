@@ -162,6 +162,7 @@ export function getSessionCountOnDate(course, date) {
 /**
  * Count total classes for a course
  * Correctly handles multiple sessions on the same day (e.g., back-to-back classes)
+ * Uses enrollmentStartDate if available to only count classes after enrollment
  * @param {Object} course - Course object
  * @returns {number}
  */
@@ -169,8 +170,12 @@ export function calculateTotalClasses(course) {
   if (!course || !course.startDate || !course.endDate || !course.weekdays) return 0
 
   try {
+    // Use enrollmentStartDate for attendance calculation (when student actually enrolled)
+    // This ensures we only count classes from the day they joined
+    const effectiveStartDate = course.enrollmentStartDate || course.startDate
+
     const dates = getDatesForWeekdays(
-      course.startDate,
+      effectiveStartDate,
       course.endDate,
       course.weekdays
     )
