@@ -428,9 +428,20 @@ export default function CoursesView({ onNavigate }) {
                         {course.name}
                       </h3>
                       {course.courseCode && (
-                        <p className="text-xs text-content-tertiary font-mono">
+                        <p className="text-xs text-content-tertiary font-mono mb-1">
                           {course.courseCode}
                         </p>
+                      )}
+                      {course.section && (
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded text-[10px] sm:text-xs font-medium border border-amber-500/20">
+                          <span>Enrolled in {course.section}</span>
+                          {course.instructor && (
+                            <>
+                              <span className="text-amber-500/50">·</span>
+                              <span className="truncate max-w-[120px] sm:max-w-[150px]">{course.instructor}</span>
+                            </>
+                          )}
+                        </div>
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
