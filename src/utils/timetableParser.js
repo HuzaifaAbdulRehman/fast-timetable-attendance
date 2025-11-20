@@ -234,13 +234,41 @@ export function parseDayTimetable(csvText, day) {
       currentRoom = roomName
     }
 
-    // Process each slot (columns 1-9)
+    // Process each slot (columns 1-9), detecting multi-slot LAB sessions
     for (let slot = 1; slot <= 9; slot++) {
       const cellText = columns[slot]
       if (!cellText) continue
 
       const entry = parseCellEntry(cellText, currentRoom, day, slot)
       if (entry) {
+        // Detect multi-slot LAB courses by checking if next 1-2 cells are empty
+        // LAB courses typically occupy 2-3 consecutive slots
+        let consecutiveEmptySlots = 0
+        for (let nextSlot = slot + 1; nextSlot <= Math.min(slot + 2, 9); nextSlot++) {
+          if (!columns[nextSlot] || columns[nextSlot].trim() === '') {
+            consecutiveEmptySlots++
+          } else {
+            break // Stop if we hit a non-empty cell
+          }
+        }
+
+        // If we have 1-2 consecutive empty slots after a LAB course, it's a multi-slot session
+        const isLikelyMultiSlot = (entry.courseCode.toLowerCase().includes('lab') ||
+                                   entry.courseCode.toLowerCase().includes('lab-')) &&
+                                  consecutiveEmptySlots >= 1
+
+        if (isLikelyMultiSlot) {
+          // Expand entry to cover empty slots
+          const totalSlots = consecutiveEmptySlots + 1 // Current slot + empty slots
+          const endSlot = slot + consecutiveEmptySlots
+          const endTime = TIME_SLOTS[endSlot]?.split('-')[1] || TIME_SLOTS[slot]?.split('-')[1]
+
+          // Update timeSlot to span all slots
+          const startTime = entry.timeSlot.split('-')[0]
+          entry.timeSlot = `${startTime}-${endTime}`
+          entry.slotCount = totalSlots
+        }
+
         entries.push(entry)
       }
     }
@@ -319,6 +347,73 @@ export function groupBySection(entries) {
 }
 
 /**
+ * Merge consecutive time slots for LAB courses
+ * @param {Array} sessions - Array of session objects for a single course/day
+ * @returns {Array} - Merged sessions with full time ranges
+ */
+function mergeConsecutiveSlots(sessions) {
+  if (sessions.length <= 1) return sessions
+
+  // Sort by slot number
+  sessions.sort((a, b) => a.slotNumber - b.slotNumber)
+
+  const merged = []
+  let currentGroup = [sessions[0]]
+
+  for (let i = 1; i < sessions.length; i++) {
+    const prev = sessions[i - 1]
+    const current = sessions[i]
+
+    // Check if consecutive slot (same day and room)
+    if (
+      current.day === prev.day &&
+      current.room === prev.room &&
+      current.slotNumber === prev.slotNumber + 1
+    ) {
+      // Consecutive slot - add to current group
+      currentGroup.push(current)
+    } else {
+      // Not consecutive - merge current group and start new one
+      merged.push(mergeSlotGroup(currentGroup))
+      currentGroup = [current]
+    }
+  }
+
+  // Merge final group
+  if (currentGroup.length > 0) {
+    merged.push(mergeSlotGroup(currentGroup))
+  }
+
+  return merged
+}
+
+/**
+ * Merge a group of consecutive slots into a single session
+ * @param {Array} slots - Array of consecutive slot objects
+ * @returns {Object} - Merged session with full time range
+ */
+function mergeSlotGroup(slots) {
+  if (slots.length === 1) return slots[0]
+
+  const firstSlot = slots[0]
+  const lastSlot = slots[slots.length - 1]
+
+  // Extract start time from first slot and end time from last slot
+  const firstTimeSlot = firstSlot.timeSlot // "08:00-08:50"
+  const lastTimeSlot = lastSlot.timeSlot   // "09:50-10:40"
+
+  const startTime = firstTimeSlot.split('-')[0] // "08:00"
+  const endTime = lastTimeSlot.split('-')[1]     // "10:40"
+
+  return {
+    ...firstSlot,
+    timeSlot: `${startTime}-${endTime}`, // "08:00-10:40" (full LAB duration)
+    slotNumber: firstSlot.slotNumber,     // Keep first slot number
+    slotCount: slots.length               // Track how many slots merged
+  }
+}
+
+/**
  * Parse all 5 day CSVs and combine into one catalog
  * @param {Object} csvFiles - Object with day names as keys and CSV content as values
  * @returns {Object} - Complete timetable catalog grouped by section
@@ -370,10 +465,27 @@ export function parseTimetable(csvFiles) {
       }
     })
 
-    // Convert map to array and calculate credit hours
+    // Convert map to array and merge consecutive slots
     const aggregatedCourses = Array.from(courseMap.values())
     aggregatedCourses.forEach(course => {
-      course.creditHours = course.sessions.length
+      // Group sessions by day for merging
+      const sessionsByDay = {}
+      course.sessions.forEach(session => {
+        if (!sessionsByDay[session.day]) {
+          sessionsByDay[session.day] = []
+        }
+        sessionsByDay[session.day].push(session)
+      })
+
+      // Merge consecutive slots for each day
+      const mergedSessions = []
+      Object.values(sessionsByDay).forEach(daySessions => {
+        const merged = mergeConsecutiveSlots(daySessions)
+        mergedSessions.push(...merged)
+      })
+
+      course.sessions = mergedSessions
+      course.creditHours = mergedSessions.length
 
       // Add backward compatibility fields (first session's data)
       if (course.sessions.length > 0) {

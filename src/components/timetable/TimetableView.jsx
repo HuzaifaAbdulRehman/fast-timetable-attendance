@@ -50,7 +50,7 @@ export default function TimetableView() {
       let courseSchedule = []
       
       if (course.schedule && Array.isArray(course.schedule) && course.schedule.length > 0) {
-        // Use existing schedule from timetable
+        // Use existing schedule from timetable (already has merged slots)
         courseSchedule = course.schedule
       } else if (course.weekdays && Array.isArray(course.weekdays) && course.weekdays.length > 0) {
         // Build basic schedule from weekdays (for manually added courses)
@@ -63,31 +63,32 @@ export default function TimetableView() {
           5: 'Friday',
           6: 'Saturday'
         }
-        
+
         courseSchedule = course.weekdays
           .filter(day => weekdayToDayName[day] && DAYS.includes(weekdayToDayName[day]))
           .map(day => {
             let startTime = '9:00 AM'
             let endTime = '10:00 AM'
-            
+
             if (course.timeSlot) {
               const [start, end] = course.timeSlot.split('-')
               // Convert 24-hour to 12-hour if needed
-              startTime = start.includes('AM') || start.includes('PM') 
-                ? start.trim() 
+              startTime = start.includes('AM') || start.includes('PM')
+                ? start.trim()
                 : formatTimeTo12Hour(start.trim())
               endTime = end && (end.includes('AM') || end.includes('PM'))
                 ? end.trim()
                 : formatTimeTo12Hour(end?.trim() || '10:00')
             }
-            
+
             return {
               day: weekdayToDayName[day],
               startTime,
-              endTime
+              endTime,
+              slotCount: 1  // Single slot for manually added courses
             }
           })
-        
+
         if (process.env.NODE_ENV === 'development') {
           console.log(`Course "${course.name}" - Built schedule from weekdays:`, courseSchedule)
         }
@@ -104,11 +105,13 @@ export default function TimetableView() {
               // Use per-session instructor/room if available, otherwise fall back to course-level
               instructor: slot.instructor || course.instructor || 'TBA',
               room: slot.room || course.room || course.roomNumber || 'TBA',
-              building: course.building || 'Academic Block',
+              building: slot.building || course.building || 'Academic Block',
               timeSlot: course.timeSlot || `${slot.startTime}-${slot.endTime}`,
               startTime: slot.startTime,
               endTime: slot.endTime,
-              day: slot.day
+              day: slot.day,
+              slotCount: slot.slotCount || 1,  // Track number of merged slots (for visual indicator)
+              isMultiSlot: (slot.slotCount || 1) > 1  // Flag for LAB/multi-slot classes
             })
           }
         })
@@ -536,13 +539,19 @@ export default function TimetableView() {
                                 {classInfo.section}
                               </span>
                             )}
+                            {/* Multi-slot indicator for LAB classes */}
+                            {classInfo.isMultiSlot && (
+                              <span className="px-1.5 sm:px-2 py-0.5 bg-orange-500/10 border border-orange-500/30 text-orange-400 text-[9px] sm:text-[10px] font-medium rounded" title={`${classInfo.slotCount} consecutive slots`}>
+                                LAB ({classInfo.slotCount}h)
+                              </span>
+                            )}
                           </div>
                         </div>
                         {classInfo.timeSlot && (
                           <div className="px-2 py-1 bg-accent/10 rounded-lg ml-2 flex-shrink-0">
                             <p className="text-[10px] sm:text-xs font-medium text-accent whitespace-nowrap">
                               {(() => {
-                                // Convert timeSlot from 24-hour to 12-hour format
+                                // Convert timeSlot from 24-hour to 12-hour format (already merged for LABs)
                                 const [start, end] = classInfo.timeSlot.split('-')
                                 if (!start || !end) return classInfo.timeSlot
 
