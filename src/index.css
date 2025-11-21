@@ -376,3 +376,34 @@ h1, h2, h3, h4, h5, h6 {
     scroll-behavior: auto !important;
   }
 }
+
+/* Pull to refresh - Fix white background on mobile */
+.ptr,
+.ptr__children,
+.ptr__pull-down {
+  background-color: var(--color-dark-bg) !important;
+}
+
+.ptr__pull-down--pull-more,
+.ptr__pull-down--loading,
+.ptr__pull-down--pull-more > div,
+.ptr__pull-down--loading > div {
+  background-color: var(--color-dark-bg) !important;
+  color: var(--color-content-secondary) !important;
+}
+
+/* Ensure no white gaps during pull */
+.ptr {
+  overflow: visible !important;
+}
+
+.ptr__children {
+  min-height: 100% !important;
+}
+
+/* Mobile safe area support */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .ptr__children {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

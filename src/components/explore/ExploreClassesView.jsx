@@ -141,6 +141,11 @@ export default function ExploreClassesView() {
 
       const data = await response.json();
 
+      // Cache the raw timetable data for change section feature
+      if (data.data) {
+        localStorage.setItem('timetable', JSON.stringify(data.data));
+      }
+
       // Flatten timetable structure into array of classes
       const allClasses = [];
       if (data.data) {
@@ -193,20 +198,34 @@ export default function ExploreClassesView() {
   );
 
   // Paginated results for rendering (memoized)
-  // Round down to ensure all grid rows are completely filled
+  // Round down to ensure all grid rows are completely filled, except for the last batch
   const displayedClasses = useMemo(() => {
     if (gridColumns === 0) return [];
 
-    const baseLimit = Math.min(displayLimit, filteredClasses.length);
+    const totalClasses = filteredClasses.length;
+    const baseLimit = Math.min(displayLimit, totalClasses);
 
     // Round down to nearest multiple of gridColumns to ensure complete rows
     // For example: if gridColumns=4 and baseLimit=53, show 52 (13 complete rows)
     const adjustedLimit = Math.floor(baseLimit / gridColumns) * gridColumns;
 
+    // Calculate remaining after adjusted limit
+    const remaining = totalClasses - adjustedLimit;
+
+    // If remaining items are fewer than one full row AND displayLimit >= totalClasses,
+    // show all items (don't hide the last partial row when user wants to see everything)
+    const shouldShowAll = displayLimit >= totalClasses || remaining < gridColumns;
+
     // If adjusted limit is 0 but we have classes, show at least one row
-    const finalLimit = adjustedLimit === 0 && filteredClasses.length > 0
-      ? Math.min(gridColumns, filteredClasses.length)
-      : adjustedLimit;
+    let finalLimit;
+    if (adjustedLimit === 0 && totalClasses > 0) {
+      finalLimit = Math.min(gridColumns, totalClasses);
+    } else if (shouldShowAll && remaining > 0 && remaining < gridColumns) {
+      // Show all remaining items when it's less than a full row
+      finalLimit = totalClasses;
+    } else {
+      finalLimit = adjustedLimit;
+    }
 
     return filteredClasses.slice(0, finalLimit);
   }, [filteredClasses, displayLimit, gridColumns]);
@@ -1036,8 +1055,9 @@ export default function ExploreClassesView() {
         }
         isPullable={true}
         resistance={2}
+        className="flex-1 flex flex-col min-h-0"
       >
-        <div className="flex-1 overflow-y-auto bg-dark-bg">
+        <div className="flex-1 overflow-y-auto bg-dark-bg min-h-0">
           {renderContent()}
         </div>
       </PullToRefresh>

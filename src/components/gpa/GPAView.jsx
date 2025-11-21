@@ -678,8 +678,9 @@ export default function GPAView() {
           refreshingContent={<div className="text-center py-4 text-accent text-sm">Refreshing...</div>}
           isPullable={true}
           resistance={2}
+          className="flex-1 flex flex-col min-h-0"
         >
-          <div className="flex-1 overflow-y-auto bg-dark-bg">
+          <div className="flex-1 overflow-y-auto bg-dark-bg min-h-0">
             {/* Header with Toggle and Title */}
             <div className="sticky top-0 z-10 bg-dark-surface/95 backdrop-blur-xl border-b border-dark-border/50 px-3 sm:px-4 py-3 sm:py-4">
               <div className="flex flex-col gap-3">

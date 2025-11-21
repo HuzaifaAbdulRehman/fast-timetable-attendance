@@ -32,10 +32,13 @@ function normalizeValue(value) {
 function fuzzyMatch(searchTokens, classData) {
   if (searchTokens.length === 0) return true // No search = match all
 
-  // All searchable fields
+  // All searchable fields (including shortName/abbreviation if exists)
   const searchableFields = [
     classData.courseName,
     classData.courseCode,
+    classData.shortName,
+    classData.code,
+    classData.abbreviation,
     classData.instructor,
     classData.section,
     classData.day,

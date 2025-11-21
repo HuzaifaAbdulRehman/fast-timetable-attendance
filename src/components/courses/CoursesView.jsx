@@ -29,6 +29,13 @@ export default function CoursesView({ onNavigate }) {
   const [showCacheReminder, setShowCacheReminder] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(true)
   const [sectionSelectorData, setSectionSelectorData] = useState(null)
+  const [hasTimetableCache, setHasTimetableCache] = useState(false)
+
+  // Check timetable cache status on mount and when courses change
+  useEffect(() => {
+    const cachedTimetable = getTimetableFromCache()
+    setHasTimetableCache(cachedTimetable && Array.isArray(cachedTimetable) && cachedTimetable.length > 0)
+  }, [courses])
 
   const handleEditCourse = (course) => {
     setEditingCourse(course)
@@ -181,10 +188,12 @@ export default function CoursesView({ onNavigate }) {
   // Pull to refresh handler
   const handleRefresh = async () => {
     setRefreshing(true)
-    // Clear timetable cache and refresh
-    clearTimetableCache()
+    // Just refresh the UI, don't clear timetable cache (needed for change section)
     await new Promise(resolve => setTimeout(resolve, 500))
     setRefreshing(false)
+    // Update cache status
+    const cachedTimetable = getTimetableFromCache()
+    setHasTimetableCache(cachedTimetable && Array.isArray(cachedTimetable) && cachedTimetable.length > 0)
     setToast({
       message: 'Courses refreshed.',
       type: 'success',
@@ -195,6 +204,7 @@ export default function CoursesView({ onNavigate }) {
   // Handle manual cache clear from banner
   const handleCacheClear = () => {
     clearTimetableCache()
+    setHasTimetableCache(false)
     setToast({
       message: 'Timetable cache cleared successfully',
       type: 'success',
@@ -434,14 +444,22 @@ export default function CoursesView({ onNavigate }) {
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
-                      <button
-                        onClick={() => handleChangeSectionClick(course)}
-                        className="p-2.5 bg-dark-bg hover:bg-blue-500/10 active:bg-blue-500/20 text-content-secondary hover:text-blue-400 active:scale-95 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
-                        title="Change section"
-                        aria-label="Change section"
-                      >
-                        <RefreshCcw className="w-4 h-4" />
-                      </button>
+                      {/* Change Section Button - Only show for courses from timetable (have courseCode) */}
+                      {course.courseCode && (
+                        <button
+                          onClick={() => handleChangeSectionClick(course)}
+                          disabled={!hasTimetableCache}
+                          className={`p-2.5 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                            hasTimetableCache
+                              ? 'bg-dark-bg hover:bg-blue-500/10 active:bg-blue-500/20 text-content-secondary hover:text-blue-400 active:scale-95'
+                              : 'bg-dark-bg/50 text-content-disabled cursor-not-allowed opacity-50'
+                          }`}
+                          title={hasTimetableCache ? 'Change section' : 'Load timetable first (Add from Timetable)'}
+                          aria-label={hasTimetableCache ? 'Change section' : 'Timetable data required'}
+                        >
+                          <RefreshCcw className="w-4 h-4" />
+                        </button>
+                      )}
                       <button
                         onClick={() => handleEditCourse(course)}
                         className="p-2.5 bg-dark-bg hover:bg-accent/10 active:bg-accent/20 text-content-secondary hover:text-accent active:scale-95 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -569,8 +587,16 @@ export default function CoursesView({ onNavigate }) {
         <TimetableSelector
           onCoursesSelected={() => {
             setShowTimetableSelector(false)
+            // Refresh cache status after selecting courses
+            const cachedTimetable = getTimetableFromCache()
+            setHasTimetableCache(cachedTimetable && Array.isArray(cachedTimetable) && cachedTimetable.length > 0)
           }}
-          onClose={() => setShowTimetableSelector(false)}
+          onClose={() => {
+            setShowTimetableSelector(false)
+            // Refresh cache status when closing (timetable may have been loaded)
+            const cachedTimetable = getTimetableFromCache()
+            setHasTimetableCache(cachedTimetable && Array.isArray(cachedTimetable) && cachedTimetable.length > 0)
+          }}
           showManualOption={true}
         />
       )}

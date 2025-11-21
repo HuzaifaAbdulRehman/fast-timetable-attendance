@@ -82,8 +82,13 @@ export function getTimetableFromCache() {
 
     const data = JSON.parse(stored)
 
-    // Validate it's actually timetable data with sections
-    if (data && typeof data === 'object' && !Array.isArray(data)) {
+    // Handle array format (direct array of courses)
+    if (Array.isArray(data)) {
+      return data.length > 0 ? data : null
+    }
+
+    // Handle object format with department keys (e.g., { BCS: [...], BSSE: [...] })
+    if (data && typeof data === 'object') {
       // Extract all sections from all departments
       const allSections = []
       for (const dept in data) {
