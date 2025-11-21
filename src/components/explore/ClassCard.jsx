@@ -4,6 +4,7 @@ import { Plus, Check, Clock, MapPin, User, BookOpen, AlertTriangle, ChevronDown,
 import { vibrate } from '../../utils/uiHelpers'
 import { getHighlightedText } from '../../hooks/useClassSearch'
 import { formatTimeTo12Hour } from '../../utils/dateHelpers'
+import { generateShortName } from '../../utils/courseNameHelper'
 
 /**
  * Day color mapping for left border accent
@@ -116,7 +117,7 @@ const ClassCard = memo(function ClassCard({
           relative group
           bg-dark-surface rounded-xl
           border-l-[3px] border-r border-t border-b
-          min-h-[180px]
+          min-h-[140px] sm:min-h-[160px]
           transition-all duration-300 ease-out
           ${isAdded
             ? 'border-r-attendance-safe/30 border-t-attendance-safe/30 border-b-attendance-safe/30 bg-attendance-safe/5 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
@@ -130,22 +131,35 @@ const ClassCard = memo(function ClassCard({
         style={{ borderLeftColor: dayColor }}
       >
       {/* Compact View - Always Visible */}
-      <div className="p-4 flex flex-col rounded-t-xl">
+      <div className="p-3 sm:p-4 flex flex-col rounded-t-xl">
         {/* Fixed header with button */}
-        <div className="flex items-start justify-between gap-3 mb-2">
-          {/* Course Code + Section - Primary */}
+        <div className="flex items-start justify-between gap-2 sm:gap-3">
+          {/* Course Info - Primary */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-baseline gap-2 mb-1 flex-wrap">
-              <h3 className="text-lg font-bold text-content-primary hover:text-accent transition-colors">
+            {/* Row 1: Course Code + Section Badge */}
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <h3 className="text-sm sm:text-base lg:text-lg font-bold text-content-primary hover:text-accent transition-colors">
                 <HighlightedText text={classData.courseCode || 'N/A'} searchTerm={searchTerm} />
               </h3>
-              <span className="text-sm font-semibold text-accent px-2 py-0.5 rounded-full bg-accent/10">
+              {/* Show auto-generated short name for long course codes (>12 chars) */}
+              {classData.courseCode && classData.courseCode.length > 12 && (
+                <span className="text-[9px] sm:text-[10px] font-medium text-content-tertiary" title="Auto-generated short name for timetable">
+                  ({generateShortName(classData.courseName, classData.courseCode, 10)})
+                </span>
+              )}
+              <span className="text-[10px] sm:text-xs font-semibold text-accent px-1.5 sm:px-2 py-0.5 rounded-full bg-accent/10">
                 <HighlightedText text={classData.section || 'N/A'} searchTerm={searchTerm} />
               </span>
-              {/* Enrollment status indicators - text-based */}
-              {isAdded && (
+            </div>
+            {/* Row 2: Course Name - Always on separate line */}
+            <p className="text-xs sm:text-sm text-content-secondary mt-1 leading-snug line-clamp-2 w-full">
+              <HighlightedText text={classData.courseName || 'Unnamed Course'} searchTerm={searchTerm} />
+            </p>
+            {/* Row 2: Enrollment status indicator (separate row for cleaner layout) */}
+            {isAdded && (
+              <div className="mt-1 sm:mt-1.5">
                 <span
-                  className={`text-[10px] sm:text-xs font-medium px-2 py-0.5 rounded cursor-help transition-all ${
+                  className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] md:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded cursor-help transition-all ${
                     isExactMatch
                       ? 'text-green-700 dark:text-green-400 bg-green-500/10 hover:bg-green-500/20'
                       : 'text-amber-700 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20'
@@ -157,19 +171,19 @@ const ClassCard = memo(function ClassCard({
                   }
                 >
                   {isExactMatch ? 'Added' : (
-                    <span className="inline-flex items-baseline gap-1 flex-wrap">
-                      <span className="whitespace-nowrap">Already enrolled in {enrolledCourse?.section}</span>
+                    <>
+                      <span className="whitespace-nowrap">In {enrolledCourse?.section}</span>
                       {enrolledCourse?.instructor && (
                         <>
-                          <span className="text-amber-500/50 dark:text-amber-400/50">·</span>
-                          <span className="truncate max-w-[100px] sm:max-w-[120px]">{enrolledCourse.instructor}</span>
+                          <span className="text-amber-500/50 dark:text-amber-400/50 hidden sm:inline">·</span>
+                          <span className="truncate max-w-[60px] sm:max-w-[100px] hidden sm:inline">{enrolledCourse.instructor}</span>
                         </>
                       )}
-                    </span>
+                    </>
                   )}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Add/Select Button - Fixed right side */}
@@ -178,9 +192,9 @@ const ClassCard = memo(function ClassCard({
             disabled={isAdded || isAdding}
             className={`
               relative flex-shrink-0
-              w-14 h-14
+              w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14
               flex items-center justify-center
-              rounded-xl
+              rounded-lg sm:rounded-xl
               font-semibold text-sm
               transition-all duration-300
               ${multiSelectMode
@@ -232,24 +246,24 @@ const ClassCard = memo(function ClassCard({
               {multiSelectMode ? (
                 isAdded ? (
                   isExactMatch ? (
-                    <Check className="w-6 h-6" strokeWidth={2.5} />
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" strokeWidth={2.5} />
                   ) : (
-                    <CheckCheck className="w-6 h-6" strokeWidth={2} />
+                    <CheckCheck className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" strokeWidth={2} />
                   )
                 ) : isSelected ? (
-                  <CheckSquare className="w-6 h-6" strokeWidth={2} />
+                  <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" strokeWidth={2} />
                 ) : (
-                  <Square className="w-6 h-6" strokeWidth={1.5} />
+                  <Square className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
                 )
               ) : (
                 isExactMatch ? (
-                  <Check className="w-6 h-6" strokeWidth={2.5} />
+                  <Check className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" strokeWidth={2.5} />
                 ) : isAdded ? (
-                  <CheckCheck className="w-6 h-6" strokeWidth={2} />
+                  <CheckCheck className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" strokeWidth={2} />
                 ) : isAdding ? (
-                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <Plus className="w-6 h-6" strokeWidth={2} />
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" strokeWidth={2} />
                 )
               )}
             </div>
@@ -269,35 +283,9 @@ const ClassCard = memo(function ClassCard({
             }
           }}
         >
-          {/* Course Name - Secondary with expand-on-tap */}
-          <div
-            onClick={(e) => {
-              e.stopPropagation()
-              vibrate(5)
-              setShowFullCourseName(!showFullCourseName)
-            }}
-            className={`text-sm sm:text-base text-content-secondary mb-2 group-hover:text-content-primary transition-colors text-left w-full break-words cursor-pointer ${
-              showFullCourseName ? '' : 'line-clamp-2'
-            }`}
-            title="Tap to expand full name"
-            role="button"
-            tabIndex={0}
-            aria-expanded={showFullCourseName}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                e.stopPropagation()
-                vibrate(5)
-                setShowFullCourseName(!showFullCourseName)
-              }
-            }}
-          >
-            <HighlightedText text={(classData.courseName || 'Unnamed Course').substring(0, 150)} searchTerm={searchTerm} />
-          </div>
-
           {/* Quick Info Row - Tertiary */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-content-tertiary">
-            {/* Instructor with expand-on-tap */}
+          <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-0.5 sm:gap-y-1 text-[10px] sm:text-xs md:text-sm text-content-tertiary">
+            {/* Instructor - show full name naturally, tap to expand if truncated */}
             {classData.instructor && (
               <div
                 onClick={(e) => {
@@ -306,7 +294,7 @@ const ClassCard = memo(function ClassCard({
                   setShowFullInstructor(!showFullInstructor)
                 }}
                 className="flex items-center gap-1 hover:text-content-secondary transition-colors cursor-pointer"
-                title="Tap to expand full name"
+                title={classData.instructor}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -318,8 +306,8 @@ const ClassCard = memo(function ClassCard({
                   }
                 }}
               >
-                <User className="w-3 h-3 flex-shrink-0" />
-                <span className={showFullInstructor ? '' : 'truncate max-w-[150px]'}>
+                <User className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
+                <span className={showFullInstructor ? 'break-words' : ''}>
                   <HighlightedText text={classData.instructor} searchTerm={searchTerm} />
                 </span>
               </div>
@@ -327,16 +315,16 @@ const ClassCard = memo(function ClassCard({
 
             {/* Days */}
             {days.length > 0 && (
-              <div className="flex items-center gap-1">
-                <Clock className="w-3 h-3 flex-shrink-0" />
+              <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+                <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
                 <span>{days.map(d => d.substring(0, 3)).join(', ')}</span>
               </div>
             )}
 
             {/* Credit Hours */}
             {classData.creditHours && (
-              <div className="flex items-center gap-1">
-                <BookOpen className="w-3 h-3 flex-shrink-0" />
+              <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+                <BookOpen className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
                 <span>{classData.creditHours} CH</span>
               </div>
             )}
@@ -344,32 +332,32 @@ const ClassCard = memo(function ClassCard({
 
           {/* Conflict Warning */}
           {hasConflict && !isAdded && (
-            <div className="flex items-center gap-1.5 mt-2 px-2 py-1 rounded-md bg-attendance-warning/10 border border-attendance-warning/30">
-              <AlertTriangle className="w-3 h-3 flex-shrink-0 text-attendance-warning" />
-              <span className="text-xs text-attendance-warning font-medium">Scheduling Conflict</span>
+            <div className="flex items-center gap-1 sm:gap-1.5 mt-1.5 sm:mt-2 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-attendance-warning/10 border border-attendance-warning/30">
+              <AlertTriangle className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0 text-attendance-warning" />
+              <span className="text-[10px] sm:text-xs text-attendance-warning font-medium">Conflict</span>
             </div>
           )}
 
           {/* Section Conflict Warning (Multiselect) */}
           {multiSelectMode && selectedDifferentSection && !isSelected && (
-            <div className="flex items-center gap-1.5 mt-2 px-2 py-1 rounded-md bg-orange-500/10 border border-orange-400/30">
-              <AlertTriangle className="w-3 h-3 flex-shrink-0 text-orange-400" />
-              <span className="text-xs text-orange-400 font-medium">
-                Section {selectedDifferentSection.section} selected
+            <div className="flex items-center gap-1 sm:gap-1.5 mt-1.5 sm:mt-2 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-orange-500/10 border border-orange-400/30">
+              <AlertTriangle className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0 text-orange-400" />
+              <span className="text-[10px] sm:text-xs text-orange-400 font-medium">
+                {selectedDifferentSection.section} selected
               </span>
             </div>
           )}
 
           {/* Expand Indicator - Pushed to bottom */}
-          <div className="flex items-center gap-1 mt-auto pt-2 -ml-1 -mb-1 px-1 py-1 text-xs text-content-tertiary group-hover:text-accent transition-colors">
+          <div className="flex items-center gap-0.5 sm:gap-1 mt-auto pt-1.5 sm:pt-2 -ml-0.5 sm:-ml-1 -mb-0.5 sm:-mb-1 px-0.5 sm:px-1 py-0.5 sm:py-1 text-[10px] sm:text-xs text-content-tertiary group-hover:text-accent transition-colors">
             {isExpanded ? (
               <>
-                <ChevronUp className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
-                <span>Hide schedule</span>
+                <ChevronUp className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span>Hide</span>
               </>
             ) : (
               <>
-                <ChevronDown className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
+                <ChevronDown className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span>View schedule</span>
               </>
             )}
@@ -490,6 +478,12 @@ const ClassCard = memo(function ClassCard({
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-xl font-bold text-content-primary">
                       {classData.courseCode || 'N/A'}
+                      {/* Show abbreviated name for long course codes */}
+                      {classData.courseCode && classData.courseCode.length > 12 && (
+                        <span className="text-sm font-medium text-content-tertiary ml-2">
+                          ({generateShortName(classData.courseName, classData.courseCode, 8)})
+                        </span>
+                      )}
                     </h3>
                     <span className="text-sm font-semibold text-accent px-3 py-1 rounded-full bg-accent/10">
                       {classData.section || 'N/A'}

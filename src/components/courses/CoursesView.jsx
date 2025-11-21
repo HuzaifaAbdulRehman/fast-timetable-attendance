@@ -12,6 +12,7 @@ import { createPortal } from 'react-dom'
 import PullToRefresh from 'react-simple-pull-to-refresh'
 import { clearTimetableCache, getTimetableFromCache } from '../../utils/cacheManager'
 import { vibrate } from '../../utils/uiHelpers'
+import { generateShortName } from '../../utils/courseNameHelper'
 
 export default function CoursesView({ onNavigate }) {
   const { courses, deleteCourse, deleteAllCourses, updateCourse, addCourse, semesters, activeSemesterId, switchSemester, createSemester, deleteSemester, changeCourseSection } = useApp()
@@ -440,6 +441,12 @@ export default function CoursesView({ onNavigate }) {
                       {course.courseCode && (
                         <p className="text-xs text-content-tertiary font-mono">
                           {course.courseCode}
+                          {/* Show abbreviated name for long course codes (>12 chars) */}
+                          {course.courseCode.length > 12 && (
+                            <span className="text-content-disabled ml-1">
+                              ({generateShortName(course.name, course.courseCode, 8)})
+                            </span>
+                          )}
                         </p>
                       )}
                     </div>

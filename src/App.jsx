@@ -10,6 +10,7 @@ import AttendanceView from './components/attendance/AttendanceView'
 import GPAView from './components/gpa/GPAView'
 import InstallPrompt from './components/shared/InstallPrompt'
 import NotificationPrompt from './components/shared/NotificationPrompt'
+import BackToTop from './components/shared/BackToTop'
 import ErrorBoundary from './components/shared/ErrorBoundary'
 import { clearAllCaches } from './utils/cacheManager'
 
@@ -62,6 +63,7 @@ function AppContent() {
       {/* Install and notification prompts */}
       <InstallPrompt />
       <NotificationPrompt />
+      <BackToTop />
     </div>
   )
 }

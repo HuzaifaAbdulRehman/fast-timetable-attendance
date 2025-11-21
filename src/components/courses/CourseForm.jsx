@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../../context/AppContext'
-import { Calendar, BookOpen, Hash } from 'lucide-react'
+import { Calendar, BookOpen, Hash, ChevronDown, ChevronUp, User, MapPin, Tag } from 'lucide-react'
 import { getTodayISO } from '../../utils/dateHelpers'
 import { WEEKDAY_FULL_NAMES } from '../../utils/constants'
 import Toast from '../shared/Toast'
@@ -81,6 +81,10 @@ export default function CourseForm({ onClose, onSave, existingCourse = null, isN
   const [errors, setErrors] = useState({})
   const [sessionSelections, setSessionSelections] = useState(
     existingCourse?.weekdays || Array(formData.creditHours).fill('')
+  )
+  const [showOptionalFields, setShowOptionalFields] = useState(
+    // Auto-expand if any optional field has data
+    !!(existingCourse?.instructor || existingCourse?.courseCode || existingCourse?.section || existingCourse?.room)
   )
 
   // Auto-calculate allowed absences: credit hours × 3 (only if user hasn't manually set it)
@@ -608,6 +612,93 @@ export default function CourseForm({ onClose, onSave, existingCourse = null, isN
             <p className="text-xs text-content-tertiary mt-1.5">
               Classes missed before using this app
             </p>
+          </div>
+
+          {/* Optional Details Section */}
+          <div className="border-t border-dark-border/30 pt-4">
+            <button
+              type="button"
+              onClick={() => {
+                vibrate([10])
+                setShowOptionalFields(!showOptionalFields)
+              }}
+              className="w-full flex items-center justify-between text-sm font-medium text-content-secondary hover:text-content-primary transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <Tag className="w-4 h-4" />
+                Optional Details
+              </span>
+              {showOptionalFields ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </button>
+            <p className="text-xs text-content-tertiary mt-1">
+              Add instructor, course code, section, and room info
+            </p>
+
+            {showOptionalFields && (
+              <div className="space-y-4 mt-4">
+                {/* Instructor Name */}
+                <div>
+                  <label className="block text-sm font-medium text-content-primary mb-2 flex items-center gap-1.5">
+                    <User className="w-4 h-4" />
+                    Instructor Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.instructor || ''}
+                    onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-dark-bg/50 border border-dark-border/30 rounded-xl text-content-primary placeholder-content-disabled focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
+                    placeholder="e.g., Dr. Ahmed Khan"
+                  />
+                </div>
+
+                {/* Course Code */}
+                <div>
+                  <label className="block text-sm font-medium text-content-primary mb-2">
+                    Course Code
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.courseCode || ''}
+                    onChange={(e) => setFormData({ ...formData, courseCode: e.target.value.toUpperCase() })}
+                    className="w-full px-4 py-2.5 bg-dark-bg/50 border border-dark-border/30 rounded-xl text-content-primary placeholder-content-disabled focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all uppercase"
+                    placeholder="e.g., CS-301"
+                  />
+                </div>
+
+                {/* Section */}
+                <div>
+                  <label className="block text-sm font-medium text-content-primary mb-2">
+                    Section
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.section || ''}
+                    onChange={(e) => setFormData({ ...formData, section: e.target.value.toUpperCase() })}
+                    className="w-full px-4 py-2.5 bg-dark-bg/50 border border-dark-border/30 rounded-xl text-content-primary placeholder-content-disabled focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all uppercase"
+                    placeholder="e.g., BCS-5B"
+                  />
+                </div>
+
+                {/* Room / Location */}
+                <div>
+                  <label className="block text-sm font-medium text-content-primary mb-2 flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4" />
+                    Room / Location
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.room || ''}
+                    onChange={(e) => setFormData({ ...formData, room: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-dark-bg/50 border border-dark-border/30 rounded-xl text-content-primary placeholder-content-disabled focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
+                    placeholder="e.g., Room 301, Block A"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </form>
       </BaseModal>

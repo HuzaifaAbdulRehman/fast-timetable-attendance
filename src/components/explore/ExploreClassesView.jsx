@@ -16,6 +16,7 @@ import {
   CheckSquare,
   Square,
   Info,
+  ArrowUp,
 } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { useClassSearch } from "../../hooks/useClassSearch";
@@ -26,6 +27,7 @@ import {
 import { vibrate } from "../../utils/uiHelpers";
 import { getTodayISO, formatTimeTo12Hour } from "../../utils/dateHelpers";
 import { clearTimetableCache } from "../../utils/cacheManager";
+import { generateShortName } from "../../utils/courseNameHelper";
 import { useDebounce } from "../../hooks/useDebounce";
 import ClassCard from "./ClassCard";
 import Toast from "../shared/Toast";
@@ -71,6 +73,10 @@ export default function ExploreClassesView() {
 
   // Expanded card state - track which card is expanded with overlay
   const [expandedCardId, setExpandedCardId] = useState(null);
+
+  // Back to top button state
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const scrollContainerRef = useRef(null);
 
   // Debounce search input for performance (300ms delay)
   const debouncedSearchInput = useDebounce(searchInput, 300);
@@ -119,6 +125,23 @@ export default function ExploreClassesView() {
     return () => window.removeEventListener('resize', updateGridColumns);
   }, []);
 
+  // Scroll to top handler
+  const scrollToTop = useCallback(() => {
+    vibrate(10);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // Fallback to window scroll
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Handle scroll to show/hide back to top button
+  const handleScroll = useCallback((e) => {
+    const scrollTop = e.target.scrollTop;
+    setShowBackToTop(scrollTop > 200); // Show after scrolling 200px
+  }, []);
+
+
   // Fetch timetable data
   useEffect(() => {
     fetchTimetable();
@@ -153,6 +176,7 @@ export default function ExploreClassesView() {
           const sectionClasses = data.data[sectionKey];
           if (Array.isArray(sectionClasses)) {
             sectionClasses.forEach((classData) => {
+              // Keep original data, don't modify courseCode/courseName for display
               allClasses.push({
                 ...classData,
                 id: `${classData.courseCode}-${classData.section}-${
@@ -372,9 +396,15 @@ export default function ExploreClassesView() {
         })()
       : undefined;
 
+    // Auto-generate short name for long course codes (>8 chars)
+    const courseCode = classData.courseCode || '';
+    const autoShortName = courseCode.length > 8
+      ? generateShortName(classData.courseName, courseCode, 8)
+      : courseCode;
+
     const initialCourseData = {
       name: classData.courseName,
-      shortName: classData.courseCode,
+      shortName: autoShortName, // Use auto-generated short name for long codes
       code: classData.courseCode,
       courseCode: classData.courseCode,
       section: classData.section,
@@ -544,9 +574,15 @@ export default function ExploreClassesView() {
           })()
         : undefined;
 
+      // Auto-generate short name for long course codes (>8 chars)
+      const courseCode = classData.courseCode || '';
+      const autoShortName = courseCode.length > 8
+        ? generateShortName(classData.courseName, courseCode, 8)
+        : courseCode;
+
       return {
         name: classData.courseName,
-        shortName: classData.courseCode,
+        shortName: autoShortName, // Use auto-generated short name for long codes
         code: classData.courseCode,
         courseCode: classData.courseCode,
         section: classData.section,
@@ -740,8 +776,19 @@ export default function ExploreClassesView() {
               </div>
             </div>
 
-            {/* Multi-Select and Clear Buttons */}
+            {/* Back to Top, Multi-Select and Clear Buttons */}
             <div className="flex items-center gap-2">
+              {/* Small inline back-to-top button */}
+              {showBackToTop && (
+                <button
+                  onClick={scrollToTop}
+                  className="p-1.5 bg-dark-surface-raised hover:bg-dark-surface-hover border border-dark-border rounded-lg text-content-tertiary hover:text-accent transition-all"
+                  aria-label="Scroll to top"
+                  title="Back to top"
+                >
+                  <ArrowUp className="w-3.5 h-3.5" />
+                </button>
+              )}
               {searchInput && (
                 <button
                   onClick={clearSearch}
@@ -857,7 +904,7 @@ export default function ExploreClassesView() {
       </div>
 
       {/* Content Area - Responsive Grid */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1">
         {loading && (
           <div className="flex flex-col items-center justify-center py-16">
             <Loader className="w-10 h-10 text-accent animate-spin mb-4" />
@@ -1057,10 +1104,15 @@ export default function ExploreClassesView() {
         resistance={2}
         className="flex-1 flex flex-col min-h-0"
       >
-        <div className="flex-1 overflow-y-auto bg-dark-bg min-h-0">
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto bg-dark-bg min-h-0"
+        >
           {renderContent()}
         </div>
       </PullToRefresh>
+
 
       {/* Toast Notifications */}
       {toast && (

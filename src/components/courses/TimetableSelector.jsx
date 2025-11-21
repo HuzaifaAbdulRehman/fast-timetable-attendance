@@ -6,6 +6,7 @@ import { useApp } from '../../context/AppContext'
 import { getTodayISO } from '../../utils/dateHelpers'
 import { useDebounce } from '../../hooks/useDebounce'
 import { getHighlightedText } from '../../hooks/useClassSearch'
+import { generateShortName } from '../../utils/courseNameHelper'
 import CourseForm from './CourseForm'
 import Toast from '../shared/Toast'
 import ConfirmDialog from '../shared/ConfirmDialog'
@@ -544,7 +545,7 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
     }
 
     // Courses from timetable.json are already aggregated with sessions array
-    // No need to re-group, just use them directly
+    // Keep original data for display, short names will be generated during enrollment
     setFilteredCourses(validCourses)
     setDisplayLimit(50) // Reset pagination on new search
     vibrate([10])
@@ -847,9 +848,15 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
       })
     }
 
+    // Auto-generate short name for long course codes (>8 chars)
+    const courseCode = course.courseCode || '';
+    const autoShortName = courseCode.length > 8
+      ? generateShortName(course.courseName, courseCode, 8)
+      : courseCode;
+
     return {
       name: course.courseName,
-      shortName: course.courseCode,
+      shortName: autoShortName, // Use auto-generated short name for long codes
       courseCode: course.courseCode,
       creditHours: course.creditHours || sessions.length,
       weekdays,
@@ -1441,17 +1448,25 @@ export default function TimetableSelector({ onCoursesSelected, onClose, showManu
                         ? "pr-20"  // Medium padding for "Added" badge
                         : "pr-14"  // Standard padding for simple checkboxes (44px touch target + spacing)
                     }>
-                      <div className="flex items-baseline gap-1.5 sm:gap-2 mb-2 flex-wrap">
+                      {/* Row 1: Course Code + Section Badge */}
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                         <span className="px-2 py-1 bg-accent/20 text-accent text-base sm:text-lg font-mono font-semibold rounded flex-shrink-0">
                           <HighlightedText text={course.courseCode} searchTerm={searchQuery} />
+                          {/* Show abbreviated name for long course codes (>12 chars) */}
+                          {course.courseCode && course.courseCode.length > 12 && (
+                            <span className="text-xs font-medium text-accent/60 ml-1">
+                              ({generateShortName(course.courseName, course.courseCode, 8)})
+                            </span>
+                          )}
                         </span>
                         <span className="px-2 py-0.5 bg-accent/10 text-accent text-xs sm:text-sm font-semibold rounded-full flex-shrink-0">
                           <HighlightedText text={course.section} searchTerm={searchQuery} />
                         </span>
-                        <h3 className="text-sm sm:text-base font-semibold text-content-primary leading-tight flex-1 min-w-0 basis-full sm:basis-auto">
-                          <HighlightedText text={course.courseName} searchTerm={searchQuery} />
-                        </h3>
                       </div>
+                      {/* Row 2: Course Name - Always separate line */}
+                      <h3 className="text-sm sm:text-base font-semibold text-content-primary leading-snug mb-2">
+                        <HighlightedText text={course.courseName} searchTerm={searchQuery} />
+                      </h3>
 
                       {/* Simple enrolled badge for cross-section duplicates */}
                       {isAlreadyAdded && !isSameSection && existingSection && (

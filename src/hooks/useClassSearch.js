@@ -37,6 +37,7 @@ function fuzzyMatch(searchTokens, classData) {
     classData.courseName,
     classData.courseCode,
     classData.shortName,
+    classData.displayCode,
     classData.code,
     classData.abbreviation,
     classData.instructor,
